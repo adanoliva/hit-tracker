@@ -57,6 +57,14 @@ Estado del port React Native. Marca cada ítem al completarlo.
 
 ## Completado
 
+- [x] `[solo mobile]` Modo Todo en 1 — el móvil actúa como sensor usando `expo-sensors`
+  - `usePhoneSensor.ts`: lee Accelerometer + Gyroscope a 50Hz, remap de ejes según placement
+  - Placement `front-vertical`: ax/gz igual que ESP32
+  - Placement `top-horizontal`: remapea gz→gy para compensar rotación del eje
+  - `PhoneSensorPicker`: bottom sheet con diagramas ASCII de cada posición
+  - Integrado en `Devices`: botón "Usar este móvil" con subtítulo de configuración actual
+  - Integrado en `Training/index`: activa `usePhoneSensor` solo cuando `phase === 'round'` y el dispositivo es `PHONE_SENSOR_ID`
+
 - [x] Scaffold Expo + TypeScript en `mobile/`
 - [x] Dependencias instaladas: react-navigation, react-native-ble-plx, expo-file-system, expo-keep-awake, expo-haptics, expo-av, victory-native, react-native-svg, @react-native-community/slider
 - [x] `src/core/` — tipos, stores, hooks, servicios copiados del desktop

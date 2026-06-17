@@ -11,6 +11,10 @@ export interface SensorReading {
 
 export type PunchType = 'jab' | 'cross' | 'right-hook' | 'left-hook' | 'unknown'
 
+// [solo mobile] Posición del móvil usado como sensor
+export type PhoneSensorPlacement = 'front-vertical' | 'top-horizontal'
+export const PHONE_SENSOR_ID = 'PHONE_SENSOR'
+
 export interface Impact {
   time: number
   intensity: number
@@ -29,6 +33,7 @@ export interface Device {
   createdAt: number
   lastSeen: number
   isConnected?: boolean
+  placement?: PhoneSensorPlacement  // [solo mobile] solo para PHONE_SENSOR_ID
 }
 
 export interface CalibrationData {
