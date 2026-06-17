@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hit Tracker - Monitoreo de Entrenamiento de Boxeo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <span class="logo">⚡ Hit Tracker</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#specs">Specs</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero" class="hero">
+    <div class="container hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">
+          Hit Tracker
+          <span class="accent-text">Cada golpe cuenta.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Monitorea tus impactos en tiempo real. Entrena más inteligente.
+        </p>
+        <p class="hero-description">
+          Sistema IoT de captura y análisis de golpes para boxeo. Conecta tu saco, calibra y sigue tu progreso al detalle.
+        </p>
+        
+        <div class="hero-cta">
+          <a href="https://github.com/adanoliva/hit-tracker#" class="btn btn-primary">
+            Ver en GitHub
+          </a>
+        </div>
+
+        <p class="hero-footer">
+          Basado en ESP32 + React. Código abierto. GPL v3.
+        </p>
+      </div>
+
+      <div class="hero-visual">
+        <div class="device-mockup">
+          <div class="phone-frame">
+            <div class="phone-screen">
+              <div class="app-header">
+                <div class="app-title">Dashboard</div>
+                <div class="app-battery"></div>
+              </div>
+              <div class="app-stats">
+                <div class="stat-box">
+                  <div class="stat-label">Power</div>
+                  <div class="stat-value">92</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">RPM</div>
+                  <div class="stat-value">4.2</div>
+                </div>
+              </div>
+              <div class="app-chart">
+                <div class="chart-bar" style="height: 30%;"></div>
+                <div class="chart-bar" style="height: 60%;"></div>
+                <div class="chart-bar" style="height: 45%;"></div>
+                <div class="chart-bar" style="height: 75%;"></div>
+                <div class="chart-bar" style="height: 55%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="features">
+    <div class="container">
+      <h2>Features</h2>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Análisis en Tiempo Real</h3>
+          <p>Visualiza tus impactos al instante. Gráficos dinámicos que capturan cada golpe con precisión.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <h3>Calibración Inteligente</h3>
+          <p>Ajusta el sensor a tu estilo. Crea perfiles personalizados para diferentes tipos de entrenamiento.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h3>Sigue tu Progreso</h3>
+          <p>Métricas detalladas: Power máximo, RPM, Valid Hits. Mira cómo mejoras semana a semana.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Sesiones Estructuradas</h3>
+          <p>Entrena con objetivos. Sesiones de 3, 5 o 10 minutos con feedback sonoro y visual.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">💾</div>
+          <h3>Almacenamiento Local</h3>
+          <p>Tus datos te pertenecen. Guardados localmente sin conexión a internet requerida.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔧</div>
+          <h3>Código Abierto</h3>
+          <p>Hardware y software open-source. Modifica, amplía y comparte tus mejoras.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section id="how" class="how-it-works">
+    <div class="container">
+      <h2>Cómo Funciona</h2>
+      
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Conecta el Sensor</h3>
+          <p>Programa el ESP32 con el firmware. La app detecta automáticamente el dispositivo via Bluetooth.</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Calibra</h3>
+          <p>Realiza 3 series de golpes (ligero, normal, fuerte). El sistema aprende tu patrón.</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Entrena</h3>
+          <p>Inicia sesión. El sensor captura datos a 100Hz. App procesa en tiempo real.</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Analiza</h3>
+          <p>Al terminar, resultados detallados. Power máximo, RPM, valid hits, progreso histórico.</p>
+        </div>
+      </div>
+
+      <div class="technical-stack">
+        <div class="stack-item">
+          <span class="stack-label">Hardware:</span>
+          <span class="stack-value">ESP32 + MPU-6050</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-label">App:</span>
+          <span class="stack-value">Electron + React</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-label">Comunicación:</span>
+          <span class="stack-value">Bluetooth BLE</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-label">Frecuencia:</span>
+          <span class="stack-value">100Hz / 10ms</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPECS -->
+  <section id="specs" class="specs">
+    <div class="container">
+      <h2>Especificaciones</h2>
+
+      <div class="specs-grid">
+        <div class="spec-column">
+          <h3>Hardware</h3>
+          <ul>
+            <li>Microcontrolador: ESP32-32D</li>
+            <li>Sensor: GY-521 (MPU-6050)</li>
+            <li>Frecuencia: 100Hz</li>
+            <li>Rango: ±16g aceleración</li>
+            <li>Conexión: Bluetooth 4.2 BLE</li>
+            <li>Alimentación: USB 5V</li>
+          </ul>
+        </div>
+
+        <div class="spec-column">
+          <h3>Métricas</h3>
+          <ul>
+            <li><strong>Power:</strong> Intensidad golpe (0-100)</li>
+            <li><strong>Valid Hit:</strong> Golpes > 80% power max</li>
+            <li><strong>RPM:</strong> Golpes por minuto</li>
+            <li><strong>Accuracy:</strong> ±2% en magnitud</li>
+            <li><strong>Latency:</strong> &lt;50ms procesamiento</li>
+            <li><strong>Storage:</strong> Ilimitado (archivos JSON)</li>
+          </ul>
+        </div>
+
+        <div class="spec-column">
+          <h3>Software</h3>
+          <ul>
+            <li>Framework: Electron 27+</li>
+            <li>Frontend: React 18+</li>
+            <li>Lenguaje: TypeScript 5+</li>
+            <li>Estado: Zustand 4+</li>
+            <li>Gráficos: Recharts 2+</li>
+            <li>Licencia: MIT</li>
+          </ul>
+        </div>
+
+        <div class="spec-column">
+          <h3>Requisitos</h3>
+          <ul>
+            <li>OS: Windows, macOS, Linux</li>
+            <li>RAM: 512MB mínimo</li>
+            <li>Node.js: 16+ (desarrollo)</li>
+            <li>Bluetooth: Necesario</li>
+            <li>Espacio: ~200MB</li>
+            <li>Setup: 10 minutos</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="download-section">
+        <h3>Crea el tuyo!</h3>
+        <div class="download-buttons">
+          <a href="https://github.com/adanoliva/hit-tracker#" class="btn btn-primary">
+            Ver en GitHub
+          </a>
+        </div>
+        <p class="download-note">
+          Clona e instala: <code>npm install && npm run dev</code>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Hit Tracker</h4>
+          <p>Sistema de monitoreo IoT para boxeo. Código abierto, MIT License.</p>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Enlaces</h4>
+          <ul>
+            <li><a href="https://github.com/adanoliva/hit-tracker#">GitHub</a></li>
+            <li><a href="#">Documentación</a></li>
+            <li><a href="#">Issues</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Comunidad</h4>
+          <ul>
+            <li><a href="#">Contribuir</a></li>
+            <li><a href="#">Reportar Bug</a></li>
+            <li><a href="#">Feature Request</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2025 Hit Tracker. GPL v3. Código abierto para boxeadores.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

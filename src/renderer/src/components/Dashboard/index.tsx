@@ -1,10 +1,94 @@
 import { useState } from 'react'
+import {
+  ComposedChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid
+} from 'recharts'
 import { useTrainingStore } from '../../stores/trainingStore'
 import { useDeviceStore } from '../../stores/deviceStore'
 import { useProfileStore } from '../../stores/profileStore'
+import type { Training } from '../../types'
 
 interface DashboardProps {
   onNavigate: (page: string) => void
+}
+
+function formatDate(ts: number): string {
+  return new Date(ts).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+}
+
+function ProgressChart({ sessions }: { sessions: Training[] }): JSX.Element {
+  const data = sessions
+    .slice()
+    .reverse()
+    .slice(-8)
+    .map((t) => ({
+      date: formatDate(t.createdAt),
+      rpm: Math.round(t.rpmAverage),
+      power: t.powerMax
+    }))
+
+  if (data.length < 2) {
+    return (
+      <div className="flex items-center justify-center h-24 text-text-muted text-xs">
+        Necesitas al menos 2 sesiones para ver el progreso
+      </div>
+    )
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={120}>
+      <ComposedChart data={data} margin={{ top: 8, right: 4, left: -28, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+        <XAxis
+          dataKey="date"
+          tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+          axisLine={false}
+          tickLine={false}
+        />
+        <YAxis
+          yAxisId="golpes"
+          tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+          axisLine={false}
+          tickLine={false}
+        />
+        <YAxis
+          yAxisId="power"
+          orientation="right"
+          domain={[0, 100]}
+          tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+          axisLine={false}
+          tickLine={false}
+          width={28}
+        />
+        <Tooltip
+          contentStyle={{
+            background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            fontSize: 12
+          }}
+          labelStyle={{ color: 'var(--text-muted)', marginBottom: 4 }}
+          itemStyle={{ color: 'var(--text-primary)' }}
+        />
+        <Bar yAxisId="golpes" dataKey="rpm" fill="var(--accent)" opacity={0.7} radius={[3, 3, 0, 0]} name="RPM prom." />
+        <Line
+          yAxisId="power"
+          dataKey="power"
+          stroke="var(--secondary)"
+          strokeWidth={2}
+          dot={{ r: 3, fill: 'var(--secondary)' }}
+          name="Power máx"
+          type="monotone"
+        />
+      </ComposedChart>
+    </ResponsiveContainer>
+  )
 }
 
 export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
@@ -15,7 +99,8 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
   const profile = getSelected()
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
-  const recent = trainings.slice(0, 5)
+  const profileSessions = trainings.filter((t) => t.profile?.id === profile.id)
+  const recent = profileSessions.slice(0, 5)
 
   return (
     <div className="p-6 space-y-6">
@@ -35,7 +120,7 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
         <div className="bg-bg-secondary rounded-xl p-4 border border-border">
           <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Perfil activo</p>
           <p className="font-semibold text-secondary">{profile.name}</p>
-          <p className="text-xs text-text-muted capitalize">
+          <p className="text-xs text-text-muted">
             {profile.stance === 'orthodox' ? 'Ortodoxo' : 'Southpaw'}
           </p>
         </div>
@@ -49,10 +134,32 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
         ▶ Nueva sesión
       </button>
 
+      {/* Progress chart */}
+      {profileSessions.length > 0 && (
+        <div className="bg-bg-secondary rounded-xl p-4 border border-border">
+          <div className="flex justify-between items-baseline mb-3">
+            <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+              Progreso · {profile.name}
+            </h2>
+            <div className="flex gap-3 text-xs text-text-muted">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-sm bg-accent inline-block opacity-70" />
+                RPM prom.
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-0.5 bg-secondary inline-block" />
+                Power
+              </span>
+            </div>
+          </div>
+          <ProgressChart sessions={profileSessions} />
+        </div>
+      )}
+
       {/* Recent trainings */}
       <div>
         <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
-          Sesiones recientes
+          Sesiones recientes · {profile.name}
         </h2>
         {recent.length === 0 ? (
           <p className="text-text-muted text-sm">Sin sesiones todavía</p>
@@ -84,12 +191,7 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
                 ) : (
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-text-primary truncate">{t.device.name}</p>
-                        <span className="text-xs text-secondary bg-secondary/10 px-1.5 py-0.5 rounded shrink-0">
-                          {t.profile?.name ?? '—'}
-                        </span>
-                      </div>
+                      <p className="text-sm font-medium text-text-primary truncate">{t.device.name}</p>
                       <p className="text-xs text-text-muted mt-0.5">
                         {new Date(t.createdAt).toLocaleDateString('es-ES', {
                           day: '2-digit',
@@ -97,9 +199,7 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
-                        {t.profile?.stance
-                          ? ` · ${t.profile.stance === 'orthodox' ? 'Ortodoxo' : 'Southpaw'}`
-                          : ''}
+                        {' · '}{t.numRounds} {t.numRounds === 1 ? 'round' : 'rounds'}
                       </p>
                     </div>
                     <div className="flex items-start gap-3 shrink-0">
