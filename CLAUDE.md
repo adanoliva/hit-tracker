@@ -4,9 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Proyecto
 
-HIT TRACKER es una app de escritorio (Electron + React + TypeScript) que monitorea sesiones de entrenamiento de boxeo en tiempo real. El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acelerómetro/giroscopio via Bluetooth BLE a la app.
+HIT TRACKER es una app de monitoreo de entrenamiento de boxeo en tiempo real. Existe en dos plataformas:
 
-**Estado actual**: Fase de documentación y código base. La app aún no está implementada — los archivos en la raíz son plantillas/contexto para construirla.
+- **Desktop** (`src/`): Electron + React + TypeScript
+- **Mobile** (`mobile/`): React Native + Expo (Android)
+
+El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acelerómetro/giroscopio via Bluetooth BLE. En mobile también existe el modo "Todo en 1" donde el propio móvil actúa como sensor.
+
+## Convención de plataformas
+
+**Toda mejora o feature se aplica a DESKTOP y MOBILE salvo que se indique explícitamente lo contrario.**
+
+Cuando una feature sea exclusiva de una plataforma, indicarlo así:
+- `[solo desktop]` — solo aplica a `src/`
+- `[solo mobile]` — solo aplica a `mobile/`
 
 ## Comandos
 
