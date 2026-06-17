@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Slider from '@react-native-community/slider'
 import { useProfileStore } from '../../core/stores/profileStore'
 import { calibrationService } from '../../core/services/calibration'
@@ -50,6 +51,7 @@ const sf = StyleSheet.create({
 })
 
 export function ProfilesPage({ onBack }: { onBack?: () => void }) {
+  const { top } = useSafeAreaInsets()
   const { profiles, selectedProfileId, addProfile, updateProfile, deleteProfile, selectProfile } = useProfileStore()
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
@@ -72,7 +74,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   }
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
+    <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: top + 16 }]}>
       {onBack && (
         <View style={s.header}>
           <TouchableOpacity onPress={onBack}>
@@ -216,7 +218,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bgPrimary },
-  content: { padding: 16, gap: 10, paddingBottom: 32 },
+  content: { paddingHorizontal: 16, gap: 10, paddingBottom: 32 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6 },
   back: { fontSize: 22, color: colors.textMuted },
   title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },

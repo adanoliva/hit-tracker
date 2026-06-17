@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useProfileStore } from '../../core/stores/profileStore'
 import { colors } from '../../theme'
@@ -43,6 +44,7 @@ function OptionRow<T extends number>({
 }
 
 export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
+  const { top } = useSafeAreaInsets()
   const [roundDuration, setRoundDuration] = useState(180)
   const [numRounds, setNumRounds] = useState(3)
   const [restDuration, setRestDuration] = useState(60)
@@ -55,13 +57,8 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
   const totalSecs = numRounds * roundDuration + (numRounds - 1) * restDuration
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
-      <View style={s.header}>
-        <TouchableOpacity onPress={onBack}>
-          <Text style={s.back}>←</Text>
-        </TouchableOpacity>
-        <Text style={s.title}>Nueva sesión</Text>
-      </View>
+    <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: top + 16 }]}>
+      <Text style={s.title}>Nueva sesión</Text>
 
       {/* Estado dispositivo */}
       <View style={[s.deviceCard, connected ? s.deviceOk : s.deviceError]}>
@@ -133,7 +130,7 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bgPrimary },
-  content: { padding: 16, gap: 16, paddingBottom: 32 },
+  content: { paddingHorizontal: 16, gap: 16, paddingBottom: 32 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   back: { fontSize: 22, color: colors.textMuted, paddingRight: 8 },
   title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },

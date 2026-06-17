@@ -30,8 +30,9 @@ Estado del port React Native. Marca cada ítem al completarlo.
 
 ### Dashboard — gráfico de progreso
 
-- [ ] Portar el gráfico de barras + línea del Dashboard desktop usando `victory-native` (ya instalado)
+- [ ] Portar el gráfico de barras + línea del Dashboard desktop usando `react-native-svg` (ya instalado, mismo approach que TrainingRound)
 - [ ] El chart desktop usa: barras = RPM promedio por sesión, línea = power máx — mismo diseño en mobile
+- [ ] NOTA: victory-native fue eliminado porque arrastra react-native-skia (C++ pesado que falla en el build). Usar react-native-svg directamente.
 
 ### Permisos Android — configuración
 
@@ -66,7 +67,7 @@ Estado del port React Native. Marca cada ítem al completarlo.
   - Integrado en `Training/index`: activa `usePhoneSensor` solo cuando `phase === 'round'` y el dispositivo es `PHONE_SENSOR_ID`
 
 - [x] Scaffold Expo + TypeScript en `mobile/`
-- [x] Dependencias instaladas: react-navigation, react-native-ble-plx, expo-file-system, expo-keep-awake, expo-haptics, expo-av, victory-native, react-native-svg, @react-native-community/slider
+- [x] Dependencias instaladas: react-navigation, react-native-ble-plx, expo-file-system, expo-keep-awake, expo-haptics, expo-av, react-native-svg, @react-native-community/slider
 - [x] `src/core/` — tipos, stores, hooks, servicios copiados del desktop
 - [x] Stores desacoplados de `window.api` → usan `src/services/storage.ts` (expo-file-system)
 - [x] `useLayout.ts` — detección isTablet + isLandscape

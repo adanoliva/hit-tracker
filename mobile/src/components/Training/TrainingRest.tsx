@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { RoundStats } from '../../core/types'
 import { colors } from '../../theme'
 
@@ -29,8 +30,9 @@ function Delta({ label, current, previous }: { label: string; current: number; p
 export function TrainingRest({
   restTimeRemaining, currentRound, totalRounds, roundStats, previousRoundStats
 }: TrainingRestProps) {
+  const { top } = useSafeAreaInsets()
   return (
-    <View style={s.container}>
+    <View style={[s.container, { paddingTop: top + 24 }]}>
       <View style={s.center}>
         <Text style={s.restLabel}>Descanso</Text>
         <Text style={s.timer}>{formatTime(restTimeRemaining)}</Text>

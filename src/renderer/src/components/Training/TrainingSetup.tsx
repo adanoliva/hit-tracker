@@ -21,12 +21,7 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps): JSX.Elem
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <button onClick={onBack} className="text-text-muted hover:text-text-primary transition-colors">
-          ←
-        </button>
-        <h1 className="text-xl font-bold text-text-primary">Nueva sesión</h1>
-      </div>
+      <h1 className="text-xl font-bold text-text-primary">Nueva sesión</h1>
 
       {/* Device status */}
       <div

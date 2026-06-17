@@ -1,11 +1,10 @@
 import { useEffect } from 'react'
 import { StatusBar } from 'expo-status-bar'
+import * as ScreenOrientation from 'expo-screen-orientation'
 import { NavigationContainer } from '@react-navigation/native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { StyleSheet } from 'react-native'
-import { useLayout } from './src/hooks/useLayout'
+import { StyleSheet, useWindowDimensions } from 'react-native'
 import { MobileLayout } from './src/navigation/MobileLayout'
-import { TabletLayout } from './src/navigation/TabletLayout'
 import { useTrainingStore } from './src/core/stores/trainingStore'
 import { useProfileStore } from './src/core/stores/profileStore'
 import { useDeviceStore } from './src/core/stores/deviceStore'
@@ -13,8 +12,18 @@ import { storage } from './src/services/storage'
 import { colors } from './src/theme'
 
 function RootNavigator() {
-  const { isTablet, isLandscape } = useLayout()
-  return isTablet && isLandscape ? <TabletLayout /> : <MobileLayout />
+  const { width, height } = useWindowDimensions()
+  const isTablet = Math.max(width, height) >= 768
+
+  useEffect(() => {
+    ScreenOrientation.lockAsync(
+      isTablet
+        ? ScreenOrientation.OrientationLock.LANDSCAPE
+        : ScreenOrientation.OrientationLock.PORTRAIT_UP
+    )
+  }, [isTablet])
+
+  return <MobileLayout />
 }
 
 export default function App() {

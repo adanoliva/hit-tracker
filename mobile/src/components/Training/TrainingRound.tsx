@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Circle, Line, G } from 'react-native-svg'
 import type { Impact, PunchType } from '../../core/types'
 import { colors } from '../../theme'
@@ -98,6 +99,7 @@ export function TrainingRound({
   roundNumber, totalRounds, timeRemaining, impacts, powerMax, rpmStats, onAbort
 }: TrainingRoundProps) {
   const { width } = useWindowDimensions()
+  const { top } = useSafeAreaInsets()
   const chartWidth = width - 32  // padding 16*2
   const chartHeight = 200
 
@@ -108,7 +110,7 @@ export function TrainingRound({
   }, {})
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { paddingTop: top + 16 }]}>
       {/* Header */}
       <View style={s.header}>
         <View>
@@ -166,7 +168,7 @@ function StatBox({ label, value, color = colors.textPrimary }: { label: string; 
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgPrimary, padding: 16, gap: 12 },
+  container: { flex: 1, backgroundColor: colors.bgPrimary, paddingHorizontal: 16, paddingBottom: 16, gap: 12 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   roundLabel: { fontSize: 11, color: colors.textMuted },
   roundNum: { fontSize: 26, fontWeight: '800', color: colors.textPrimary },

@@ -100,7 +100,7 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const profileSessions = trainings.filter((t) => t.profile?.id === profile.id)
-  const recent = profileSessions.slice(0, 5)
+  const recent = profileSessions
 
   return (
     <div className="p-6 space-y-6">

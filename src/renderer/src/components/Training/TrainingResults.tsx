@@ -61,7 +61,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps): JSX
         onClick={onDone}
         className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-4 rounded-xl text-lg transition-all"
       >
-        Volver al dashboard
+        ▶ Nueva sesión
       </button>
     </div>
   )

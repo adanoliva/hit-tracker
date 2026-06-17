@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useProfileStore } from '../../core/stores/profileStore'
 import { useTrainingStore } from '../../core/stores/trainingStore'
@@ -24,6 +25,7 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
   const isPhoneSensor = connected?.mac === PHONE_SENSOR_ID
   const phonePlacement = (connected as any)?.placement as PhoneSensorPlacement | undefined
 
+  const { top } = useSafeAreaInsets()
   const { impacts, powerMax, rpmStats, processReading, reset } = useSensorData(profile)
   const {
     phase, currentRoundNumber, totalRounds, roundTimeRemaining,
@@ -74,7 +76,7 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
     return (
       <TrainingResults
         training={finishedTraining}
-        onDone={() => { reset(); onBack?.() }}
+        onDone={() => { abortTraining(); reset(); onBack?.() }}
       />
     )
   }
@@ -85,7 +87,7 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
 
   if (phase === 'preparing') {
     return (
-      <View style={s.center}>
+      <View style={[s.center, { paddingTop: top }]}>
         <Text style={s.prepLabel}>Prepárate...</Text>
         <Text style={s.prepTimer}>{prepTimeRemaining}</Text>
         <TouchableOpacity onPress={handleAbort}>

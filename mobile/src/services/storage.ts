@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import type { Training, CalibrationProfile, Device } from '../core/types'
 
 const BASE = FileSystem.documentDirectory + 'HitTracker/'

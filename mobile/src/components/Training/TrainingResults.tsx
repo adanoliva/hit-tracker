@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { Training } from '../../core/types'
 import { colors } from '../../theme'
 
@@ -17,13 +18,14 @@ function Stat({ label, value, color = colors.textPrimary }: { label: string; val
 }
 
 export function TrainingResults({ training, onDone }: TrainingResultsProps) {
+  const { top } = useSafeAreaInsets()
   const bestRound = training.rounds.reduce(
     (best, r) => (r.stats.powerMax > best.stats.powerMax ? r : best),
     training.rounds[0]
   )
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
+    <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: top + 16 }]}>
       <View style={s.heroSection}>
         <Text style={s.heroEmoji}>🥊</Text>
         <Text style={s.heroTitle}>Entrenamiento completado</Text>
@@ -62,7 +64,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
       </View>
 
       <TouchableOpacity style={s.doneBtn} onPress={onDone}>
-        <Text style={s.doneBtnText}>Volver al dashboard</Text>
+        <Text style={s.doneBtnText}>▶ Nueva sesión</Text>
       </TouchableOpacity>
     </ScrollView>
   )
@@ -70,7 +72,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bgPrimary },
-  content: { padding: 16, gap: 16, paddingBottom: 32 },
+  content: { paddingHorizontal: 16, gap: 16, paddingBottom: 32 },
   heroSection: { alignItems: 'center', gap: 6, paddingVertical: 8 },
   heroEmoji: { fontSize: 48 },
   heroTitle: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },

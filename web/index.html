@@ -24,14 +24,17 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding-bottom: 64px;
     }
 
     .container {
       text-align: center;
-      padding: 40px 24px;
+      padding: 60px 24px 0;
       max-width: 560px;
+      width: 100%;
     }
 
     .logo {
@@ -114,6 +117,72 @@
       color: var(--secondary);
     }
 
+    .screenshots {
+      margin-top: 48px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .screenshot-frame {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      width: 280px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    .screenshot-titlebar {
+      background: #1f1f1f;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green { background: #28c840; }
+
+    .screenshot-frame img {
+      width: 100%;
+      display: block;
+    }
+
+    .screenshot-label {
+      padding: 8px 12px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: left;
+      border-top: 1px solid var(--border);
+    }
+
+    .screenshot-frame img { cursor: zoom-in; }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+
+    .lightbox.open { display: flex; }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 16px 64px rgba(0,0,0,0.8);
+    }
+
     footer {
       position: fixed;
       bottom: 24px;
@@ -133,7 +202,7 @@
     </div>
     <div class="badge">Próximamente</div>
 
-    <h1>Cada golpe,<br><span class="accent">medido.</span></h1>
+    <h1>Cada golpe<br><span class="accent">cuenta.</span></h1>
 
     <p>
       Sistema IoT de análisis de entrenamiento de boxeo en tiempo real.
@@ -154,6 +223,43 @@
     </div>
   </div>
 
-  <footer>En desarrollo &mdash; Hit Tracker &copy; 2025</footer>
+  <div class="screenshots" style="max-width:640px;margin:48px auto 0;">
+    <div class="screenshot-frame">
+      <div class="screenshot-titlebar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+      </div>
+      <img src="screenshoot/desktop/Dashboard.png" alt="Dashboard" />
+      <div class="screenshot-label">Dashboard — progreso y sesiones recientes</div>
+    </div>
+    <div class="screenshot-frame">
+      <div class="screenshot-titlebar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+      </div>
+      <img src="screenshoot/desktop/SesionRegistro.png" alt="Sesión en directo" />
+      <div class="screenshot-label">Sesión en directo — golpes, power y RPM</div>
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <script>
+    document.querySelectorAll('.screenshot-frame img').forEach(img => {
+      img.addEventListener('click', () => {
+        document.getElementById('lightbox-img').src = img.src
+        document.getElementById('lightbox').classList.add('open')
+      })
+    })
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open')
+    })
+  </script>
+
+  <footer>En desarrollo &mdash; Hit Tracker &copy; 2026</footer>
 </body>
 </html>

@@ -81,10 +81,7 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
 
   return (
     <div className="p-6 space-y-5">
-      <div className="flex items-center gap-3">
-        <button onClick={onBack} className="text-text-muted hover:text-text-primary transition-colors">←</button>
-        <h1 className="text-xl font-bold text-text-primary">Perfiles</h1>
-      </div>
+      <h1 className="text-xl font-bold text-text-primary">Perfiles</h1>
 
       <div className="space-y-2">
         {profiles.map((p) => (

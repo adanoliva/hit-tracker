@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Alert, TextInput, ActivityIndicator, PermissionsAndroid, Platform
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import type { Device, PhoneSensorPlacement } from '../../core/types'
 import { PHONE_SENSOR_ID } from '../../core/types'
@@ -24,6 +25,7 @@ type ScanState = 'idle' | 'scanning' | 'error'
 interface FoundDevice { id: string; name: string }
 
 export function DevicesPage({ onBack }: { onBack?: () => void }) {
+  const { top } = useSafeAreaInsets()
   const { devices, connected, addDevice, updateDevice, removeDevice, setConnected } = useDeviceStore()
 
   const [scanState, setScanState] = useState<ScanState>('idle')
@@ -117,7 +119,7 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
   }
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
+    <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: top + 16 }]}>
       {onBack && (
         <View style={s.header}>
           <TouchableOpacity onPress={onBack}>
@@ -267,7 +269,7 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bgPrimary },
-  content: { padding: 16, gap: 10, paddingBottom: 32 },
+  content: { paddingHorizontal: 16, gap: 10, paddingBottom: 32 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6 },
   back: { fontSize: 22, color: colors.textMuted },
   title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },
