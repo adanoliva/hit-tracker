@@ -10,7 +10,12 @@ import { PHONE_SENSOR_ID } from '../../core/types'
 import { PhoneSensorPicker } from './PhoneSensorPicker'
 import { colors } from '../../theme'
 
-const bleManager = new BleManager()
+// Lazy init para evitar crash en emulador/dispositivos sin BLE
+let _bleManager: BleManager | null = null
+function getBleManager(): BleManager {
+  if (!_bleManager) _bleManager = new BleManager()
+  return _bleManager
+}
 
 async function requestBlePermissions(): Promise<boolean> {
   if (Platform.OS !== 'android') return true
@@ -23,7 +28,6 @@ async function requestBlePermissions(): Promise<boolean> {
 }
 
 type ScanState = 'idle' | 'scanning' | 'error'
-
 interface FoundDevice { id: string; name: string }
 
 export function DevicesPage({ onBack }: { onBack?: () => void }) {
@@ -55,8 +59,7 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
     setConnected(PHONE_SENSOR_ID)
   }
 
-  // Detener escaneo al desmontar
-  useEffect(() => () => { bleManager.stopDeviceScan() }, [])
+  useEffect(() => () => { getBleManager().stopDeviceScan() }, [])
 
   const startScan = useCallback(async () => {
     const granted = await requestBlePermissions()
@@ -69,9 +72,9 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
     setScanError('')
     setFound([])
 
-    bleManager.startDeviceScan(null, null, (error, device) => {
+    getBleManager().startDeviceScan(null, null, (error, device) => {
       if (error) {
-        bleManager.stopDeviceScan()
+        getBleManager().stopDeviceScan()
         setScanState('error')
         setScanError(error.message)
         return
@@ -84,24 +87,22 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
       }
     })
 
-    // Auto-parar después de 15s
     setTimeout(() => {
-      bleManager.stopDeviceScan()
+      getBleManager().stopDeviceScan()
       setScanState((prev) => prev === 'scanning' ? 'idle' : prev)
     }, 15000)
   }, [])
 
   const stopScan = () => {
-    bleManager.stopDeviceScan()
+    getBleManager().stopDeviceScan()
     setScanState('idle')
     setFound([])
   }
 
   const selectDevice = (fd: FoundDevice) => {
-    bleManager.stopDeviceScan()
+    getBleManager().stopDeviceScan()
     setScanState('idle')
     setFound([])
-
     const newDevice: Device = {
       mac: fd.id, name: fd.name,
       createdAt: Date.now(), lastSeen: Date.now()
@@ -128,15 +129,12 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
       )}
       {!onBack && <Text style={s.title}>Dispositivos</Text>}
 
-      {/* Dispositivos guardados */}
       {devices.length === 0 && scanState === 'idle' && (
         <Text style={s.muted}>Sin dispositivos registrados</Text>
       )}
+
       {devices.map((d) => (
-        <View
-          key={d.mac}
-          style={[s.card, connected?.mac === d.mac && s.cardActive]}
-        >
+        <View key={d.mac} style={[s.card, connected?.mac === d.mac && s.cardActive]}>
           {editingMac === d.mac ? (
             <View style={s.editRow}>
               <TextInput
@@ -157,7 +155,9 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
             <View style={s.cardRow}>
               <View style={s.flex1}>
                 <Text style={s.deviceName}>{d.name}</Text>
-                <Text style={[s.muted, { fontFamily: 'monospace' }]}>{d.mac}</Text>
+                {d.mac !== PHONE_SENSOR_ID && (
+                  <Text style={[s.muted, { fontFamily: 'monospace' }]}>{d.mac}</Text>
+                )}
                 {connected?.mac === d.mac && <Text style={s.activeBadge}>● Activo</Text>}
               </View>
               <View style={s.actions}>
@@ -170,12 +170,18 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
                     <Text style={s.btnText}>Usar</Text>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity
-                  style={s.btnMuted}
-                  onPress={() => { setEditingMac(d.mac); setEditName(d.name) }}
-                >
-                  <Text style={s.btnMutedText}>Renombrar</Text>
-                </TouchableOpacity>
+                {d.mac === PHONE_SENSOR_ID ? (
+                  <TouchableOpacity style={s.btnMuted} onPress={() => setShowPhonePicker(true)}>
+                    <Text style={s.btnMutedText}>Cambiar posición</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={s.btnMuted}
+                    onPress={() => { setEditingMac(d.mac); setEditName(d.name) }}
+                  >
+                    <Text style={s.btnMutedText}>Renombrar</Text>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
                   style={s.btnMuted}
                   onPress={() =>
@@ -193,14 +199,13 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
         </View>
       ))}
 
-      {/* Panel de escaneo */}
-      {/* Opción: este móvil como sensor [solo mobile] */}
+      {/* [solo mobile] Usar este móvil como sensor */}
       {scanState === 'idle' && (
         <TouchableOpacity style={s.phoneBtn} onPress={() => setShowPhonePicker(true)}>
           <Text style={s.phoneBtnTitle}>📱 Usar este móvil como sensor</Text>
           <Text style={s.phoneBtnSub}>
             {phoneDevice
-              ? `Configurado: ${phoneDevice.name.replace('📱 Este móvil — ', '')}`
+              ? `Configurado: ${phoneDevice.placement === 'front-vertical' ? 'Frontal vertical' : 'Horizontal encima'}`
               : 'El móvil detecta golpes con sus propios sensores'}
           </Text>
         </TouchableOpacity>
@@ -210,13 +215,6 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
         <TouchableOpacity style={s.scanBtn} onPress={startScan}>
           <Text style={s.scanText}>+ Buscar dispositivo Bluetooth</Text>
         </TouchableOpacity>
-      )}
-
-      {showPhonePicker && (
-        <PhoneSensorPicker
-          onConfirm={handleAddPhone}
-          onCancel={() => setShowPhonePicker(false)}
-        />
       )}
 
       {scanState === 'scanning' && (
@@ -234,7 +232,9 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
             <Text style={s.muted}>Asegúrate de que el Bluetooth está activado y el saco encendido</Text>
           ) : (
             <View style={s.foundList}>
-              <Text style={s.foundCount}>{found.length} dispositivo{found.length !== 1 ? 's' : ''} encontrado{found.length !== 1 ? 's' : ''}</Text>
+              <Text style={s.foundCount}>
+                {found.length} dispositivo{found.length !== 1 ? 's' : ''} encontrado{found.length !== 1 ? 's' : ''}
+              </Text>
               {found.map((fd) => (
                 <TouchableOpacity key={fd.id} style={s.foundItem} onPress={() => selectDevice(fd)}>
                   <Text style={s.foundName}>{fd.name}</Text>
@@ -254,6 +254,13 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
             <Text style={s.cancelScanText}>Cerrar</Text>
           </TouchableOpacity>
         </View>
+      )}
+
+      {showPhonePicker && (
+        <PhoneSensorPicker
+          onConfirm={handleAddPhone}
+          onCancel={() => setShowPhonePicker(false)}
+        />
       )}
     </ScrollView>
   )
