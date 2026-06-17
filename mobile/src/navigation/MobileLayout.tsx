@@ -8,33 +8,28 @@ import { colors } from '../theme'
 
 const Tab = createBottomTabNavigator()
 
-function icon(label: string) {
-  const map: Record<string, string> = {
-    Inicio: '🏠', Entrenar: '🥊', Dispositivos: '📡', Perfiles: '⚙️'
-  }
-  return <Text style={{ fontSize: 20 }}>{map[label]}</Text>
+const TAB_ICONS: Record<string, string> = {
+  Inicio: '🏠', Entrenar: '🥊', Dispositivos: '📡', Perfiles: '⚙️'
 }
 
 export function MobileLayout() {
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: { backgroundColor: colors.bgSecondary, borderTopColor: colors.border },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 11 }
-      }}
+        tabBarLabelStyle: { fontSize: 11 },
+        tabBarIcon: () => <Text style={{ fontSize: 20 }}>{TAB_ICONS[route.name]}</Text>
+      })}
     >
-      <Tab.Screen name="Inicio" options={{ tabBarIcon: () => icon('Inicio') }}>
-        {() => <Dashboard onNavigate={() => {}} />}
+      <Tab.Screen name="Inicio">
+        {({ navigation }) => <Dashboard onNavigate={(p) => navigation.navigate(p === 'training' ? 'Entrenar' : p)} />}
       </Tab.Screen>
-      <Tab.Screen name="Entrenar" options={{ tabBarIcon: () => icon('Entrenar') }}
-        component={TrainingPage} />
-      <Tab.Screen name="Dispositivos" options={{ tabBarIcon: () => icon('Dispositivos') }}
-        component={DevicesPage} />
-      <Tab.Screen name="Perfiles" options={{ tabBarIcon: () => icon('Perfiles') }}
-        component={ProfilesPage} />
+      <Tab.Screen name="Entrenar" component={TrainingPage} />
+      <Tab.Screen name="Dispositivos" component={DevicesPage} />
+      <Tab.Screen name="Perfiles" component={ProfilesPage} />
     </Tab.Navigator>
   )
 }

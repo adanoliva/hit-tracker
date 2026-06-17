@@ -25,7 +25,9 @@ export function TabletLayout() {
         name="Inicio"
         options={{ drawerIcon: () => <Text>🏠</Text> }}
       >
-        {() => <Dashboard onNavigate={() => {}} />}
+        {({ navigation }) => (
+          <Dashboard onNavigate={(p) => navigation.navigate(p === 'training' ? 'Entrenar' : p)} />
+        )}
       </Drawer.Screen>
       <Drawer.Screen
         name="Entrenar"
