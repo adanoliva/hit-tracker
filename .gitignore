@@ -3,3 +3,5 @@ out/
 dist/
 .env
 *.local
+mobile/node_modules/
+mobile/.expo/
