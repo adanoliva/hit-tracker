@@ -3,19 +3,12 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Alert, TextInput, ActivityIndicator, PermissionsAndroid, Platform
 } from 'react-native'
-import { BleManager } from 'react-native-ble-plx'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import type { Device, PhoneSensorPlacement } from '../../core/types'
 import { PHONE_SENSOR_ID } from '../../core/types'
 import { PhoneSensorPicker } from './PhoneSensorPicker'
+import { getBleManager, isBleAvailable } from '../../services/ble'
 import { colors } from '../../theme'
-
-// Lazy init para evitar crash en emulador/dispositivos sin BLE
-let _bleManager: BleManager | null = null
-function getBleManager(): BleManager {
-  if (!_bleManager) _bleManager = new BleManager()
-  return _bleManager
-}
 
 async function requestBlePermissions(): Promise<boolean> {
   if (Platform.OS !== 'android') return true
@@ -59,9 +52,14 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
     setConnected(PHONE_SENSOR_ID)
   }
 
-  useEffect(() => () => { getBleManager().stopDeviceScan() }, [])
+  useEffect(() => () => { getBleManager()?.stopDeviceScan() }, [])
 
   const startScan = useCallback(async () => {
+    if (!isBleAvailable) {
+      Alert.alert('BLE no disponible', 'Este build no tiene soporte Bluetooth. Usa el modo "Este móvil como sensor" o haz un build de producción.')
+      return
+    }
+
     const granted = await requestBlePermissions()
     if (!granted) {
       Alert.alert('Permisos', 'Se necesitan permisos de Bluetooth para buscar dispositivos.')
@@ -72,9 +70,10 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
     setScanError('')
     setFound([])
 
-    getBleManager().startDeviceScan(null, null, (error, device) => {
+    const ble = getBleManager()!
+    ble.startDeviceScan(null, null, (error, device) => {
       if (error) {
-        getBleManager().stopDeviceScan()
+        ble.stopDeviceScan()
         setScanState('error')
         setScanError(error.message)
         return
@@ -88,19 +87,19 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
     })
 
     setTimeout(() => {
-      getBleManager().stopDeviceScan()
+      ble.stopDeviceScan()
       setScanState((prev) => prev === 'scanning' ? 'idle' : prev)
     }, 15000)
   }, [])
 
   const stopScan = () => {
-    getBleManager().stopDeviceScan()
+    getBleManager()?.stopDeviceScan()
     setScanState('idle')
     setFound([])
   }
 
   const selectDevice = (fd: FoundDevice) => {
-    getBleManager().stopDeviceScan()
+    getBleManager()?.stopDeviceScan()
     setScanState('idle')
     setFound([])
     const newDevice: Device = {
