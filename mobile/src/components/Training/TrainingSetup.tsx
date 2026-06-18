@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useProfileStore } from '../../core/stores/profileStore'
@@ -45,6 +45,7 @@ function OptionRow<T extends number>({
 
 export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
   const { top } = useSafeAreaInsets()
+  const [freeMode, setFreeMode] = useState(false)
   const [roundDuration, setRoundDuration] = useState(180)
   const [numRounds, setNumRounds] = useState(3)
   const [restDuration, setRestDuration] = useState(60)
@@ -55,6 +56,11 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
   const selectProfile = useProfileStore((s) => s.selectProfile)
 
   const totalSecs = numRounds * roundDuration + (numRounds - 1) * restDuration
+  const handleStart = () => {
+    if (!connected) return
+    if (freeMode) onStart(0, 1, 0)
+    else onStart(roundDuration, numRounds, restDuration)
+  }
 
   return (
     <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: top + 16 }]}>
@@ -88,38 +94,54 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
         </View>
       </View>
 
-      <OptionRow
-        label="Duración por ronda"
-        options={[60, 120, 180, 300] as const as any}
-        selected={roundDuration}
-        onSelect={setRoundDuration}
-        format={(v) => v < 60 ? `${v}s` : `${v / 60}min`}
-      />
-      <OptionRow
-        label="Número de rondas"
-        options={[1, 3, 5, 8] as const as any}
-        selected={numRounds}
-        onSelect={setNumRounds}
-        format={(v) => String(v)}
-      />
-      <OptionRow
-        label="Descanso entre rondas"
-        options={[30, 60, 90] as const as any}
-        selected={restDuration}
-        onSelect={setRestDuration}
-        format={(v) => `${v}s`}
-      />
+      {/* Modo libre */}
+      <View style={s.freeModeRow}>
+        <View>
+          <Text style={s.freeModeLabel}>Modo libre</Text>
+          <Text style={s.muted}>Sin límite de tiempo — tú decides cuándo parar</Text>
+        </View>
+        <Switch
+          value={freeMode}
+          onValueChange={setFreeMode}
+          trackColor={{ false: colors.border, true: colors.accent }}
+          thumbColor="#fff"
+        />
+      </View>
 
-      <View style={s.summary}>
+      {!freeMode && <>
+        <OptionRow
+          label="Duración por ronda"
+          options={[60, 120, 180, 300] as const as any}
+          selected={roundDuration}
+          onSelect={setRoundDuration}
+          format={(v) => v < 60 ? `${v}s` : `${v / 60}min`}
+        />
+        <OptionRow
+          label="Número de rondas"
+          options={[1, 3, 5, 8] as const as any}
+          selected={numRounds}
+          onSelect={setNumRounds}
+          format={(v) => String(v)}
+        />
+        <OptionRow
+          label="Descanso entre rondas"
+          options={[30, 60, 90] as const as any}
+          selected={restDuration}
+          onSelect={setRestDuration}
+          format={(v) => `${v}s`}
+        />
+      </>}
+
+      {!freeMode && <View style={s.summary}>
         <Text style={s.summaryText}>
           Total: {numRounds} × {roundDuration / 60}min + {numRounds - 1} × {restDuration}s descanso
         </Text>
         <Text style={s.muted}>≈ {Math.round(totalSecs / 60)} minutos</Text>
-      </View>
+      </View>}
 
       <TouchableOpacity
         style={[s.startBtn, !connected && s.startBtnDisabled]}
-        onPress={() => connected && onStart(roundDuration, numRounds, restDuration)}
+        onPress={handleStart}
         disabled={!connected}
       >
         <Text style={s.startText}>Iniciar entrenamiento</Text>
@@ -152,6 +174,12 @@ const s = StyleSheet.create({
   profileOption: { flex: 0, paddingHorizontal: 14 },
   optionText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
   optionTextActive: { color: '#fff' },
+  freeModeRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: colors.bgSecondary, borderRadius: 12,
+    padding: 14, borderWidth: 1, borderColor: colors.border
+  },
+  freeModeLabel: { fontSize: 14, fontWeight: '700', color: colors.textPrimary, marginBottom: 2 },
   summary: {
     backgroundColor: colors.bgSecondary, borderRadius: 12,
     padding: 14, borderWidth: 1, borderColor: colors.border

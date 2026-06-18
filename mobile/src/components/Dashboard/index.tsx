@@ -15,7 +15,7 @@ function sessionPowerMax(t: Training) {
 function ProgressChart({ sessions, width }: { sessions: Training[]; width: number }) {
   const data = sessions.slice().reverse().slice(-8).map((t) => ({
     date: new Date(t.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-    hpm: Math.round(t.hpmAverage),
+    hpm: Math.round(t.hpmAverage) || 0,
     power: sessionPowerMax(t)
   }))
 

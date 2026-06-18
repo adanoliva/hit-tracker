@@ -8,6 +8,7 @@ interface TrainingSetupProps {
 }
 
 export function TrainingSetup({ onStart, onBack }: TrainingSetupProps): JSX.Element {
+  const [freeMode, setFreeMode] = useState(false)
   const [roundDuration, setRoundDuration] = useState(180)
   const [numRounds, setNumRounds] = useState(3)
   const [restDuration, setRestDuration] = useState(60)
@@ -55,8 +56,22 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps): JSX.Elem
         </select>
       </div>
 
+      {/* Modo libre */}
+      <div className="flex items-center justify-between bg-bg-secondary rounded-xl p-4 border border-border">
+        <div>
+          <p className="text-sm font-bold text-text-primary">Modo libre</p>
+          <p className="text-xs text-text-muted mt-0.5">Sin límite de tiempo — tú decides cuándo parar</p>
+        </div>
+        <button
+          onClick={() => setFreeMode(!freeMode)}
+          className={`w-12 h-6 rounded-full transition-all relative ${freeMode ? 'bg-accent' : 'bg-border'}`}
+        >
+          <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-all shadow ${freeMode ? 'left-6' : 'left-0.5'}`} />
+        </button>
+      </div>
+
       {/* Round config */}
-      <div className="space-y-4">
+      {!freeMode && <div className="space-y-4">
         <div>
           <label className="text-xs text-text-muted uppercase tracking-wider block mb-2">
             Duración por ronda
@@ -119,19 +134,19 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps): JSX.Elem
             ))}
           </div>
         </div>
-      </div>
+      </div>}
 
-      <div className="bg-bg-secondary rounded-xl p-4 border border-border text-sm text-text-muted">
+      {!freeMode && <div className="bg-bg-secondary rounded-xl p-4 border border-border text-sm text-text-muted">
         <p>
           Total: {numRounds} × {roundDuration / 60}min + {numRounds - 1} × {restDuration}s descanso
         </p>
         <p className="text-text-muted text-xs mt-1">
           ≈ {Math.round((numRounds * roundDuration + (numRounds - 1) * restDuration) / 60)} minutos
         </p>
-      </div>
+      </div>}
 
       <button
-        onClick={() => onStart(roundDuration, numRounds, restDuration)}
+        onClick={() => freeMode ? onStart(0, 1, 0) : onStart(roundDuration, numRounds, restDuration)}
         disabled={!canStart}
         className="w-full bg-accent hover:bg-accent-hover disabled:bg-bg-tertiary disabled:text-text-muted text-white font-bold py-4 rounded-xl text-lg transition-all"
       >

@@ -89,15 +89,19 @@ interface TrainingRoundProps {
   roundNumber: number
   totalRounds: number
   timeRemaining: number
+  timeElapsed: number
+  isFreeMode: boolean
   impacts: Impact[]
   powerMax: number
   powerMaxMag: number
   hpmStats: { current: number; average: number; max: number }
   onAbort: () => void
+  onFinish: () => void
 }
 
 export function TrainingRound({
-  roundNumber, totalRounds, timeRemaining, impacts, powerMax, powerMaxMag, hpmStats, onAbort
+  roundNumber, totalRounds, timeRemaining, timeElapsed, isFreeMode,
+  impacts, powerMax, powerMaxMag, hpmStats, onAbort, onFinish
 }: TrainingRoundProps) {
   const { width } = useWindowDimensions()
   const { top } = useSafeAreaInsets()
@@ -120,12 +124,19 @@ export function TrainingRound({
             {roundNumber} <Text style={s.roundTotal}>/ {totalRounds}</Text>
           </Text>
         </View>
-        <Text style={[s.timer, timeRemaining <= 10 && s.timerAlert]}>
-          {formatTime(timeRemaining)}
+        <Text style={[s.timer, !isFreeMode && timeRemaining <= 10 && s.timerAlert]}>
+          {isFreeMode ? formatTime(timeElapsed) : formatTime(timeRemaining)}
         </Text>
-        <TouchableOpacity style={s.abortBtn} onPress={onAbort}>
-          <Text style={s.abortText}>Abortar</Text>
-        </TouchableOpacity>
+        <View style={s.headerBtns}>
+          {isFreeMode && (
+            <TouchableOpacity style={s.finishBtn} onPress={onFinish}>
+              <Text style={s.finishText}>Finalizar</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={s.abortBtn} onPress={onAbort}>
+            <Text style={s.abortText}>Abortar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Leyenda */}
@@ -176,6 +187,9 @@ const s = StyleSheet.create({
   roundTotal: { fontSize: 18, color: colors.textMuted },
   timer: { fontSize: 52, fontFamily: 'monospace', fontWeight: '800', color: colors.textPrimary },
   timerAlert: { color: colors.accent },
+  headerBtns: { gap: 6, alignItems: 'flex-end' },
+  finishBtn: { borderWidth: 1, borderColor: colors.secondary, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
+  finishText: { fontSize: 12, color: colors.secondary, fontWeight: '700' },
   abortBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
   abortText: { fontSize: 12, color: colors.textMuted },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },

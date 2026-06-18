@@ -29,12 +29,15 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
     currentRoundNumber,
     totalRounds,
     roundTimeRemaining,
+    roundTimeElapsed,
     restTimeRemaining,
     prepTimeRemaining,
     completedRounds,
     finishedTraining,
+    isFreeMode,
     startTraining,
     abortTraining,
+    finishCurrentRound,
     getPreviousRoundStats
   } = useTraining()
 
@@ -128,10 +131,13 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
       roundNumber={currentRoundNumber}
       totalRounds={totalRounds}
       timeRemaining={roundTimeRemaining}
+      timeElapsed={roundTimeElapsed}
+      isFreeMode={isFreeMode}
       impacts={impacts}
       powerMax={powerMax}
       hpmStats={hpmStats}
       onAbort={handleAbort}
+      onFinish={finishCurrentRound}
     />
   )
 }

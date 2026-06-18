@@ -28,9 +28,9 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
   const { top } = useSafeAreaInsets()
   const { impacts, powerMax, powerMaxMag, hpmStats, processReading, reset } = useSensorData(profile)
   const {
-    phase, currentRoundNumber, totalRounds, roundTimeRemaining,
-    restTimeRemaining, prepTimeRemaining, completedRounds,
-    finishedTraining, startTraining, abortTraining, getPreviousRoundStats
+    phase, currentRoundNumber, totalRounds, roundTimeRemaining, roundTimeElapsed,
+    restTimeRemaining, prepTimeRemaining, completedRounds, isFreeMode,
+    finishedTraining, startTraining, abortTraining, finishCurrentRound, getPreviousRoundStats
   } = useTraining()
 
   const savedRef = useRef(false)
@@ -118,6 +118,9 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
       impacts={impacts}
       powerMax={powerMax}
       powerMaxMag={powerMaxMag}
+      timeElapsed={roundTimeElapsed}
+      isFreeMode={isFreeMode}
+      onFinish={finishCurrentRound}
       hpmStats={hpmStats}
       onAbort={handleAbort}
     />

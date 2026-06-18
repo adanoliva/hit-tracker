@@ -5,10 +5,13 @@ interface TrainingRoundProps {
   roundNumber: number
   totalRounds: number
   timeRemaining: number
+  timeElapsed: number
+  isFreeMode: boolean
   impacts: Impact[]
   powerMax: number
   hpmStats: { current: number; average: number; max: number }
   onAbort: () => void
+  onFinish: () => void
 }
 
 function formatTime(seconds: number): string {
@@ -50,13 +53,8 @@ function ImpactDot(props: any): JSX.Element {
 }
 
 export function TrainingRound({
-  roundNumber,
-  totalRounds,
-  timeRemaining,
-  impacts,
-  powerMax,
-  hpmStats,
-  onAbort
+  roundNumber, totalRounds, timeRemaining, timeElapsed, isFreeMode,
+  impacts, powerMax, hpmStats, onAbort, onFinish
 }: TrainingRoundProps): JSX.Element {
   const validHits = impacts.filter((i) => i.isValid).length
 
@@ -89,15 +87,25 @@ export function TrainingRound({
             {roundNumber} <span className="text-text-muted text-lg">/ {totalRounds}</span>
           </p>
         </div>
-        <p className={`text-5xl font-mono font-bold ${timeRemaining <= 10 ? 'text-accent' : 'text-text-primary'}`}>
-          {formatTime(timeRemaining)}
+        <p className={`text-5xl font-mono font-bold ${!isFreeMode && timeRemaining <= 10 ? 'text-accent' : 'text-text-primary'}`}>
+          {isFreeMode ? formatTime(timeElapsed) : formatTime(timeRemaining)}
         </p>
-        <button
-          onClick={onAbort}
-          className="text-xs text-text-muted hover:text-accent transition-colors px-3 py-1 border border-border hover:border-accent rounded-lg"
-        >
-          Abortar
-        </button>
+        <div className="flex flex-col gap-1.5">
+          {isFreeMode && (
+            <button
+              onClick={onFinish}
+              className="text-xs text-secondary font-bold hover:text-secondary/80 transition-colors px-3 py-1 border border-secondary hover:border-secondary/80 rounded-lg"
+            >
+              Finalizar
+            </button>
+          )}
+          <button
+            onClick={onAbort}
+            className="text-xs text-text-muted hover:text-accent transition-colors px-3 py-1 border border-border hover:border-accent rounded-lg"
+          >
+            Abortar
+          </button>
+        </div>
       </div>
 
       {/* Leyenda de golpes */}

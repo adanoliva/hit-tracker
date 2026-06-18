@@ -10,10 +10,12 @@ interface UseTrainingReturn {
   currentRoundNumber: number
   totalRounds: number
   roundTimeRemaining: number
+  roundTimeElapsed: number
   restTimeRemaining: number
   prepTimeRemaining: number
   completedRounds: Round[]
   finishedTraining: Training | null
+  isFreeMode: boolean
   startTraining: (
     device: Device,
     profile: CalibrationProfile,
@@ -22,6 +24,7 @@ interface UseTrainingReturn {
     restDuration: number
   ) => void
   abortTraining: () => void
+  finishCurrentRound: () => void
   getPreviousRoundStats: () => RoundStats | null
 }
 
@@ -38,6 +41,7 @@ export function useTraining(): UseTrainingReturn {
   const [completedRounds, setCompletedRounds] = useState<Round[]>([])
   const [finishedTraining, setFinishedTraining] = useState<Training | null>(null)
 
+  const [roundTimeElapsed, setRoundTimeElapsed] = useState(0)
   const configRef = useRef({ roundDuration: 180, numRounds: 3, restDuration: 60 })
   const timerRef  = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -74,9 +78,19 @@ export function useTraining(): UseTrainingReturn {
 
   const startRound = useCallback((roundNumber: number) => {
     setCurrentRoundNumber(roundNumber)
+    setRoundTimeElapsed(0)
     setRoundTimeRemaining(configRef.current.roundDuration)
     setPhase('round')
     trainingService.startRound(roundNumber)
+
+    const freeMode = configRef.current.roundDuration === 0
+
+    if (freeMode) {
+      timerRef.current = setInterval(() => {
+        setRoundTimeElapsed((prev) => prev + 1)
+      }, 1000)
+      return
+    }
 
     timerRef.current = setInterval(() => {
       setRoundTimeRemaining((prev) => {
@@ -89,11 +103,8 @@ export function useTraining(): UseTrainingReturn {
               const updated = [...prevRounds, round]
 
               if (updated.length >= configRef.current.numRounds) {
-                // Última ronda — cerrar entrenamiento
                 const training = trainingService.finishTraining()
-                if (training) {
-                  setFinishedTraining(training)
-                }
+                if (training) setFinishedTraining(training)
                 setPhase('finished')
               } else {
                 startRest(roundNumber)
@@ -154,6 +165,20 @@ export function useTraining(): UseTrainingReturn {
     setFinishedTraining(null)
   }, [])
 
+  const finishCurrentRound = useCallback(() => {
+    clearTimer()
+    const round = trainingService.finishRound()
+    if (round) {
+      setCompletedRounds((prev) => {
+        const updated = [...prev, round]
+        const training = trainingService.finishTraining()
+        if (training) setFinishedTraining(training)
+        setPhase('finished')
+        return updated
+      })
+    }
+  }, [])
+
   useEffect(() => () => clearTimer(), [])
 
   useEffect(() => { setActivePhase(phase) }, [phase])
@@ -167,12 +192,15 @@ export function useTraining(): UseTrainingReturn {
     currentRoundNumber,
     totalRounds,
     roundTimeRemaining,
+    roundTimeElapsed,
     restTimeRemaining,
     prepTimeRemaining,
     completedRounds,
     finishedTraining,
+    isFreeMode: configRef.current.roundDuration === 0,
     startTraining,
     abortTraining,
+    finishCurrentRound,
     getPreviousRoundStats
   }
 }

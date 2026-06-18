@@ -29,8 +29,8 @@ function ProgressChart({ sessions }: { sessions: Training[] }): JSX.Element {
     .slice(-8)
     .map((t) => ({
       date: formatDate(t.createdAt),
-      hpm: Math.round(t.hpmAverage),
-      power: t.powerMax
+      hpm: Math.round(t.hpmAverage) || 0,
+      power: Math.max(0, ...t.rounds.flatMap(r => r.impacts).map(i => Math.round(i.magnitude)))
     }))
 
   if (data.length < 2) {
