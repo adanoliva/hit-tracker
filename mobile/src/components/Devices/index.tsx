@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Alert, TextInput, ActivityIndicator, PermissionsAndroid, Platform
+  Alert, TextInput, ActivityIndicator, PermissionsAndroid, Platform, Image, Modal, useWindowDimensions
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
@@ -34,6 +34,8 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
   const [editingMac, setEditingMac] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [showPhonePicker, setShowPhonePicker] = useState(false)
+  const [showPlacement, setShowPlacement] = useState(false)
+  const { width } = useWindowDimensions()
 
   const phoneDevice = devices.find((d) => d.mac === PHONE_SENSOR_ID)
 
@@ -120,15 +122,52 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
 
   return (
     <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: top + 16 }]}>
-      {onBack && (
-        <View style={s.header}>
-          <TouchableOpacity onPress={onBack}>
-            <Text style={s.back}>←</Text>
-          </TouchableOpacity>
+      <View style={s.titleRow}>
+        {onBack ? (
+          <View style={s.headerLeft}>
+            <TouchableOpacity onPress={onBack}>
+              <Text style={s.back}>←</Text>
+            </TouchableOpacity>
+            <Text style={s.title}>Dispositivos</Text>
+          </View>
+        ) : (
           <Text style={s.title}>Dispositivos</Text>
-        </View>
-      )}
-      {!onBack && <Text style={s.title}>Dispositivos</Text>}
+        )}
+        <TouchableOpacity style={s.placementBtn} onPress={() => setShowPlacement(true)}>
+          <Text style={s.placementBtnText}>¿Cómo colocar?</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Modal de colocación */}
+      <Modal transparent animationType="fade" visible={showPlacement} onRequestClose={() => setShowPlacement(false)}>
+        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowPlacement(false)}>
+          <View style={s.modalCard}>
+            <View style={s.modalHeader}>
+              <View>
+                <Text style={s.modalTitle}>Colocación del sensor</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowPlacement(false)}>
+                <Text style={s.modalClose}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <Image
+              source={require('../../../assets/sensor-placement.png')}
+              style={[s.modalImage, { width: width - 80, height: (width - 80) * 0.75 }]}
+              resizeMode="contain"
+            />
+            <View style={s.modalLabels}>
+              <View style={s.modalLabelCol}>
+                <Text style={s.modalLabelTitle}>Frontal</Text>
+                <Text style={s.modalLabelDesc}>Letras de frente hacia ti · flecha ↓</Text>
+              </View>
+              <View style={s.modalLabelCol}>
+                <Text style={s.modalLabelTitle}>Encima</Text>
+                <Text style={s.modalLabelDesc}>Letras hacia arriba · parte superior hacia ti ↗</Text>
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {devices.length === 0 && scanState === 'idle' && (
         <Text style={s.muted}>Sin dispositivos registrados</Text>
@@ -327,5 +366,28 @@ const s = StyleSheet.create({
     backgroundColor: colors.bgSecondary, borderRadius: 12, padding: 16,
     borderWidth: 1, borderColor: `${colors.accent}66`, gap: 8
   },
-  errorTitle: { fontSize: 14, fontWeight: '600', color: colors.accent }
+  errorTitle: { fontSize: 14, fontWeight: '600', color: colors.accent },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  placementBtn: {
+    borderWidth: 1, borderColor: colors.border, borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 5
+  },
+  placementBtnText: { fontSize: 11, color: colors.textMuted },
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.7)',
+    alignItems: 'center', justifyContent: 'center', padding: 20
+  },
+  modalCard: {
+    backgroundColor: colors.bgSecondary, borderRadius: 16,
+    padding: 20, gap: 14, borderWidth: 1, borderColor: colors.border, width: '100%'
+  },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  modalTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
+  modalClose: { fontSize: 16, color: colors.textMuted },
+  modalImage: { borderRadius: 10, alignSelf: 'center' },
+  modalLabels: { flexDirection: 'row', justifyContent: 'space-around' },
+  modalLabelCol: { alignItems: 'center', gap: 2, flex: 1 },
+  modalLabelTitle: { fontSize: 12, fontWeight: '700', color: colors.textPrimary },
+  modalLabelDesc: { fontSize: 11, color: colors.textMuted, textAlign: 'center', lineHeight: 16 },
 })

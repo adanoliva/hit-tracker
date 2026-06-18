@@ -26,7 +26,7 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
   const phonePlacement = (connected as any)?.placement as PhoneSensorPlacement | undefined
 
   const { top } = useSafeAreaInsets()
-  const { impacts, powerMax, powerMaxMag, hpmStats, processReading, reset } = useSensorData(profile)
+  const { impacts, powerMax, powerMaxMag, hpmStats, processReading, reset } = useSensorData(profile, connected?.placement)
   const {
     phase, currentRoundNumber, totalRounds, roundTimeRemaining, roundTimeElapsed,
     restTimeRemaining, prepTimeRemaining, completedRounds, isFreeMode,

@@ -4,10 +4,6 @@ import type { SensorReading, PhoneSensorPlacement } from '../types'
 
 const SAMPLE_INTERVAL_MS = 20 // ~50Hz, mismo que el ESP32
 
-function remapGz(raw: { gy: number; gz: number }, placement: PhoneSensorPlacement): number {
-  return placement === 'top-horizontal' ? raw.gy : raw.gz
-}
-
 interface UsePhoneSensorOptions {
   placement: PhoneSensorPlacement
   active: boolean
@@ -27,17 +23,10 @@ export function usePhoneSensor({ placement, active, onReading }: UsePhoneSensorO
 
     const accelSub = accelerometer.subscribe(({ x: ax, y: ay, z: az }) => {
       const g = gyroRef.current
-
-      // react-native-sensors devuelve aceleración en m/s²
       const gx = g.x * (180 / Math.PI)
       const gy = g.y * (180 / Math.PI)
-      const gz = remapGz(
-        { gy: g.y * (180 / Math.PI), gz: g.z * (180 / Math.PI) },
-        placement
-      )
-
+      const gz = g.z * (180 / Math.PI)
       const magnitude = Math.sqrt(ax * ax + ay * ay + az * az)
-
       onReading({ timestamp: Date.now(), ax, ay, az, gx, gy, gz, magnitude })
     })
 

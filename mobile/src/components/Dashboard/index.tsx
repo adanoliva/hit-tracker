@@ -73,7 +73,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
   const { top } = useSafeAreaInsets()
   const { width } = useWindowDimensions()
   const trainings = useTrainingStore((s) => s.trainings)
-  const removeTraining = useTrainingStore((s) => s.removeTraining)
+  const removeTraining = useTrainingStore((s) => s.deleteTraining)
   const connected = useDeviceStore((s) => s.connected)
   const getSelected = useProfileStore((s) => s.getSelected)
   const profile = getSelected()

@@ -23,7 +23,7 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
   const profile = getSelected()
   const isMock  = connected?.mac === MOCK_DEVICE_ID
 
-  const { impacts, powerMax, hpmStats, processReading, reset } = useSensorData(profile)
+  const { impacts, powerMax, hpmStats, processReading, reset } = useSensorData(profile, connected?.placement)
   const {
     phase,
     currentRoundNumber,

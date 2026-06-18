@@ -11,6 +11,8 @@ export interface SensorReading {
 
 export type PunchType = 'jab' | 'cross' | 'right-hook' | 'left-hook' | 'unknown'
 
+export type SensorPlacement = 'front-vertical' | 'top-horizontal'
+
 export interface Impact {
   time: number
   intensity: number
@@ -29,6 +31,7 @@ export interface Device {
   createdAt: number
   lastSeen: number
   isConnected?: boolean
+  placement?: SensorPlacement
 }
 
 export interface CalibrationData {

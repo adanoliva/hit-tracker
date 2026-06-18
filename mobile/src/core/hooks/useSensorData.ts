@@ -1,11 +1,23 @@
 import { useState, useCallback, useRef } from 'react'
-import type { SensorReading, Impact, CalibrationProfile, PunchType } from '../types'
+import type { SensorReading, Impact, CalibrationProfile, PunchType, PhoneSensorPlacement } from '../types'
 import { calibrationService } from '../services/calibration'
 
 interface HPMStats {
   current: number
   average: number
   max: number
+}
+
+// Normaliza los ejes del sensor según su posición física en el saco
+function normalizeAxes(r: SensorReading, placement?: PhoneSensorPlacement): { ax: number; gz: number } {
+  if (placement === 'top-horizontal') {
+    // Sensor tumbado encima: eje Y apunta hacia el saco (impacto), Z apunta arriba
+    // Para jab/cross: ax sigue siendo lateral → sin cambio
+    // Para hooks: la rotación lateral ahora está en gy, no en gz
+    return { ax: r.ax, gz: r.gy }
+  }
+  // front-vertical (default): ejes ya correctos
+  return { ax: r.ax, gz: r.gz }
 }
 
 interface UseSensorDataReturn {
@@ -32,7 +44,7 @@ function classifyPunch(ax: number, gz: number, profile: CalibrationProfile): Pun
   return                          profile.stance === 'orthodox' ? 'right-hook' : 'left-hook'
 }
 
-export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn {
+export function useSensorData(profile: CalibrationProfile, placement?: PhoneSensorPlacement): UseSensorDataReturn {
   const [impacts, setImpacts] = useState<Impact[]>([])
   const [powerMax, setPowerMax] = useState(0)
   const [powerMaxMag, setPowerMaxMag] = useState(0)
@@ -62,7 +74,8 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
 
       lastPeakTime.current = now
       const intensity  = calibrationService.calculateIntensity(prev.magnitude, profile)
-      const punchType  = classifyPunch(prev.ax, prev.gz, profile)
+      const { ax, gz } = normalizeAxes(prev, placement)
+      const punchType  = classifyPunch(ax, gz, profile)
 
       const newPowerMax = Math.max(powerMaxRef.current, intensity)
       powerMaxRef.current = newPowerMax
@@ -102,7 +115,7 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
 
       return impact
     },
-    [profile]
+    [profile, placement]
   )
 
   const reset = useCallback(() => {

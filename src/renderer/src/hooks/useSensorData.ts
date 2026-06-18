@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import type { SensorReading, Impact, CalibrationProfile, PunchType } from '../types'
+import type { SensorReading, Impact, CalibrationProfile, PunchType, SensorPlacement } from '../types'
 import { calibrationService } from '../services/calibration'
 
 interface HPMStats {
@@ -18,6 +18,13 @@ interface UseSensorDataReturn {
 
 const PEAK_COOLDOWN_MS = 200
 
+function normalizeAxes(r: SensorReading, placement?: SensorPlacement): { ax: number; gz: number } {
+  if (placement === 'top-horizontal') {
+    return { ax: r.ax, gz: r.gy }
+  }
+  return { ax: r.ax, gz: r.gz }
+}
+
 function classifyPunch(ax: number, gz: number, profile: CalibrationProfile): PunchType {
   const isHook = Math.abs(gz) >= profile.hookThreshold
 
@@ -31,7 +38,7 @@ function classifyPunch(ax: number, gz: number, profile: CalibrationProfile): Pun
   return                          profile.stance === 'orthodox' ? 'right-hook' : 'left-hook'
 }
 
-export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn {
+export function useSensorData(profile: CalibrationProfile, placement?: SensorPlacement): UseSensorDataReturn {
   const [impacts, setImpacts] = useState<Impact[]>([])
   const [powerMax, setPowerMax] = useState(0)
   const [hpmStats, setHpmStats] = useState<HPMStats>({ current: 0, average: 0, max: 0 })
@@ -59,7 +66,8 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
 
       lastPeakTime.current = now
       const intensity  = calibrationService.calculateIntensity(prev.magnitude, profile)
-      const punchType  = classifyPunch(prev.ax, prev.gz, profile)
+      const { ax, gz } = normalizeAxes(prev, placement)
+      const punchType  = classifyPunch(ax, gz, profile)
 
       const newPowerMax = Math.max(powerMaxRef.current, intensity)
       powerMaxRef.current = newPowerMax
@@ -95,7 +103,7 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
 
       return impact
     },
-    [profile]
+    [profile, placement]
   )
 
   const reset = useCallback(() => {

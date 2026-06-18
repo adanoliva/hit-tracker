@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useDeviceStore } from '../../stores/deviceStore'
 import { detectMockSensor, MOCK_DEVICE_ID, MOCK_DEVICE_NAME } from '../../services/mockSensor'
 import type { Device } from '../../types'
@@ -19,6 +19,13 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
   const [foundDevices, setFoundDevices] = useState<BleDevice[]>([])
   const [editingMac, setEditingMac] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
+  const [showPlacement, setShowPlacement] = useState(false)
+  const dialogRef = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    if (showPlacement) dialogRef.current?.showModal()
+    else dialogRef.current?.close()
+  }, [showPlacement])
 
   // Escucha dispositivos BLE encontrados desde main process
   useEffect(() => {
@@ -108,7 +115,55 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
 
   return (
     <div className="p-6 space-y-5">
-      <h1 className="text-xl font-bold text-text-primary">Dispositivos</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-text-primary">Dispositivos</h1>
+        <button
+          onClick={() => setShowPlacement(true)}
+          className="text-xs text-text-muted hover:text-text-primary border border-border hover:border-accent/40 px-3 py-1.5 rounded-lg transition-all"
+        >
+          ¿Cómo colocar el sensor?
+        </button>
+      </div>
+
+      {/* Modal de colocación */}
+      <dialog
+        ref={dialogRef}
+        onClose={() => setShowPlacement(false)}
+        onClick={(e) => { if (e.target === dialogRef.current) setShowPlacement(false) }}
+        className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-xl backdrop:bg-black/60 outline-none"
+      >
+        <div className="space-y-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-base font-bold text-text-primary">Colocación del sensor</h2>
+              <p className="text-xs text-text-muted mt-1">
+                Coloca el sensor con la cara frontal hacia fuera (izquierda) o en la parte superior del saco (derecha).
+              </p>
+            </div>
+            <button
+              onClick={() => setShowPlacement(false)}
+              className="text-text-muted hover:text-text-primary transition-colors text-lg leading-none ml-4"
+            >
+              ✕
+            </button>
+          </div>
+          <img
+            src={new URL('../../assets/sensor-placement.png', import.meta.url).href}
+            alt="Colocación del sensor"
+            className="w-full rounded-xl object-contain"
+          />
+          <div className="flex justify-around text-center gap-4">
+            <div className="space-y-0.5">
+              <p className="text-xs font-semibold text-text-primary">Frontal</p>
+              <p className="text-xs text-text-muted">Letras de frente hacia ti · flecha ↓</p>
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-xs font-semibold text-text-primary">Encima</p>
+              <p className="text-xs text-text-muted">Letras hacia arriba · parte superior hacia ti ↗</p>
+            </div>
+          </div>
+        </div>
+      </dialog>
 
       {/* Dispositivos guardados */}
       <div className="space-y-2">

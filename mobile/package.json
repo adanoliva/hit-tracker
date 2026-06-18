@@ -12,6 +12,7 @@
     "expo-haptics": "^56.0.3",
     "expo-keep-awake": "^56.0.3",
     "expo-screen-orientation": "~56.0.5",
+    "expo-splash-screen": "~56.0.10",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
     "react-native": "0.85.3",
