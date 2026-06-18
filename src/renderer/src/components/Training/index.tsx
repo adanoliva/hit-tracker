@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { audioService } from '../../services/audio'
 import { useDeviceStore } from '../../stores/deviceStore'
 import { useProfileStore } from '../../stores/profileStore'
 import { useTrainingStore } from '../../stores/trainingStore'
@@ -54,6 +55,39 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
   useEffect(() => {
     if (phase === 'preparing') savedRef.current = false
   }, [phase])
+
+  // Campana en transiciones de fase (no en preparing→round, solo rest→round, round→resting/finished)
+  const prevPhaseRef = useRef<string>('idle')
+  useEffect(() => {
+    const prev = prevPhaseRef.current
+    prevPhaseRef.current = phase
+
+    if (phase === 'resting' || phase === 'finished') {
+      audioService.bell()
+    }
+    if (phase === 'round' && prev === 'resting') {
+      audioService.bell()
+    }
+  }, [phase])
+
+  // Beeps countdown en preparación: 3→beep, 2→beep, 1→BEEP largo
+  useEffect(() => {
+    if (phase !== 'preparing') return
+    if (prepTimeRemaining === 3 || prepTimeRemaining === 2) audioService.beep()
+    if (prepTimeRemaining === 1) audioService.longBeep()
+  }, [prepTimeRemaining, phase])
+
+  // Timer countdown en los últimos 10s de ronda
+  useEffect(() => {
+    if (phase === 'round' && roundTimeRemaining === 10) audioService.countdown()
+  }, [roundTimeRemaining, phase])
+
+  // Beeps countdown en descanso: 3→beep, 2→beep, 1→BEEP largo
+  useEffect(() => {
+    if (phase !== 'resting') return
+    if (restTimeRemaining === 3 || restTimeRemaining === 2) audioService.beep()
+    if (restTimeRemaining === 1) audioService.longBeep()
+  }, [restTimeRemaining, phase])
 
   // Mock sensor: conectar/desconectar según la fase
   useEffect(() => {
