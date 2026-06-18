@@ -11,12 +11,14 @@ interface HPMStats {
 // Normaliza los ejes del sensor según su posición física en el saco
 function normalizeAxes(r: SensorReading, placement?: PhoneSensorPlacement): { ax: number; gz: number } {
   if (placement === 'top-horizontal') {
-    // Sensor tumbado encima: eje Y apunta hacia el saco (impacto), Z apunta arriba
-    // Para jab/cross: ax sigue siendo lateral → sin cambio
-    // Para hooks: la rotación lateral ahora está en gy, no en gz
-    return { ax: r.ax, gz: r.gy }
+    // Sensor tumbado encima, pantalla hacia arriba:
+    // - ax sigue siendo el eje lateral (jab/cross) ✓
+    // - gz sigue siendo la rotación alrededor del eje vertical del saco (hooks) ✓
+    //   porque Z del sensor apunta hacia arriba, igual que el eje de cuelgue del saco
+    // - el eje de impacto directo cambia de Z a Y, pero magnitude ya lo captura
+    return { ax: r.ax, gz: r.gz }
   }
-  // front-vertical (default): ejes ya correctos
+  // front-vertical (default): ejes directos del sensor
   return { ax: r.ax, gz: r.gz }
 }
 
@@ -32,7 +34,7 @@ interface UseSensorDataReturn {
 const PEAK_COOLDOWN_MS = 200
 
 function classifyPunch(ax: number, gz: number, profile: CalibrationProfile): PunchType {
-  const isHook = Math.abs(gz) >= profile.hookThreshold
+const isHook = Math.abs(gz) >= profile.hookThreshold
 
   // Orthodox: jab = mano izquierda (ax negativo desde el sensor), cross = derecha (ax positivo)
   // Southpaw: invertido — jab = mano derecha (ax positivo), cross = izquierda (ax negativo)

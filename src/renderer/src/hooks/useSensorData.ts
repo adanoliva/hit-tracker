@@ -20,7 +20,8 @@ const PEAK_COOLDOWN_MS = 200
 
 function normalizeAxes(r: SensorReading, placement?: SensorPlacement): { ax: number; gz: number } {
   if (placement === 'top-horizontal') {
-    return { ax: r.ax, gz: r.gy }
+    // gz sigue siendo la rotación alrededor del eje vertical (hooks) en ambas posiciones
+    return { ax: r.ax, gz: r.gz }
   }
   return { ax: r.ax, gz: r.gz }
 }

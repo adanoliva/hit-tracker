@@ -27,7 +27,7 @@ export function usePhoneSensor({ placement, active, onReading }: UsePhoneSensorO
       const gy = g.y * (180 / Math.PI)
       const gz = g.z * (180 / Math.PI)
       const magnitude = Math.sqrt(ax * ax + ay * ay + az * az)
-      onReading({ timestamp: Date.now(), ax, ay, az, gx, gy, gz, magnitude })
+onReading({ timestamp: Date.now(), ax, ay, az, gx, gy, gz, magnitude })
     })
 
     return () => {
