@@ -13,7 +13,7 @@ import { colors } from './src/theme'
 
 function RootNavigator() {
   const { width, height } = useWindowDimensions()
-  const isTablet = Math.max(width, height) >= 768
+  const isTablet = Math.min(width, height) >= 600
 
   useEffect(() => {
     ScreenOrientation.lockAsync(
@@ -46,7 +46,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <NavigationContainer>
-        <StatusBar style="light" backgroundColor={colors.bgPrimary} />
+        <StatusBar style="light" backgroundColor={colors.bgPrimary} translucent={false} />
         <RootNavigator />
       </NavigationContainer>
     </GestureHandlerRootView>

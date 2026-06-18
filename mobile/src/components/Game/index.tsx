@@ -76,18 +76,15 @@ export function GamePage() {
     <View style={[s.root, { paddingTop: top, paddingBottom: bottom + 16 }]}>
       <Animated.View style={[s.flash, { opacity: flashOpacity }]} pointerEvents="none" />
 
-      <Text style={s.title}>MEJOR GOLPE</Text>
-
-      <View style={s.scoreWrap}>
-        <Text style={[s.score, isRecord && s.scoreRecord]}>{bestHit}</Text>
+      <View style={s.bestWrap}>
+        <Text style={s.bestLabel}>MEJOR</Text>
+        <Text style={[s.bestValue, isRecord && s.bestValueRecord]}>{bestHit}</Text>
       </View>
 
-      {lastHit > 0 && (
-        <View style={s.lastWrap}>
-          <Text style={s.lastLabel}>ÚLTIMO</Text>
-          <Text style={s.lastValue}>{lastHit}</Text>
-        </View>
-      )}
+      <View style={s.currentWrap}>
+        <Text style={s.currentLabel}>ACTUAL</Text>
+        <Text style={s.currentValue}>{lastHit > 0 ? lastHit : '—'}</Text>
+      </View>
 
       <TouchableOpacity style={s.resetBtn} onPress={handleReset} activeOpacity={0.7}>
         <Text style={s.resetText}>RESET</Text>
@@ -123,41 +120,40 @@ const s = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
-  title: {
-    fontSize: 13,
+  bestWrap: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  bestLabel: {
+    fontSize: 11,
     letterSpacing: 3,
     color: colors.textMuted,
-    marginTop: 24,
   },
-  scoreWrap: {
+  bestValue: {
+    fontSize: 32,
+    fontWeight: '700',
+    fontFamily: 'monospace',
+    color: colors.textMuted,
+  },
+  bestValueRecord: {
+    color: colors.accent,
+  },
+  currentWrap: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  score: {
-    fontSize: 96,
+  currentLabel: {
+    fontSize: 13,
+    letterSpacing: 3,
+    color: colors.textMuted,
+    marginBottom: 8,
+  },
+  currentValue: {
+    fontSize: 120,
     fontWeight: '800',
     fontFamily: 'monospace',
     color: colors.textPrimary,
-  },
-  scoreRecord: {
-    color: colors.accent,
-  },
-  lastWrap: {
-    alignItems: 'center',
-    gap: 2,
-    marginBottom: 24,
-  },
-  lastLabel: {
-    fontSize: 11,
-    letterSpacing: 2,
-    color: colors.textMuted,
-  },
-  lastValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.secondary,
-    fontFamily: 'monospace',
   },
   resetBtn: {
     width: '100%',

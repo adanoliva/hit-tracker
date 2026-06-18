@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { PhoneSensorPlacement } from '../../core/types'
 import { colors } from '../../theme'
 
@@ -47,11 +48,12 @@ interface PhoneSensorPickerProps {
 
 export function PhoneSensorPicker({ onConfirm, onCancel }: PhoneSensorPickerProps) {
   const [selected, setSelected] = useState<PhoneSensorPlacement>('front-vertical')
+  const insets = useSafeAreaInsets()
 
   return (
     <Modal transparent animationType="slide" onRequestClose={onCancel}>
       <View style={s.overlay}>
-        <View style={s.sheet}>
+        <View style={[s.sheet, { paddingBottom: Math.max(insets.bottom + 16, 36) }]}>
           <Text style={s.title}>Usar este móvil como sensor</Text>
           <Text style={s.subtitle}>
             El móvil detectará los golpes con sus propios sensores de movimiento.{'\n'}
@@ -104,7 +106,7 @@ const s = StyleSheet.create({
   },
   sheet: {
     backgroundColor: colors.bgSecondary, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    padding: 20, maxHeight: '90%'
+    padding: 20, paddingBottom: 20, maxHeight: '90%'
   },
   title: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 },
   subtitle: { fontSize: 13, color: colors.textMuted, lineHeight: 20, marginBottom: 16 },

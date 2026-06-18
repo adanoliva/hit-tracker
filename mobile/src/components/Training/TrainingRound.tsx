@@ -91,12 +91,13 @@ interface TrainingRoundProps {
   timeRemaining: number
   impacts: Impact[]
   powerMax: number
+  powerMaxMag: number
   hpmStats: { current: number; average: number; max: number }
   onAbort: () => void
 }
 
 export function TrainingRound({
-  roundNumber, totalRounds, timeRemaining, impacts, powerMax, hpmStats, onAbort
+  roundNumber, totalRounds, timeRemaining, impacts, powerMax, powerMaxMag, hpmStats, onAbort
 }: TrainingRoundProps) {
   const { width } = useWindowDimensions()
   const { top } = useSafeAreaInsets()
@@ -151,7 +152,7 @@ export function TrainingRound({
       <View style={s.statsRow}>
         <StatBox label="Golpes" value={impacts.length} />
         <StatBox label="Válidos" value={validHits} color={colors.accent} />
-        <StatBox label="Power máx" value={powerMax} color={colors.accent} />
+        <StatBox label="Power máx" value={powerMaxMag} color={colors.accent} />
         <StatBox label="HPM" value={hpmStats.current} color={colors.secondary} />
       </View>
     </View>

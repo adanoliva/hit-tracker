@@ -35,7 +35,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
       <View style={s.statsGrid}>
         <Stat label="Total golpes" value={training.totalImpacts} />
         <Stat label="Golpes válidos" value={training.validHits} color={colors.accent} />
-        <Stat label="Power máximo" value={training.powerMax} color={colors.accent} />
+        <Stat label="Power máximo" value={Math.max(0, ...training.rounds.flatMap(r => r.impacts).map(i => Math.round(i.magnitude)))} color={colors.accent} />
         <Stat label="HPM promedio" value={training.hpmAverage} color={colors.secondary} />
       </View>
 
@@ -56,7 +56,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
               <Text style={s.muted}>{r.stats.totalImpacts} golpes</Text>
             </View>
             <View style={s.roundRight}>
-              <Text style={[s.roundValue, { color: colors.accent }]}>{r.stats.powerMax}</Text>
+              <Text style={[s.roundValue, { color: colors.accent }]}>{Math.max(0, ...r.impacts.map(i => Math.round(i.magnitude)))}</Text>
               <Text style={[s.muted, { color: colors.secondary }]}>{r.stats.hpmAverage} HPM</Text>
             </View>
           </View>

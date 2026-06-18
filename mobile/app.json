@@ -5,19 +5,23 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "backgroundColor": "#0f0f0f",
+      "translucent": false
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "../resources/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+        "backgroundImage": "../resources/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
+        "monochromeImage": "../resources/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.mobile"
+      "package": "com.hittracker.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
