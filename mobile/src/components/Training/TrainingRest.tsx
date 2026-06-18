@@ -52,8 +52,8 @@ export function TrainingRest({
               <Text style={s.muted}>Power máx</Text>
             </View>
             <View style={s.statItem}>
-              <Text style={[s.statValue, { color: colors.secondary }]}>{roundStats.rpmAverage}</Text>
-              <Text style={s.muted}>RPM avg</Text>
+              <Text style={[s.statValue, { color: colors.secondary }]}>{roundStats.hpmAverage}</Text>
+              <Text style={s.muted}>HPM avg</Text>
             </View>
           </View>
 
@@ -63,7 +63,7 @@ export function TrainingRest({
               <View style={s.deltaRow}>
                 <Delta label="Golpes" current={roundStats.totalImpacts} previous={previousRoundStats.totalImpacts} />
                 <Delta label="Power" current={roundStats.powerMax} previous={previousRoundStats.powerMax} />
-                <Delta label="RPM" current={roundStats.rpmAverage} previous={previousRoundStats.rpmAverage} />
+                <Delta label="HPM" current={roundStats.hpmAverage} previous={previousRoundStats.hpmAverage} />
               </View>
             </View>
           )}

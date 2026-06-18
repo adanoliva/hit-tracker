@@ -7,7 +7,7 @@ interface TrainingRoundProps {
   timeRemaining: number
   impacts: Impact[]
   powerMax: number
-  rpmStats: { current: number; average: number; max: number }
+  hpmStats: { current: number; average: number; max: number }
   onAbort: () => void
 }
 
@@ -55,7 +55,7 @@ export function TrainingRound({
   timeRemaining,
   impacts,
   powerMax,
-  rpmStats,
+  hpmStats,
   onAbort
 }: TrainingRoundProps): JSX.Element {
   const validHits = impacts.filter((i) => i.isValid).length
@@ -159,7 +159,7 @@ export function TrainingRound({
         <Stat label="Golpes" value={impacts.length} />
         <Stat label="Válidos" value={validHits} color="text-accent" />
         <Stat label="Power máx" value={powerMax} color="text-accent" />
-        <Stat label="RPM" value={rpmStats.current} color="text-secondary" />
+        <Stat label="HPM" value={hpmStats.current} color="text-secondary" />
       </div>
     </div>
   )

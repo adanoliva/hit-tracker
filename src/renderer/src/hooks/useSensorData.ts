@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react'
 import type { SensorReading, Impact, CalibrationProfile, PunchType } from '../types'
 import { calibrationService } from '../services/calibration'
 
-interface RPMStats {
+interface HPMStats {
   current: number
   average: number
   max: number
@@ -11,7 +11,7 @@ interface RPMStats {
 interface UseSensorDataReturn {
   impacts: Impact[]
   powerMax: number
-  rpmStats: RPMStats
+  hpmStats: HPMStats
   processReading: (reading: SensorReading) => Impact | null
   reset: () => void
 }
@@ -34,7 +34,7 @@ function classifyPunch(ax: number, gz: number, profile: CalibrationProfile): Pun
 export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn {
   const [impacts, setImpacts] = useState<Impact[]>([])
   const [powerMax, setPowerMax] = useState(0)
-  const [rpmStats, setRpmStats] = useState<RPMStats>({ current: 0, average: 0, max: 0 })
+  const [hpmStats, setHpmStats] = useState<HPMStats>({ current: 0, average: 0, max: 0 })
 
   const lastPeakTime  = useRef(0)
   const prevReading   = useRef<SensorReading | null>(null)
@@ -80,14 +80,14 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
         const updated = [...prevImpacts, impact]
 
         const elapsed    = (Date.now() - startTime.current) / 60000
-        const avgRpm     = elapsed > 0 ? Math.round(updated.length / elapsed) : 0
+        const avgHpm     = elapsed > 0 ? Math.round(updated.length / elapsed) : 0
         const recentHits = updated.filter((i) => now - i.time < 10000)
-        const currentRpm = Math.round((recentHits.length / 10000) * 60000)
+        const currentHpm = Math.round((recentHits.length / 10000) * 60000)
 
-        setRpmStats((prev) => ({
-          current: currentRpm,
-          average: avgRpm,
-          max: Math.max(prev.max, currentRpm)
+        setHpmStats((prev) => ({
+          current: currentHpm,
+          average: avgHpm,
+          max: Math.max(prev.max, currentHpm)
         }))
 
         return updated
@@ -101,12 +101,12 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
   const reset = useCallback(() => {
     setImpacts([])
     setPowerMax(0)
-    setRpmStats({ current: 0, average: 0, max: 0 })
+    setHpmStats({ current: 0, average: 0, max: 0 })
     lastPeakTime.current  = 0
     prevReading.current   = null
     startTime.current     = Date.now()
     powerMaxRef.current   = 0
   }, [])
 
-  return { impacts, powerMax, rpmStats, processReading, reset }
+  return { impacts, powerMax, hpmStats, processReading, reset }
 }

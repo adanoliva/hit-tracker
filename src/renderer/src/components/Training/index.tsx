@@ -23,7 +23,7 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
   const profile = getSelected()
   const isMock  = connected?.mac === MOCK_DEVICE_ID
 
-  const { impacts, powerMax, rpmStats, processReading, reset } = useSensorData(profile)
+  const { impacts, powerMax, hpmStats, processReading, reset } = useSensorData(profile)
   const {
     phase,
     currentRoundNumber,
@@ -130,7 +130,7 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
       timeRemaining={roundTimeRemaining}
       impacts={impacts}
       powerMax={powerMax}
-      rpmStats={rpmStats}
+      hpmStats={hpmStats}
       onAbort={handleAbort}
     />
   )

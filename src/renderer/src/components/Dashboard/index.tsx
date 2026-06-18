@@ -29,7 +29,7 @@ function ProgressChart({ sessions }: { sessions: Training[] }): JSX.Element {
     .slice(-8)
     .map((t) => ({
       date: formatDate(t.createdAt),
-      rpm: Math.round(t.rpmAverage),
+      hpm: Math.round(t.hpmAverage),
       power: t.powerMax
     }))
 
@@ -76,7 +76,7 @@ function ProgressChart({ sessions }: { sessions: Training[] }): JSX.Element {
           labelStyle={{ color: 'var(--text-muted)', marginBottom: 4 }}
           itemStyle={{ color: 'var(--text-primary)' }}
         />
-        <Bar yAxisId="golpes" dataKey="rpm" fill="var(--accent)" opacity={0.7} radius={[3, 3, 0, 0]} name="RPM prom." />
+        <Bar yAxisId="golpes" dataKey="hpm" fill="var(--accent)" opacity={0.7} radius={[3, 3, 0, 0]} name="HPM prom." />
         <Line
           yAxisId="power"
           dataKey="power"
@@ -144,7 +144,7 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
             <div className="flex gap-3 text-xs text-text-muted">
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-sm bg-accent inline-block opacity-70" />
-                RPM prom.
+                HPM prom.
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2 h-0.5 bg-secondary inline-block" />

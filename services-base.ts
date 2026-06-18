@@ -226,7 +226,7 @@ export class SessionService {
       totalImpacts: 0,
       validHits: 0,
       powerMax: 0,
-      rpmAverage: 0
+      hpmAverage: 0
     };
 
     console.log(`[Session] Iniciada: ${this.currentSession.id}`);
@@ -241,7 +241,7 @@ export class SessionService {
     // Actualizar estadísticas finales
     session.totalImpacts = stats.totalImpacts;
     session.validHits = stats.validHits;
-    session.rpmAverage = stats.rpmAverage;
+    session.hpmAverage = stats.hpmAverage;
 
     this.currentSession = null;
     
@@ -278,9 +278,9 @@ export class SessionService {
         validHits: 0,
         validHitRate: 0,
         powerMax: 0,
-        rpmAverage: 0,
-        rpmMax: 0,
-        rpmMin: 0,
+        hpmAverage: 0,
+        hpmMax: 0,
+        hpmMin: 0,
         consistencyScore: 0
       };
     }
@@ -291,7 +291,7 @@ export class SessionService {
 
     const validHits = impacts.filter(i => i.isValid).length;
     const validHitRate = impacts.length > 0 ? (validHits / impacts.length) * 100 : 0;
-    const rpmAverage = durationMinutes > 0 ? impacts.length / durationMinutes : 0;
+    const hpmAverage = durationMinutes > 0 ? impacts.length / durationMinutes : 0;
 
     return {
       duration,
@@ -299,9 +299,9 @@ export class SessionService {
       validHits,
       validHitRate,
       powerMax: this.currentSession.powerMax || 0,
-      rpmAverage,
-      rpmMax: 0,  // TODO: calcular máximo RPM
-      rpmMin: 0,  // TODO: calcular mínimo RPM
+      hpmAverage,
+      hpmMax: 0,  // TODO: calcular máximo HPM
+      hpmMin: 0,  // TODO: calcular mínimo HPM
       consistencyScore: 0  // TODO: calcular varianza
     };
   }

@@ -69,7 +69,7 @@ export interface TrainingSession {
   totalImpacts: number;
   validHits: number;     // impactos > 80%
   powerMax: number;      // máximo power detectado
-  rpmAverage: number;    // golpes/minuto promedio
+  hpmAverage: number;    // golpes/minuto promedio
   notes?: string;
 }
 
@@ -79,9 +79,9 @@ export interface SessionStats {
   validHits: number;
   validHitRate: number;  // porcentaje
   powerMax: number;
-  rpmAverage: number;
-  rpmMax: number;
-  rpmMin: number;
+  hpmAverage: number;
+  hpmMax: number;
+  hpmMin: number;
   consistencyScore: number;  // varianza
 }
 

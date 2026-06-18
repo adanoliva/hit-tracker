@@ -10,7 +10,7 @@ import { colors } from '../../theme'
 function ProgressChart({ sessions, width }: { sessions: Training[]; width: number }) {
   const data = sessions.slice().reverse().slice(-8).map((t) => ({
     date: new Date(t.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-    rpm: Math.round(t.rpmAverage),
+    hpm: Math.round(t.hpmAverage),
     power: t.powerMax
   }))
 
@@ -26,19 +26,19 @@ function ProgressChart({ sessions, width }: { sessions: Training[]; width: numbe
   const pad = { t: 10, r: 28, b: 24, l: 28 }
   const W = width - pad.l - pad.r
 
-  const maxRpm = Math.max(...data.map((d) => d.rpm), 1)
+  const maxHpm = Math.max(...data.map((d) => d.hpm), 1)
   const barW = Math.max(4, W / data.length - 6)
 
   const toX = (i: number) => pad.l + (i / (data.length - 1)) * W
-  const toYRpm = (v: number) => pad.t + (H - pad.t - pad.b) * (1 - v / (maxRpm * 1.1))
+  const toYRpm = (v: number) => pad.t + (H - pad.t - pad.b) * (1 - v / (maxHpm * 1.1))
   const toYPower = (v: number) => pad.t + (H - pad.t - pad.b) * (1 - v / 105)
 
   return (
     <Svg width={width} height={H}>
-      {/* Bars (RPM) */}
+      {/* Bars (HPM) */}
       {data.map((d, i) => {
         const x = toX(i)
-        const barH = (H - pad.t - pad.b) * (d.rpm / (maxRpm * 1.1))
+        const barH = (H - pad.t - pad.b) * (d.hpm / (maxHpm * 1.1))
         return (
           <Rect
             key={`b${i}`}
@@ -134,7 +134,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
             <View style={styles.legend}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: colors.accent }]} />
-                <Text style={styles.legendText}>RPM</Text>
+                <Text style={styles.legendText}>HPM</Text>
               </View>
               <View style={styles.legendItem}>
                 <View style={[styles.legendLine, { backgroundColor: colors.secondary }]} />

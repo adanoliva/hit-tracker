@@ -64,8 +64,8 @@ export interface RoundStats {
   validHits: number
   validHitRate: number
   powerMax: number
-  rpmAverage: number
-  rpmMax: number
+  hpmAverage: number
+  hpmMax: number
   powerTrend: number[]
   isFatigued: boolean
 }
@@ -93,7 +93,7 @@ export interface Training {
   totalImpacts: number
   validHits: number
   powerMax: number
-  rpmAverage: number
+  hpmAverage: number
 }
 
 export interface AppConfig {

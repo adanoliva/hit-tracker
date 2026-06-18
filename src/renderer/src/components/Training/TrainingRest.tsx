@@ -46,8 +46,8 @@ export function TrainingRest({
               <p className="text-xs text-text-muted">Power máx</p>
             </div>
             <div>
-              <p className="text-lg font-bold text-secondary">{roundStats.rpmAverage}</p>
-              <p className="text-xs text-text-muted">RPM avg</p>
+              <p className="text-lg font-bold text-secondary">{roundStats.hpmAverage}</p>
+              <p className="text-xs text-text-muted">HPM avg</p>
             </div>
           </div>
 
@@ -57,7 +57,7 @@ export function TrainingRest({
               <div className="flex gap-4 text-xs">
                 <Delta label="Golpes" current={roundStats.totalImpacts} previous={previousRoundStats.totalImpacts} />
                 <Delta label="Power" current={roundStats.powerMax} previous={previousRoundStats.powerMax} />
-                <Delta label="RPM" current={roundStats.rpmAverage} previous={previousRoundStats.rpmAverage} />
+                <Delta label="HPM" current={roundStats.hpmAverage} previous={previousRoundStats.hpmAverage} />
               </div>
             </div>
           )}

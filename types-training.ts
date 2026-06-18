@@ -59,8 +59,8 @@ export interface RoundStats {
   validHits: number;
   validHitRate: number;     // porcentaje
   powerMax: number;
-  rpmAverage: number;
-  rpmMax: number;
+  hpmAverage: number;
+  hpmMax: number;
   powerTrend: 'up' | 'down' | 'stable';  // comparado con ronda anterior
 }
 
@@ -132,7 +132,7 @@ export interface TrainingStats {
   
   // Tendencias
   powerProgression: 'up' | 'down' | 'stable';
-  rpmProgression: 'up' | 'down' | 'stable';
+  hpmProgression: 'up' | 'down' | 'stable';
   consistencyScore: number;  // varianza entre rondas
 }
 

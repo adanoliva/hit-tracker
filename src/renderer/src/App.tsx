@@ -2,22 +2,28 @@ import { useState, useEffect } from 'react'
 import { useDeviceStore } from './stores/deviceStore'
 import { useProfileStore } from './stores/profileStore'
 import { useTrainingStore } from './stores/trainingStore'
+
+const SESSION_PHASES = ['preparing', 'round', 'resting']
 import { Dashboard } from './components/Dashboard'
 import { TrainingPage } from './components/Training'
+import { GamePage } from './components/Game'
 import { DevicesPage } from './components/Devices'
 import { ProfilesPage } from './components/Profiles'
 
-type Page = 'dashboard' | 'training' | 'devices' | 'profiles'
+type Page = 'dashboard' | 'training' | 'game' | 'devices' | 'profiles'
 
 const NAV = [
   { id: 'dashboard', label: 'Inicio', icon: '🏠' },
   { id: 'training', label: 'Entrenar', icon: '🥊' },
+  { id: 'game', label: 'Game', icon: '🎯' },
   { id: 'devices', label: 'Dispositivos', icon: '📡' },
   { id: 'profiles', label: 'Perfiles', icon: '⚙️' }
 ] as const
 
 export function App(): JSX.Element {
   const [page, setPage] = useState<Page>('dashboard')
+  const activePhase = useTrainingStore((s) => s.activePhase)
+  const sessionActive = SESSION_PHASES.includes(activePhase)
   const setDevices = useDeviceStore((s) => s.setDevices)
   const setProfiles = useProfileStore((s) => s.setProfiles)
   const setTrainings = useTrainingStore((s) => s.setTrainings)
@@ -40,6 +46,8 @@ export function App(): JSX.Element {
         return <Dashboard onNavigate={(p) => setPage(p as Page)} />
       case 'training':
         return <TrainingPage onBack={() => setPage('dashboard')} />
+      case 'game':
+        return <GamePage />
       case 'devices':
         return <DevicesPage onBack={() => setPage('dashboard')} />
       case 'profiles':
@@ -52,18 +60,26 @@ export function App(): JSX.Element {
       <div className="flex-1 overflow-y-auto">{renderPage()}</div>
 
       <nav className="border-t border-border bg-bg-secondary flex">
-        {NAV.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setPage(item.id)}
-            className={`flex-1 flex flex-col items-center py-3 gap-1 text-xs transition-all ${
-              page === item.id ? 'text-accent' : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            <span className="text-xl">{item.icon}</span>
-            <span>{item.label}</span>
-          </button>
-        ))}
+        {NAV.map((item) => {
+          const blocked = sessionActive && item.id !== 'training'
+          return (
+            <button
+              key={item.id}
+              onClick={() => !blocked && setPage(item.id)}
+              disabled={blocked}
+              className={`flex-1 flex flex-col items-center py-3 gap-1 text-xs transition-all ${
+                blocked
+                  ? 'text-text-muted opacity-30 cursor-not-allowed'
+                  : page === item.id
+                    ? 'text-accent'
+                    : 'text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          )
+        })}
       </nav>
     </div>
   )

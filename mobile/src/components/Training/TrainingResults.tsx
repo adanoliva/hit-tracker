@@ -36,7 +36,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
         <Stat label="Total golpes" value={training.totalImpacts} />
         <Stat label="Golpes válidos" value={training.validHits} color={colors.accent} />
         <Stat label="Power máximo" value={training.powerMax} color={colors.accent} />
-        <Stat label="RPM promedio" value={training.rpmAverage} color={colors.secondary} />
+        <Stat label="HPM promedio" value={training.hpmAverage} color={colors.secondary} />
       </View>
 
       <Text style={s.sectionTitle}>Por ronda</Text>
@@ -57,7 +57,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
             </View>
             <View style={s.roundRight}>
               <Text style={[s.roundValue, { color: colors.accent }]}>{r.stats.powerMax}</Text>
-              <Text style={[s.muted, { color: colors.secondary }]}>{r.stats.rpmAverage} RPM</Text>
+              <Text style={[s.muted, { color: colors.secondary }]}>{r.stats.hpmAverage} HPM</Text>
             </View>
           </View>
         ))}

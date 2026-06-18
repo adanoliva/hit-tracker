@@ -25,7 +25,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps): JSX
         <Stat label="Total golpes" value={training.totalImpacts} />
         <Stat label="Golpes válidos" value={training.validHits} color="text-accent" />
         <Stat label="Power máximo" value={training.powerMax} color="text-accent" />
-        <Stat label="RPM promedio" value={training.rpmAverage} color="text-secondary" />
+        <Stat label="HPM promedio" value={training.hpmAverage} color="text-secondary" />
       </div>
 
       {/* Rounds breakdown */}
@@ -50,7 +50,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps): JSX
               </div>
               <div className="text-right">
                 <p className="text-sm font-bold text-accent">{r.stats.powerMax}</p>
-                <p className="text-xs text-secondary">{r.stats.rpmAverage} RPM</p>
+                <p className="text-xs text-secondary">{r.stats.hpmAverage} HPM</p>
               </div>
             </div>
           ))}

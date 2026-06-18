@@ -218,7 +218,7 @@ export class TrainingService {
       totalImpacts: 0,
       validHits: 0,
       powerMax: 0,
-      avgRpmAcrossRounds: 0,
+      avgHpmAcrossRounds: 0,
       bestRound: 0
     };
 
@@ -248,8 +248,8 @@ export class TrainingService {
         validHits: 0,
         validHitRate: 0,
         powerMax: 0,
-        rpmAverage: 0,
-        rpmMax: 0,
+        hpmAverage: 0,
+        hpmMax: 0,
         powerTrend: 'stable'
       }
     };
@@ -298,8 +298,8 @@ export class TrainingService {
         validHits: 0,
         validHitRate: 0,
         powerMax: 0,
-        rpmAverage: 0,
-        rpmMax: 0,
+        hpmAverage: 0,
+        hpmMax: 0,
         powerTrend: 'stable'
       };
     }
@@ -371,8 +371,8 @@ export class TrainingService {
       validHits,
       validHitRate: impacts.length > 0 ? (validHits / impacts.length) * 100 : 0,
       powerMax: Math.max(...impacts.map(i => i.magnitude), 0),
-      rpmAverage: durationMinutes > 0 ? impacts.length / durationMinutes : 0,
-      rpmMax: 0, // TODO: calcular máximo RPM local
+      hpmAverage: durationMinutes > 0 ? impacts.length / durationMinutes : 0,
+      hpmMax: 0, // TODO: calcular máximo HPM local
       powerTrend: this.calculatePowerTrend(round)
     };
   }
@@ -388,10 +388,10 @@ export class TrainingService {
     training.validHits = rounds.reduce((sum, r) => sum + r.stats.validHits, 0);
     training.powerMax = Math.max(...rounds.map(r => r.stats.powerMax), 0);
 
-    // Promediar RPM
-    const avgRpms = rounds.map(r => r.stats.rpmAverage);
-    training.avgRpmAcrossRounds = avgRpms.length > 0
-      ? avgRpms.reduce((a, b) => a + b) / avgRpms.length
+    // Promediar HPM
+    const avgHpms = rounds.map(r => r.stats.hpmAverage);
+    training.avgHpmAcrossRounds = avgHpms.length > 0
+      ? avgHpms.reduce((a, b) => a + b) / avgHpms.length
       : 0;
 
     // Encontrar mejor ronda (por validHitRate)

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import type { Device, CalibrationProfile, Round, RoundStats, Training } from '../types'
 import { trainingService } from '../services/trainingService'
+import { useTrainingStore } from '../stores/trainingStore'
 
 type TrainingPhase = 'idle' | 'preparing' | 'round' | 'resting' | 'finished'
 
@@ -27,6 +28,7 @@ interface UseTrainingReturn {
 const PREP_DURATION = 10
 
 export function useTraining(): UseTrainingReturn {
+  const setActivePhase = useTrainingStore((s) => s.setActivePhase)
   const [phase, setPhase] = useState<TrainingPhase>('idle')
   const [currentRoundNumber, setCurrentRoundNumber] = useState(1)
   const [totalRounds, setTotalRounds] = useState(3)
@@ -153,6 +155,8 @@ export function useTraining(): UseTrainingReturn {
   }, [])
 
   useEffect(() => () => clearTimer(), [])
+
+  useEffect(() => { setActivePhase(phase) }, [phase])
 
   const getPreviousRoundStats = useCallback((): RoundStats | null => {
     return trainingService.getPreviousRoundStats(currentRoundNumber)
