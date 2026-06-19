@@ -1,6 +1,19 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import type { Training, CalibrationProfile, Device } from '../core/types'
 
+// Compatibilidad con entrenamientos grabados antes del renombrado rpm → hpm
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateTraining(t: any): any {
+  for (const round of t.rounds ?? []) {
+    if (round.stats && round.stats.hpmAverage === undefined) {
+      round.stats.hpmAverage = round.stats.rpmAverage ?? 0
+      round.stats.hpmMax = round.stats.rpmMax ?? 0
+    }
+  }
+  if (t.hpmAverage === undefined) t.hpmAverage = t.rpmAverage ?? 0
+  return t
+}
+
 const BASE = FileSystem.documentDirectory + 'HitTracker/'
 const TRAININGS_DIR = BASE + 'trainings/'
 
@@ -32,7 +45,10 @@ export const storage = {
     const results = await Promise.all(
       files
         .filter((f) => f.endsWith('.json'))
-        .map((f) => readJson<Training | null>(TRAININGS_DIR + f, null))
+        .map(async (f) => {
+          const t = await readJson<Training | null>(TRAININGS_DIR + f, null)
+          return t ? migrateTraining(t) : null
+        })
     )
     return (results.filter(Boolean) as Training[]).sort((a, b) => b.createdAt - a.createdAt)
   },

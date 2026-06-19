@@ -4,6 +4,19 @@ import { join } from 'path'
 import type { Training } from '../renderer/src/types'
 import type { Device, CalibrationProfile } from '../renderer/src/types'
 
+// Compatibilidad con entrenamientos grabados antes del renombrado rpm → hpm
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateTraining(t: any): any {
+  for (const round of t.rounds ?? []) {
+    if (round.stats && round.stats.hpmAverage === undefined) {
+      round.stats.hpmAverage = round.stats.rpmAverage ?? 0
+      round.stats.hpmMax = round.stats.rpmMax ?? 0
+    }
+  }
+  if (t.hpmAverage === undefined) t.hpmAverage = t.rpmAverage ?? 0
+  return t
+}
+
 const DATA_DIR = join(app.getPath('userData'), 'HitTracker')
 const TRAININGS_DIR = join(DATA_DIR, 'trainings')
 const DEVICES_FILE = join(DATA_DIR, 'devices.json')
@@ -30,7 +43,7 @@ export function registerIpcHandlers(): void {
     const trainings = await Promise.all(
       jsonFiles.map(async (f) => {
         const content = await fs.readFile(join(TRAININGS_DIR, f), 'utf8')
-        return JSON.parse(content) as Training
+        return migrateTraining(JSON.parse(content)) as Training
       })
     )
     return trainings.sort((a, b) => b.createdAt - a.createdAt)
