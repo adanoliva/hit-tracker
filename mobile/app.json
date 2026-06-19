@@ -33,7 +33,8 @@
     },
     "plugins": [
       "expo-splash-screen",
-      "expo-audio"
+      "expo-audio",
+      "./plugins/withArmOnly"
     ]
   }
 }
