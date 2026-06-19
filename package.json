@@ -1,6 +1,6 @@
 {
   "name": "hit-tracker",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Sistema integrado de captura y análisis de impactos en entrenamiento de boxeo",
   "main": "out/main/index.js",
   "author": "Adán",

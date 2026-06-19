@@ -8,8 +8,9 @@
     "strict": true,
     "skipLibCheck": true,
     "paths": {
-      "@renderer/*": ["./src/renderer/src/*"]
+      "@renderer/*": ["./src/renderer/src/*"],
+      "@shared/*": ["./shared/*"]
     }
   },
-  "include": ["src/renderer/src/**/*"]
+  "include": ["src/renderer/src/**/*", "shared/**/*"]
 }

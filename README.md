@@ -1,382 +1,259 @@
-# HIT TRACKER
+# HIT TRACKER 🥊
 
-Sistema integrado de captura y análisis de impactos en entrenamiento de boxeo.
+> Monitoreo de entrenamiento de boxeo en tiempo real. Mide la potencia, el ritmo y la fatiga de cada golpe — ronda a ronda.
 
-**Tecnología**: Electron + React + TypeScript + ESP32 + MPU-6050
+<br>
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│   RONDA 2 / 3          ████████████████░░░░   2:14              │
+│                                                                  │
+│   Golpes    47          Válidos   31   (66%)                     │
+│   Potencia  MAX 94      HPM       38   golpes/min                │
+│                                                                  │
+│   ▁▃▅▇▆▅▇█▇▅▃▄▆▇▅▆▄▃▅▆▇▅▄▃▂▄▆▇▅▆▄▅▇▆▅▄▆▇█▇▅▄▅▆▇▅              │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+<br>
+
+## ¿Qué es?
+
+HIT TRACKER conecta un sensor inercial (ESP32 + MPU-6050) montado en el saco de boxeo con una app en tiempo real. Cada golpe queda registrado con su **potencia**, **validez** y **timestamp** — agrupados por rondas, con descansos cronometrados.
+
+No requiere cámara, ni visión artificial, ni suscripción. Solo hardware de 15€ y los datos son tuyos.
 
 ---
 
-## 📋 Contenido del Proyecto
+## Plataformas
 
-Este proyecto incluye documentación técnica completa y código base para desarrollar HIT TRACKER.
+| | Desktop | Mobile |
+|---|---|---|
+| **Stack** | Electron + React + TypeScript | React Native + Expo (Android) |
+| **Sensor** | ESP32 vía Bluetooth BLE | ESP32 BLE **o** el propio móvil |
+| **Modo "Todo en 1"** | — | El móvil actúa como sensor sin ESP32 |
+| **Persistencia** | JSON local (`%AppData%`) | JSON local (`documentDirectory`) |
 
-### Documentación
-
-1. **ARQUITECTURA.md** - Visión general del sistema, diagrama de componentes, flujos de datos
-2. **SENSOR-TECNICO.md** - Especificaciones hardware, esquema de conexión, firmware ESP32
-3. **APP-TECNICO.md** - Arquitectura de la aplicación, servicios, hooks, componentes React
-
-### Código
-
-1. **hit-tracker-firmware.ino** - Firmware Arduino completo para ESP32
-2. **types-index.ts** - Interfaces TypeScript principales
-3. **services-base.ts** - Servicios de BLE, calibración y sesiones
-4. **hooks-base.ts** - Hooks React para manejo de sensores y sesiones
+Ambas plataformas comparten los **mismos tipos y lógica de negocio** (`shared/`).
 
 ---
 
-## 🚀 Inicio Rápido
+## Hardware
 
-### Requisitos
+```
+┌──────────────┐    I2C    ┌─────────────┐    BLE     ┌──────────┐
+│ GY-521       ├──────────▶│    ESP32    ├───────────▶│  App     │
+│ MPU-6050     │           │  DevKit C   │            │          │
+│ (accel + gyro│           │             │            │ Desktop  │
+│  3 ejes c/u) │           │  50 Hz      │            │ o Mobile │
+└──────────────┘           └─────────────┘            └──────────┘
+```
 
-**Hardware:**
-- ESP32-32D
-- Módulo GY-521 (MPU-6050)
-- Cable USB para programación
-- Cables jumper hembra-hembra
+**Conexión del sensor:**
 
-**Software:**
-- Arduino IDE 2.0+
-- Node.js 16+
-- npm o yarn
-
-### Instalación Hardware
-
-1. Conectar GY-521 al ESP32:
-   ```
-   GY-521 SDA  → ESP32 GPIO 21
-   GY-521 SCL  → ESP32 GPIO 22
-   GY-521 VCC  → ESP32 3.3V
-   GY-521 GND  → ESP32 GND
-   ```
-
-2. Cargar firmware:
-   - Abrir `hit-tracker-firmware.ino` en Arduino IDE
-   - Seleccionar: Board → ESP32 DevKit C
-   - Upload Speed: 921600
-   - Click "Upload"
-   - Abrir Serial Monitor (115200 baud)
-
-### Instalación App
-
-1. Crear estructura de carpetas:
-   ```bash
-   mkdir hit-tracker
-   cd hit-tracker
-   ```
-
-2. Copiar archivos:
-   - Copiar `types-index.ts` → `src/types/index.ts`
-   - Copiar `services-base.ts` → `src/services/index.ts`
-   - Copiar `hooks-base.ts` → `src/hooks/index.ts`
-
-3. Instalar dependencias:
-   ```bash
-   npm install electron react react-dom zustand recharts
-   npm install --save-dev typescript vite electron-vite @types/react
-   ```
-
-4. Ejecutar en desarrollo:
-   ```bash
-   npm run dev
-   ```
+| GY-521 | ESP32 |
+|--------|-------|
+| SDA    | GPIO 21 |
+| SCL    | GPIO 22 |
+| VCC    | 3.3V |
+| GND    | GND |
 
 ---
 
-## 📊 Estructura de Carpetas
+## Inicio Rápido
+
+### 1. Firmware ESP32
 
 ```
-hit-tracker/
-├─ ARQUITECTURA.md                # Documentación general
-├─ SENSOR-TECNICO.md              # Documentación del hardware
-├─ APP-TECNICO.md                 # Documentación de la app
-│
-├─ hit-tracker-firmware.ino        # Firmware ESP32
-│
-├─ src/
-│  ├─ types/
-│  │  ├─ sensor.ts               # SensorReading, Impact
-│  │  ├─ device.ts               # Device interface
-│  │  ├─ profile.ts              # CalibrationProfile
-│  │  ├─ session.ts              # TrainingSession
-│  │  └─ index.ts                # Exportar todos
-│  │
-│  ├─ services/
-│  │  ├─ bluetooth.ts            # BLE communication
-│  │  ├─ calibration.ts          # Calibration logic
-│  │  ├─ session.ts              # Session management
-│  │  └─ index.ts                # Exportar todos
-│  │
-│  ├─ hooks/
-│  │  ├─ useSensorData.ts        # Procesar datos sensor
-│  │  ├─ useSession.ts           # Gestionar sesión
-│  │  ├─ useCalibration.ts       # Gestionar calibración
-│  │  └─ index.ts                # Exportar todos
-│  │
-│  ├─ stores/
-│  │  ├─ deviceStore.ts          # Estado de dispositivos
-│  │  ├─ profileStore.ts         # Estado de perfiles
-│  │  ├─ sessionStore.ts         # Estado de sesiones
-│  │  └─ index.ts                # Exportar todos
-│  │
-│  ├─ components/
-│  │  ├─ Dashboard.tsx
-│  │  ├─ Devices/
-│  │  ├─ Profiles/
-│  │  ├─ Session/
-│  │  └─ Progress/
-│  │
-│  ├─ utils/
-│  │  ├─ math.ts                 # Cálculos
-│  │  ├─ storage.ts              # I/O archivos
-│  │  └─ format.ts               # Formateo
-│  │
-│  ├─ App.tsx
-│  └─ index.css
-│
-├─ public/
-├─ package.json
-├─ tsconfig.json
-└─ vite.config.ts
+Arduino IDE 2 → Board: ESP32 DevKit C → Upload Speed: 921600
 ```
+
+Abre el `.ino` del directorio `tools/firmware/`, sube al ESP32 y verifica en el Serial Monitor (115200 baud) que imprime lecturas del sensor.
+
+### 2. App Desktop
+
+```bash
+git clone <repo>
+cd hit-tracker
+npm install
+npm run dev
+```
+
+Requisitos: Node.js 18+, npm 9+. Bluetooth habilitado en el PC.
+
+### 3. App Mobile
+
+```bash
+cd mobile
+npm install
+npm run android     # o: expo start → escáner QR con Expo Go
+```
+
+Requisitos: Android 8+ con Bluetooth o sin él (modo "Todo en 1").
 
 ---
 
-## 🔑 Conceptos Principales
+## Cómo funciona
 
-### Power (Potencia)
+### Detección de golpes
 
-Métrica de intensidad de golpe (0-100):
-- Basada en magnitud de aceleración del sensor
-- Se aplica threshold y sensitivity del perfil
-- Un golpe es "válido" si > 80% del máximo detectado
-
-### Valid Hit (Golpe Válido)
-
-Golpe que supera el 80% de tu máximo poder actual.
-
-Ejemplo:
-```
-Si tu poder máximo histórico es 92:
-- Golpe de 90 intensidad → VÁLIDO ✓
-- Golpe de 70 intensidad → Inválido ✗
-```
-
-### RPM (Revoluciones Por Minuto)
-
-Golpes por minuto: métrica de velocidad/ritmo.
+El sensor mide aceleración en 3 ejes a ~50Hz. Cuando la magnitud supera el umbral del perfil de calibración y comienza a descender, se registra un **impacto**:
 
 ```
-10 golpes en 2.5 minutos = 4 RPM
+magnitude = √(ax² + ay² + az²)
+
+Si magnitude > threshold  →  detecta pico
+intensity = clamp(0-100, (magnitude - threshold) × sensitivity)
+isValid   = intensity ≥ powerMax × 0.8
 ```
+
+### Estructura de un entrenamiento
+
+```
+Training
+└── rounds: Round[]
+    ├── Round 1 { impacts[], stats: RoundStats }
+    ├── Round 2 { impacts[], stats: RoundStats }
+    └── Round N ...
+
+RoundStats
+├── totalImpacts / validHits / validHitRate
+├── powerMax / hpmAverage / hpmMax
+├── powerTrend[]     ← intensidad de cada golpe en orden
+└── isFatigued       ← 2ª mitad < 1ª mitad × 0.85
+```
+
+### Fases de la sesión
+
+```
+idle ──▶ preparing (10s) ──▶ round ──▶ resting ──▶ round ──▶ ... ──▶ finished
+                  beep×10     campana               campana               ding ding
+```
+
+El modo **libre** (`roundDuration = 0`) deja el timer subiendo; el usuario termina la ronda manualmente.
 
 ### Calibración
 
-Proceso de ajustar threshold y sensitivity:
-1. Usuario golpea ligero (5-10 veces)
-2. Usuario golpea normal (5-10 veces)
-3. Usuario golpea fuerte (5-10 veces)
-4. App sugiere valores automáticos
-5. Usuario puede ajustar manualmente
+El perfil de calibración ajusta dos parámetros:
+
+- **threshold**: a partir de qué magnitud se considera un golpe
+- **sensitivity**: cómo se escala la magnitud a intensidad 0-100
+
+La calibración guiada pide golpes ligeros → normales → fuertes y sugiere valores automáticamente.
 
 ---
 
-## 🎯 Casos de Uso
-
-### Caso 1: Primera Sesión
+## Estructura del Proyecto
 
 ```
-1. Abrir app
-2. Dashboard muestra "No hay dispositivos conectados"
-3. Click "Conectar saco"
-4. Seleccionar MAC del ESP32
-5. Ingresar nombre: "Saco de entrenamiento"
-6. Dashboard muestra perfil "Default" y saco conectado
-7. Click "Nueva sesión"
-8. Seleccionar duración: 5 minutos
-9. Click "Iniciar" → cuenta atrás 10s
-10. Campana suena → empezar a golpear
-11. Gráfico muestra impactos en tiempo real
-12. 5 minutos después → fin automático
-13. Resultado guardado con timestamp
-```
-
-### Caso 2: Calibrar Nuevo Perfil
-
-```
-1. Click "Nuevos perfiles"
-2. Ingresar nombre: "Golpe fuerte"
-3. Se crea con valores Default
-4. Click "Calibrar"
-5. Pantalla: "Golpea ligero" → 8 golpes
-6. Pantalla: "Golpea normal" → 8 golpes
-7. Pantalla: "Golpea fuerte" → 8 golpes
-8. App sugiere: Threshold=20.5, Sensitivity=18.0
-9. Usuario ajusta sliders si quiere
-10. Click "Guardar"
-11. Perfil guardado y listo para usar
-```
-
-### Caso 3: Ver Progreso
-
-```
-1. Click "Progreso"
-2. Ver gráfico: Power máximo en últimas sesiones (tendencia)
-3. Ver tabla: últimas 5 sesiones con stats
-4. Ver logros: "5 sesiones completadas", "PR 98"
-5. Comparativa: "Este mes vs mes pasado: +27 power"
+hit-tracker/
+│
+├─ shared/                    ← Código común a Desktop y Mobile
+│  ├─ types/index.ts          Todos los tipos del dominio
+│  └─ services/
+│     ├─ calibration.ts       calibrationService
+│     └─ training.ts          trainingService
+│
+├─ src/                       ← App Desktop (Electron)
+│  ├─ main/
+│  │  ├─ index.ts             Entry point + BrowserWindow
+│  │  └─ ipc-handlers.ts      File system via IPC
+│  ├─ preload/index.ts        window.api (contextBridge)
+│  └─ renderer/src/
+│     ├─ hooks/               useSensorData · useTraining
+│     ├─ stores/              deviceStore · profileStore · trainingStore
+│     ├─ services/            audio · mockSensor (+ re-exports @shared)
+│     └─ components/          Dashboard · Devices · Profiles · Training · Progress
+│
+├─ mobile/                    ← App Mobile (Expo / React Native)
+│  ├─ src/
+│  │  ├─ core/                hooks · stores · types (re-exports @shared)
+│  │  ├─ services/            audio (expo-audio) · ble · storage (expo-fs)
+│  │  └─ components/          Dashboard · Devices · Profiles · Training · Game
+│  ├─ metro.config.js         Resuelve @shared desde ../shared
+│  └─ App.tsx
+│
+├─ docs/
+│  ├─ ARQUITECTURA.md         Diagrama de componentes y flujo de datos
+│  ├─ DOCUMENTO_TECNICO.md    Referencia completa de tipos, hooks, stores e IPC
+│  ├─ ROADMAP.md              Estado actual y próximas features
+│  └─ SENSOR-TECNICO-V*.md    Versiones del hardware ESP32
+│
+└─ tools/                     Firmware Arduino y utilidades
 ```
 
 ---
 
-## 🛠️ Desarrollo
+## Conceptos Clave
 
-### Agregar Nuevo Hook
+### HPM — Golpes Por Minuto
 
-```typescript
-// src/hooks/useMiLogica.ts
+Métrica de velocidad/cadencia. Se calcula en dos ventanas:
+- **HPM actual**: golpes en los últimos 10 segundos × 6
+- **HPM promedio**: total de golpes / minutos transcurridos
 
-import { useState, useCallback } from 'react'
+### Valid Hit — Golpe Válido
 
-export function useMiLogica() {
-  const [state, setState] = useState(null)
-  
-  const miFunction = useCallback(() => {
-    // lógica
-  }, [])
-  
-  return { state, miFunction }
-}
-```
+Un golpe es válido si su intensidad supera el 80% del máximo detectado en la sesión. Filtra golpes débiles o involuntarios y refleja el esfuerzo real.
 
-### Agregar Nuevo Componente
+### Fatiga de ronda
 
-```typescript
-// src/components/MiComponente.tsx
-
-import React from 'react'
-
-export function MiComponente() {
-  return (
-    <div className="p-4">
-      {/* contenido */}
-    </div>
-  )
-}
-```
-
-### Agregar Nuevo Servicio
-
-```typescript
-// src/services/miServicio.ts
-
-export class MiServicio {
-  miMetodo() {
-    // implementar
-  }
-}
-
-export const miServicio = new MiServicio()
-```
+`isFatigued = true` cuando la intensidad promedio de la segunda mitad de la ronda es inferior al 85% de la primera mitad. Indicador de caída de rendimiento intra-ronda.
 
 ---
 
-## 📱 Pantallas Principales
+## Stack Técnico
 
-### Dashboard
-- Estado de conexión
-- Sesiones recientes
-- Botón "Nueva sesión"
-- Acceso a Perfiles y Dispositivos
-
-### Sesión
-- Timer (cuenta atrás)
-- Gráfico en vivo (impactos)
-- Estadísticas en tiempo real
-- Controles (inicio/parada)
-
-### Perfiles
-- Lista de perfiles
-- Crear nuevo
-- Editar/Eliminar
-- Calibrar
-
-### Progreso
-- Gráficos de tendencia
-- Estadísticas mensuales
-- Logros
-- Comparativas
+| Capa | Desktop | Mobile |
+|---|---|---|
+| Framework | Electron 33 | Expo SDK 56 |
+| UI | React 18 + TypeScript 5 | React Native 0.85 + TypeScript 6 |
+| Estado | Zustand 4 | Zustand 5 |
+| BLE | Web Bluetooth API | react-native-ble-plx 3 |
+| Sensor nativo | — | react-native-sensors 7 |
+| Audio | HTMLAudioElement | expo-audio 56 |
+| Gráficos | Recharts 2 | react-native-svg 15 |
+| Estilos | Tailwind CSS 3 | StyleSheet (RN) |
+| Build | electron-vite + electron-builder | EAS Build |
 
 ---
 
-## 🔗 Dependencias Principales
+## Troubleshooting
 
-```json
-{
-  "dependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "zustand": "^4.0.0",
-    "recharts": "^2.0.0",
-    "electron": "^27.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.0.0",
-    "vite": "^5.0.0",
-    "tailwindcss": "^3.0.0"
-  }
-}
-```
+**ESP32 no aparece en el ordenador**
+- Instalar driver CH340 o CP2102 según el chip USB del módulo
+- Probar con otro cable (algunos son solo de carga)
 
----
+**La app no detecta el sensor BLE**
+- Verificar que Bluetooth está activado en el PC/móvil
+- Reiniciar el ESP32 (botón RST)
+- Abrir Serial Monitor para confirmar que el firmware está corriendo
 
-## 🐛 Troubleshooting
+**Golpes erráticos o falsos positivos**
+- Aumentar el `threshold` en el perfil de calibración
+- Añadir un condensador de 100µF entre VCC y GND del GY-521 para filtrar ruido
 
-### ESP32 no se detecta
-- Instalar driver CH340 o CP2102
-- Verificar cable USB (algunos son solo carga)
-- Reiniciar Arduino IDE
-
-### App no conecta con sensor
-- Verificar Bluetooth está encendido en PC
-- Reiniciar ESP32 (botón RST)
-- Verificar Serial Monitor para ver logs del sensor
-
-### Datos erráticos
-- Agregar capacitor 100µF entre VCC-GND del sensor
-- Verificar que cables no tengan ruido de RF
-- Reubicar antena BLE del PC
-
-### Performance bajo
-- Reducir frecuencia de notificaciones BLE
-- Usar throttling en gráficos (recharts optimizado)
-- Limitar número de sesiones cargadas
+**Mobile — `@shared` no resuelve**
+- Verificar que `metro.config.js` incluye `watchFolders` apuntando a `../shared`
+- Reiniciar Metro con `--reset-cache`: `expo start --clear`
 
 ---
 
-## 📝 Próximos Pasos
+## Documentación
 
-1. ✅ Documentación completa
-2. ✅ Código base (tipos, servicios, hooks)
-3. ⏳ Implementar componentes React
-4. ⏳ Integrar BLE real con noble-mac
-5. ⏳ Testing automático
-6. ⏳ Build ejecutable
-7. ⏳ Rhythm Mode v2
-8. ⏳ Cloud sincronización
-
----
-
-## 📄 Licencia
-
-MIT - Libre para uso educativo y comercial.
+| Documento | Contenido |
+|---|---|
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Diagrama completo, flujo de datos, modelo de datos |
+| [`docs/DOCUMENTO_TECNICO.md`](docs/DOCUMENTO_TECNICO.md) | Tipos, servicios, hooks, stores, IPC API |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Estado actual, features en progreso, backlog |
+| [`docs/SENSOR-TECNICO-V1.md`](docs/SENSOR-TECNICO-V1.md) | Hardware V1: breadboard + USB |
+| [`docs/SENSOR-TECNICO-V2.md`](docs/SENSOR-TECNICO-V2.md) | Hardware V2: LiPo + botón on/off |
+| [`docs/SENSOR-TECNICO-V3.md`](docs/SENSOR-TECNICO-V3.md) | Hardware V3: micro SD, sesión autónoma |
 
 ---
 
-## 📧 Contacto
+## Licencia
 
-Para preguntas o contribuciones, abrir issue en el repositorio.
-
----
-
-**HIT TRACKER** - Monitoreo de entrenamiento de boxeo con IoT 🥊
+MIT — libre para uso personal, educativo y comercial.

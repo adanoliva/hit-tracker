@@ -154,6 +154,16 @@ Rango esperado:
 
 ## Firmware (Código Arduino)
 
+### UUIDs BLE
+
+```cpp
+// Fijos para todas las versiones del sensor — la app los usa para identificar
+// el servicio y leer la versión antes de iniciar el streaming.
+#define SERVICE_UUID                 "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID          "beb5483e-36e1-4688-b7f5-ea07361b26a8"  // datos (NOTIFY)
+#define VERSION_CHARACTERISTIC_UUID  "beb5483e-36e1-4688-b7f5-ea07361b26a9"  // versión (READ)
+```
+
 ### Configuración Inicial
 
 ```cpp
@@ -174,10 +184,23 @@ const uint8_t MPU_ADDR = 0x68;
 // Objeto del sensor
 MPU6050 mpu(Wire, MPU_ADDR);
 
+// ── Configuración de identidad del sensor ──────────────────────────────────
+// El usuario edita estos valores antes de flashear el firmware.
+// DEVICE_NAME aparecerá en la lista de dispositivos de la app.
+// BLE_PIN es el PIN de emparejamiento — solo quien lo sepa podrá conectar.
+// SENSOR_VERSION es leído por la app al conectar para adaptar la UI:
+//   1 → streaming BLE solo
+//   2 → streaming BLE + LEDs (sin botón, sin SD)
+//   3 → streaming BLE + LEDs + botón de acción + SD
+#define DEVICE_NAME    "HIT_TRACKER_SACO1"   // máx 20 caracteres
+#define BLE_PIN        "1234"                 // mínimo 4 dígitos
+#define SENSOR_VERSION 1                      // cambiar a 2 o 3 según el hardware
+
 // Variables BLE
 BLEServer* pServer = nullptr;
 BLECharacteristic* pCharacteristic = nullptr;
 bool deviceConnected = false;
+bool authenticated = false;
 uint32_t lastNotifyTime = 0;
 
 // Configuración
@@ -281,9 +304,14 @@ bool shouldNotify(float magnitude) {
 
 ```cpp
 void initBLE() {
-  // Crear dispositivo BLE
-  BLEDevice::init("HIT_TRACKER");
-  
+  // Nombre del dispositivo (el usuario lo configura en DEVICE_NAME)
+  BLEDevice::init(DEVICE_NAME);
+
+  // PIN de emparejamiento: solo dispositivos que lo conozcan pueden conectar
+  BLEDevice::setEncryptionLevel(ESP_BLE_SEC_ENCRYPT);
+  BLESecurity *pSecurity = new BLESecurity();
+  pSecurity->setStaticPIN(atoi(BLE_PIN));
+
   // Crear servidor
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new ServerCallbacks());
@@ -291,13 +319,22 @@ void initBLE() {
   // Crear servicio
   BLEService *pService = pServer->createService(SERVICE_UUID);
   
-  // Crear característica (notificación)
+  // Característica de datos en tiempo real (NOTIFY)
   pCharacteristic = pService->createCharacteristic(
     CHARACTERISTIC_UUID,
     BLECharacteristic::PROPERTY_NOTIFY
   );
   pCharacteristic->addDescriptor(new BLE2902());
-  
+
+  // Característica de versión del sensor (READ)
+  // La app la lee al conectar para saber qué capacidades tiene el hardware.
+  BLECharacteristic* pVersionChar = pService->createCharacteristic(
+    VERSION_CHARACTERISTIC_UUID,
+    BLECharacteristic::PROPERTY_READ
+  );
+  uint8_t version = SENSOR_VERSION;
+  pVersionChar->setValue(&version, 1);
+
   // Iniciar servicio
   pService->start();
   
@@ -337,6 +374,18 @@ class ServerCallbacks: public BLEServerCallbacks {
   }
 };
 ```
+
+---
+
+### Versión del sensor — comportamiento en la app
+
+Al conectar, la app lee `VERSION_CHARACTERISTIC_UUID` y adapta la UI:
+
+| Versión | Capacidades | UI adicional en la app |
+|---|---|---|
+| 1 | Streaming BLE | Ninguna — funcionamiento base |
+| 2 | Streaming BLE + LEDs | Ninguna — los LEDs son transparentes para la app |
+| 3 | Streaming BLE + LEDs + SD | Botón "Recuperar sesiones del sensor" en dashboard |
 
 ---
 
@@ -394,6 +443,23 @@ void testI2C() {
 // - "Cliente conectado" cuando conecta desde app
 // - Lecturas de sensor cada 10ms
 ```
+
+---
+
+## Personalización antes de flashear
+
+Antes de cargar el firmware, el usuario debe editar dos líneas al inicio del archivo `.ino`:
+
+```cpp
+#define DEVICE_NAME  "HIT_TRACKER_SACO1"   // nombre que verá la app al escanear
+#define BLE_PIN      "1234"                 // PIN que pedirá al emparejar
+```
+
+**`DEVICE_NAME`** — identifica el sensor en la lista de la app. Si hay varios sacos, cada uno tiene su nombre (`HIT_TRACKER_SACO1`, `HIT_TRACKER_SACO2`, etc.). Máximo 20 caracteres, sin espacios.
+
+**`BLE_PIN`** — evita que cualquier dispositivo cercano conecte con el sensor. El PIN lo elige el usuario al configurar el firmware. La app lo pedirá una sola vez al emparejar; el sistema operativo lo recuerda. Mínimo 4 dígitos numéricos.
+
+> El PIN se almacena en el firmware, no en la SD ni en la app. Si se pierde, hay que reflashear con el PIN correcto o uno nuevo.
 
 ---
 
