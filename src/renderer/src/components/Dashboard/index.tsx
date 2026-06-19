@@ -120,9 +120,6 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
         <div className="bg-bg-secondary rounded-xl p-4 border border-border">
           <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Perfil activo</p>
           <p className="font-semibold text-secondary">{profile.name}</p>
-          <p className="text-xs text-text-muted">
-            {profile.stance === 'orthodox' ? 'Ortodoxo' : 'Southpaw'}
-          </p>
         </div>
       </div>
 

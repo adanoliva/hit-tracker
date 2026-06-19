@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import type { SensorReading, Impact, CalibrationProfile, PunchType, SensorPlacement } from '../types'
+import type { SensorReading, Impact, CalibrationProfile, SensorPlacement } from '../types'
 import { calibrationService } from '../services/calibration'
 
 interface HPMStats {
@@ -18,28 +18,7 @@ interface UseSensorDataReturn {
 
 const PEAK_COOLDOWN_MS = 200
 
-function normalizeAxes(r: SensorReading, placement?: SensorPlacement): { ax: number; gz: number } {
-  if (placement === 'top-horizontal') {
-    // gz sigue siendo la rotación alrededor del eje vertical (hooks) en ambas posiciones
-    return { ax: r.ax, gz: r.gz }
-  }
-  return { ax: r.ax, gz: r.gz }
-}
-
-function classifyPunch(ax: number, gz: number, profile: CalibrationProfile): PunchType {
-  const isHook = Math.abs(gz) >= profile.hookThreshold
-
-  // Orthodox: jab = mano izquierda (ax negativo desde el sensor), cross = derecha (ax positivo)
-  // Southpaw: invertido — jab = mano derecha (ax positivo), cross = izquierda (ax negativo)
-  const jabSide  = profile.stance === 'orthodox' ? ax < 0 : ax >= 0
-
-  if ( jabSide && !isHook) return 'jab'
-  if (!jabSide && !isHook) return 'cross'
-  if ( jabSide && isHook)  return profile.stance === 'orthodox' ? 'left-hook'  : 'right-hook'
-  return                          profile.stance === 'orthodox' ? 'right-hook' : 'left-hook'
-}
-
-export function useSensorData(profile: CalibrationProfile, placement?: SensorPlacement): UseSensorDataReturn {
+export function useSensorData(profile: CalibrationProfile, _placement?: SensorPlacement): UseSensorDataReturn {
   const [impacts, setImpacts] = useState<Impact[]>([])
   const [powerMax, setPowerMax] = useState(0)
   const [hpmStats, setHpmStats] = useState<HPMStats>({ current: 0, average: 0, max: 0 })
@@ -67,8 +46,6 @@ export function useSensorData(profile: CalibrationProfile, placement?: SensorPla
 
       lastPeakTime.current = now
       const intensity  = calibrationService.calculateIntensity(prev.magnitude, profile)
-      const { ax, gz } = normalizeAxes(prev, placement)
-      const punchType  = classifyPunch(ax, gz, profile)
 
       const newPowerMax = Math.max(powerMaxRef.current, intensity)
       powerMaxRef.current = newPowerMax
@@ -79,10 +56,7 @@ export function useSensorData(profile: CalibrationProfile, placement?: SensorPla
         intensity,
         magnitude: prev.magnitude,
         duration:  0,
-        isValid:   intensity >= newPowerMax * 0.8,
-        punchType,
-        peakAx:    prev.ax,
-        peakGz:    prev.gz
+        isValid:   intensity >= newPowerMax * 0.8
       }
 
       setImpacts((prevImpacts) => {
@@ -104,7 +78,7 @@ export function useSensorData(profile: CalibrationProfile, placement?: SensorPla
 
       return impact
     },
-    [profile, placement]
+    [profile]
   )
 
   const reset = useCallback(() => {

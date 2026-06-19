@@ -1,20 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Circle, Line, G } from 'react-native-svg'
-import type { Impact, PunchType } from '../../core/types'
+import type { Impact } from '../../core/types'
 import { colors } from '../../theme'
 
-const PUNCH_COLOR: Record<PunchType, string> = {
-  'jab':        '#00d9ff',
-  'cross':      '#ff4444',
-  'right-hook': '#ff9900',
-  'left-hook':  '#cc44ff',
-  'unknown':    '#555555'
-}
-const PUNCH_LABEL: Record<PunchType, string> = {
-  'jab': 'Jab', 'cross': 'Cross', 'right-hook': 'Hook D', 'left-hook': 'Hook I', 'unknown': '?'
-}
-const PUNCH_TYPES: PunchType[] = ['jab', 'cross', 'right-hook', 'left-hook']
+const HIT_COLOR = '#c0c0c0'
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60)
@@ -70,7 +60,7 @@ function ImpactChart({ impacts, powerMax, width, height }: {
       {impacts.map((impact, i) => {
         const cx = toX(impact.time)
         const cy = toY(impact.intensity)
-        const color = PUNCH_COLOR[impact.punchType]
+        const color = HIT_COLOR
         const r = impact.isValid ? 6 : 4
         return (
           <G key={`d${i}`}>
@@ -109,10 +99,6 @@ export function TrainingRound({
   const chartHeight = 200
 
   const validHits = impacts.filter((i) => i.isValid).length
-  const counts = impacts.reduce<Partial<Record<PunchType, number>>>((acc, i) => {
-    acc[i.punchType] = (acc[i.punchType] ?? 0) + 1
-    return acc
-  }, {})
 
   return (
     <View style={[s.container, { paddingTop: top + 16 }]}>
@@ -137,21 +123,6 @@ export function TrainingRound({
             <Text style={s.abortText}>Abortar</Text>
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Leyenda */}
-      <View style={s.legend}>
-        {PUNCH_TYPES.map((pt) => (
-          <View key={pt} style={s.legendItem}>
-            <View style={[s.legendDot, { backgroundColor: PUNCH_COLOR[pt] }]} />
-            <Text style={s.legendText}>
-              {PUNCH_LABEL[pt]}
-              {counts[pt] != null && (
-                <Text style={{ color: PUNCH_COLOR[pt], fontWeight: '700' }}> {counts[pt]}</Text>
-              )}
-            </Text>
-          </View>
-        ))}
       </View>
 
       {/* Gráfico */}
@@ -192,10 +163,6 @@ const s = StyleSheet.create({
   finishText: { fontSize: 12, color: colors.secondary, fontWeight: '700' },
   abortBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
   abortText: { fontSize: 12, color: colors.textMuted },
-  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  legendDot: { width: 10, height: 10, borderRadius: 5 },
-  legendText: { fontSize: 12, color: colors.textMuted },
   chartContainer: {
     backgroundColor: colors.bgSecondary, borderRadius: 12,
     borderWidth: 1, borderColor: colors.border, overflow: 'hidden'

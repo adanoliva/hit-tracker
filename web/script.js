@@ -232,7 +232,7 @@ console.log(
   '%cGitHub: https://github.com/adanoliva/hit-tracker',
   'color: #a0a0a0; font-size: 12px;',
   'color: #808080; font-size: 11px;',
-  'color: #00d9ff; font-size: 12px; text-decoration: underline;'
+  'color: #c0c0c0; font-size: 12px; text-decoration: underline;'
 );
 
 // ==================== SERVICE WORKER (PWA - opcional) ==================== 

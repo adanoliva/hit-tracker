@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useProfileStore } from '../../stores/profileStore'
 import { calibrationService } from '../../services/calibration'
-import type { CalibrationProfile, Stance } from '../../types'
+import type { CalibrationProfile } from '../../types'
 
 interface ProfilesPageProps {
   onBack: () => void
@@ -72,9 +72,7 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
     updateProfile(editing.id, {
       name: editing.name,
       threshold: editing.threshold,
-      sensitivity: editing.sensitivity,
-      hookThreshold: editing.hookThreshold,
-      stance: editing.stance
+      sensitivity: editing.sensitivity
     })
     setEditing(null)
   }
@@ -101,39 +99,6 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
                   placeholder="Nombre del perfil"
                 />
 
-                {/* Guardia */}
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">Guardia</p>
-                    <p className="text-xs text-text-muted mt-0.5">
-                      Define qué mano lanza el jab. El jab es siempre la mano delantera.
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    {(['orthodox', 'southpaw'] as Stance[]).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setEditing({ ...editing, stance: s })}
-                        className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all border ${
-                          editing.stance === s
-                            ? 'bg-secondary/20 border-secondary text-secondary'
-                            : 'bg-bg-tertiary border-border text-text-muted hover:border-secondary/40'
-                        }`}
-                      >
-                        {s === 'orthodox' ? 'Ortodoxo · diestro' : 'Southpaw · zurdo'}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-text-muted/70">
-                    {editing.stance === 'orthodox'
-                      ? 'Jab = mano izquierda adelante. Cross = mano derecha.'
-                      : 'Jab = mano derecha adelante. Cross = mano izquierda.'}
-                  </p>
-                </div>
-
-                {/* Separador */}
-                <div className="border-t border-border" />
-
                 {/* Mínimo de detección */}
                 <SliderField
                   label="Mínimo de detección"
@@ -158,19 +123,6 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
                   onChange={(v) => setEditing({ ...editing, sensitivity: v })}
                 />
 
-                {/* Detección de hooks */}
-                <SliderField
-                  label="Detección de ganchos"
-                  hint="Rotación mínima del saco para clasificar un golpe como gancho (hook) en vez de directo. Súbelo si los directos se detectan como ganchos. Bájalo si los ganchos aparecen como directos."
-                  value={editing.hookThreshold}
-                  min={40}
-                  max={200}
-                  step={5}
-                  unit="°/s"
-                  color="text-secondary"
-                  onChange={(v) => setEditing({ ...editing, hookThreshold: v })}
-                />
-
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={handleSaveEdit}
@@ -191,8 +143,6 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
                 <div>
                   <p className="font-medium text-text-primary">{p.name}</p>
                   <p className="text-xs text-text-muted mt-0.5">
-                    {p.stance === 'orthodox' ? 'Ortodoxo' : 'Southpaw'}
-                    {' · '}
                     Detección <span className="text-accent">{p.threshold}</span>
                     {' · '}
                     Potencia <span className="text-secondary">{p.sensitivity}</span>

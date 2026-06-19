@@ -125,7 +125,7 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
         />
         <OptionRow
           label="Descanso entre rondas"
-          options={[30, 60, 90] as const as any}
+          options={[10, 20, 30, 60, 90] as const as any}
           selected={restDuration}
           onSelect={setRestDuration}
           format={(v) => `${v}s`}

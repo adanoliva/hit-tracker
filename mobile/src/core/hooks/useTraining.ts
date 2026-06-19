@@ -60,17 +60,12 @@ export function useTraining(): UseTrainingReturn {
       setRestTimeRemaining((prev) => {
         if (prev <= 1) {
           clearTimer()
-          // startRound se llama en el siguiente tick para evitar capturar stale ref
+          setTimeout(() => startRoundRef.current(afterRound + 1), 0)
           return 0
         }
         return prev - 1
       })
     }, 1000)
-
-    // Cuando el descanso termina arrancamos la siguiente ronda
-    setTimeout(() => {
-      startRoundRef.current(afterRound + 1)
-    }, configRef.current.restDuration * 1000)
   }, [])
 
   // Ref para evitar dependencias circulares entre startRound y startRest

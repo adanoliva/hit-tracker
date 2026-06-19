@@ -4,17 +4,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'bg-primary': '#0f0f0f',
-        'bg-secondary': '#1a1a1a',
-        'bg-tertiary': '#252525',
-        border: '#2a2a2a',
-        accent: '#ff4444',
-        'accent-hover': '#ff6666',
-        secondary: '#00d9ff',
-        'secondary-hover': '#00f0ff',
-        'text-primary': '#e0e0e0',
-        'text-secondary': '#a0a0a0',
-        'text-muted': '#808080'
+        'bg-primary':      'var(--bg-primary)',
+        'bg-secondary':    'var(--bg-secondary)',
+        'bg-tertiary':     'var(--bg-tertiary)',
+        border:            'var(--border)',
+        accent:            'var(--accent)',
+        'accent-hover':    'var(--accent-hover)',
+        secondary:         'var(--secondary)',
+        'secondary-hover': 'var(--secondary-hover)',
+        'text-primary':    'var(--text-primary)',
+        'text-secondary':  'var(--text-secondary)',
+        'text-muted':      'var(--text-muted)'
       }
     }
   },

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hit Tracker — Análisis de boxeo en tiempo real</title>
-  <meta name="description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes, clasifica jabs, crosses y hooks, y muestra tu progreso sesión a sesión. Disponible para Windows y Android.">
-  <meta name="keywords" content="hit tracker, boxeo, entrenamiento boxeo, sensor boxeo, ESP32, BLE, análisis golpes, jab, cross, hook, app boxeo, IoT boxeo">
+  <meta name="description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes y muestra tu progreso sesión a sesión. Disponible para Windows y Android.">
+  <meta name="keywords" content="hit tracker, boxeo, entrenamiento boxeo, sensor boxeo, ESP32, BLE, análisis golpes, app boxeo, IoT boxeo">
   <meta name="author" content="Hit Tracker">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hit-tracker.es/">
@@ -14,7 +14,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hit-tracker.es/">
   <meta property="og:title" content="Hit Tracker — Análisis de boxeo en tiempo real">
-  <meta property="og:description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes, clasifica jabs, crosses y hooks, y muestra tu progreso sesión a sesión.">
+  <meta property="og:description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes y muestra tu progreso sesión a sesión.">
   <meta property="og:image" content="https://hit-tracker.es/screenshoot/desktop/Dashboard.png">
   <meta property="og:locale" content="es_ES">
   <meta property="og:site_name" content="Hit Tracker">
@@ -23,7 +23,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://hit-tracker.es/">
   <meta name="twitter:title" content="Hit Tracker — Análisis de boxeo en tiempo real">
-  <meta name="twitter:description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes, clasifica jabs, crosses y hooks, y muestra tu progreso sesión a sesión.">
+  <meta name="twitter:description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes y muestra tu progreso sesión a sesión.">
   <meta name="twitter:image" content="https://hit-tracker.es/screenshoot/desktop/Dashboard.png">
 
   <link rel="icon" href="logo.png" type="image/png">
@@ -33,7 +33,7 @@
       --bg-secondary: #1a1a1a;
       --border: #2a2a2a;
       --accent: #ff4444;
-      --secondary: #00d9ff;
+      --secondary: #c0c0c0;
       --text-primary: #e0e0e0;
       --text-muted: #808080;
     }
@@ -49,31 +49,36 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding-bottom: 64px;
+      padding: 60px 24px 80px;
     }
 
-    .container {
-      text-align: center;
-      padding: 60px 24px 0;
-      max-width: 560px;
+    .page-layout {
+      display: flex;
+      align-items: center;
+      gap: 64px;
+      max-width: 1000px;
       width: 100%;
+    }
+
+    .content-left {
+      flex: 1;
+      min-width: 0;
     }
 
     .logo {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
     .logo img {
-      height: 52px;
+      height: 44px;
       width: auto;
     }
 
     .logo-text {
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: 800;
       letter-spacing: -0.5px;
     }
@@ -92,11 +97,11 @@
       text-transform: uppercase;
       padding: 4px 12px;
       border-radius: 999px;
-      margin-bottom: 40px;
+      margin-bottom: 28px;
     }
 
     h1 {
-      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
       font-weight: 800;
       line-height: 1.15;
       margin-bottom: 20px;
@@ -115,12 +120,11 @@
       width: 40px;
       height: 2px;
       background: var(--border);
-      margin: 36px auto;
+      margin: 28px 0;
     }
 
     .stack {
       display: flex;
-      justify-content: center;
       flex-wrap: wrap;
       gap: 8px;
     }
@@ -139,70 +143,171 @@
       color: var(--secondary);
     }
 
-    .screenshots {
-      margin-top: 48px;
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .screenshot-frame {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      width: 280px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    }
-
-    .screenshot-titlebar {
-      background: #1f1f1f;
-      border-bottom: 1px solid var(--border);
-      padding: 8px 12px;
+    /* Carousel */
+    .device-carousel {
+      position: relative;
+      width: 420px;
+      flex-shrink: 0;
+      height: 430px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
     }
 
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-red { background: #ff5f57; }
-    .dot-yellow { background: #febc2e; }
-    .dot-green { background: #28c840; }
-
-    .screenshot-frame img {
-      width: 100%;
-      display: block;
-    }
-
-    .screenshot-label {
-      padding: 8px 12px;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-align: left;
-      border-top: 1px solid var(--border);
-    }
-
-    .screenshot-frame img { cursor: zoom-in; }
-
-    .lightbox {
-      display: none;
-      position: fixed;
+    .device-slide {
+      position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 999;
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      cursor: zoom-out;
+      opacity: 0;
+      transition: opacity 0.7s ease;
+      pointer-events: none;
+      gap: 12px;
     }
 
-    .lightbox.open { display: flex; }
+    .device-slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      animation: float 3.5s ease-in-out infinite;
+    }
 
-    .lightbox img {
-      max-width: 90vw;
-      max-height: 90vh;
-      border-radius: 8px;
-      box-shadow: 0 16px 64px rgba(0,0,0,0.8);
+    .device-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .phone-frame {
+      width: 180px;
+      background: #111;
+      border: 9px solid #1c1c1c;
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(255,68,68,0.2), 0 4px 16px rgba(0,0,0,0.6);
+    }
+
+    .phone-notch {
+      height: 18px;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .phone-notch::after {
+      content: '';
+      width: 52px;
+      height: 5px;
+      background: #2a2a2a;
+      border-radius: 3px;
+    }
+
+    .phone-screen img { width: 100%; display: block; }
+
+    .tablet-frame {
+      width: 360px;
+      background: #111;
+      border: 10px solid #1c1c1c;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(255,68,68,0.2), 0 4px 16px rgba(0,0,0,0.6);
+    }
+
+    .tablet-camera {
+      height: 16px;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tablet-camera::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #2a2a2a;
+    }
+
+    .tablet-screen img { width: 100%; display: block; }
+
+    .desktop-frame {
+      width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .desktop-screen {
+      width: 100%;
+      background: #111;
+      border: 10px solid #1c1c1c;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(255,68,68,0.15), 0 4px 16px rgba(0,0,0,0.6);
+    }
+
+    .desktop-screen img {
+      width: 100%;
+      height: 200px;
+      display: block;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .desktop-chin {
+      width: 100%;
+      height: 7px;
+      background: #1c1c1c;
+      border-radius: 0 0 3px 3px;
+    }
+
+    .desktop-stand {
+      width: 28px;
+      height: 16px;
+      background: #181818;
+      clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+    }
+
+    .desktop-base {
+      width: 80px;
+      height: 5px;
+      background: #1c1c1c;
+      border-radius: 3px;
+    }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+    }
+
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: none;
+      background: var(--border);
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .carousel-dot.active {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(-8px); }
+      50% { transform: translateY(8px); }
     }
 
     footer {
@@ -214,72 +319,133 @@
       color: var(--text-muted);
       font-size: 0.75rem;
     }
+
+    @media (max-width: 860px) {
+      .page-layout {
+        flex-direction: column;
+        gap: 48px;
+      }
+
+      .content-left {
+        text-align: center;
+      }
+
+      .logo { justify-content: center; }
+      .divider { margin: 28px auto; }
+      .stack { justify-content: center; }
+
+      .device-carousel {
+        width: 100%;
+        max-width: 360px;
+        height: 400px;
+      }
+
+      .tablet-frame, .desktop-frame { width: 300px; }
+      .phone-frame { width: 150px; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="logo">
-      <img src="logo.png" alt="Hit Tracker" />
-      <div class="logo-text">Hit<span>Tracker</span></div>
-    </div>
-    <div class="badge">Próximamente</div>
-
-    <h1>Cada golpe<br><span class="accent">cuenta.</span></h1>
-
-    <p>
-      Sistema IoT de análisis de entrenamiento de boxeo en tiempo real.
-      Sensor ESP32 + MPU-6050 conectado via Bluetooth BLE a una app. Disponible próximamente para <strong style="color: var(--text-primary)">Windows</strong> y <strong style="color: var(--text-primary)">Android</strong>.
-    </p>
-    <p>
-      Detecta golpes, clasifica jabs, crosses y hooks, y muestra tu progreso sesión a sesión.
-    </p>
-
-    <div class="divider"></div>
-
-    <div class="stack">
-      <span class="tag highlight">ESP32 + MPU-6050</span>
-      <span class="tag highlight">Bluetooth BLE</span>
-      <span class="tag">Electron</span>
-      <span class="tag">React</span>
-      <span class="tag">TypeScript</span>
-    </div>
-  </div>
-
-  <div class="screenshots" style="max-width:640px;margin:48px auto 0;">
-    <div class="screenshot-frame">
-      <div class="screenshot-titlebar">
-        <div class="dot dot-red"></div>
-        <div class="dot dot-yellow"></div>
-        <div class="dot dot-green"></div>
+  <div class="page-layout">
+    <div class="content-left">
+      <div class="logo">
+        <img src="logo.png" alt="Hit Tracker" />
+        <div class="logo-text">Hit<span>Tracker</span></div>
       </div>
-      <img src="screenshoot/desktop/Dashboard.png" alt="Dashboard" />
-      <div class="screenshot-label">Dashboard — progreso y sesiones recientes</div>
-    </div>
-    <div class="screenshot-frame">
-      <div class="screenshot-titlebar">
-        <div class="dot dot-red"></div>
-        <div class="dot dot-yellow"></div>
-        <div class="dot dot-green"></div>
-      </div>
-      <img src="screenshoot/desktop/SesionRegistro.png" alt="Sesión en directo" />
-      <div class="screenshot-label">Sesión en directo — golpes, power y HPM</div>
-    </div>
-  </div>
+      <div class="badge">Próximamente</div>
 
-  <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
-    <img id="lightbox-img" src="" alt="" />
+      <h1>Cada golpe<br><span class="accent">cuenta.</span></h1>
+
+      <p>
+        Sistema IoT de análisis de entrenamiento de boxeo en tiempo real.
+        Sensor ESP32 + MPU-6050 conectado via Bluetooth BLE. Disponible próximamente para <strong style="color: var(--text-primary)">Windows</strong> y <strong style="color: var(--text-primary)">Android</strong>.
+      </p>
+      <p>
+        Monitorea tus impactos en tiempo real. Entrena más inteligente.
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="stack">
+        <span class="tag highlight">ESP32 + MPU-6050</span>
+        <span class="tag highlight">Bluetooth BLE</span>
+        <span class="tag">Electron</span>
+        <span class="tag">React Native</span>
+        <span class="tag">TypeScript</span>
+      </div>
+    </div>
+
+    <div class="device-carousel">
+
+      <div class="device-slide active" data-device="mobile">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <img src="screenshoot/mobile/Dashboard.png" alt="HitTracker en Android" />
+          </div>
+        </div>
+        <div class="device-label">Android</div>
+      </div>
+
+      <div class="device-slide" data-device="tablet">
+        <div class="tablet-frame">
+          <div class="tablet-camera"></div>
+          <div class="tablet-screen">
+            <img src="screenshoot/tablet/Dashboard.png" alt="HitTracker en tablet" />
+          </div>
+        </div>
+        <div class="device-label">Tablet</div>
+      </div>
+
+      <div class="device-slide" data-device="desktop">
+        <div class="desktop-frame">
+          <div class="desktop-screen">
+            <img src="screenshoot/desktop/Dashboard.png" alt="HitTracker en escritorio" />
+          </div>
+          <div class="desktop-chin"></div>
+          <div class="desktop-stand"></div>
+          <div class="desktop-base"></div>
+        </div>
+        <div class="device-label">Windows</div>
+      </div>
+
+      <div class="carousel-dots">
+        <button class="carousel-dot active" data-index="0"></button>
+        <button class="carousel-dot" data-index="1"></button>
+        <button class="carousel-dot" data-index="2"></button>
+      </div>
+    </div>
   </div>
 
   <script>
-    document.querySelectorAll('.screenshot-frame img').forEach(img => {
-      img.addEventListener('click', () => {
-        document.getElementById('lightbox-img').src = img.src
-        document.getElementById('lightbox').classList.add('open')
+    (function () {
+      const slides = document.querySelectorAll('.device-slide')
+      const dots = document.querySelectorAll('.carousel-dot')
+      let current = 0
+      let timer
+
+      function goTo(index) {
+        slides[current].classList.remove('active')
+        dots[current].classList.remove('active')
+        current = index
+        slides[current].classList.add('active')
+        dots[current].classList.add('active')
+      }
+
+      function next() { goTo((current + 1) % slides.length) }
+
+      function startTimer() { timer = setInterval(next, 4000) }
+
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          clearInterval(timer)
+          goTo(i)
+          startTimer()
+        })
       })
-    })
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open')
-    })
+
+      startTimer()
+    })()
   </script>
 
   <footer>En desarrollo &mdash; Hit Tracker &copy; 2026</footer>

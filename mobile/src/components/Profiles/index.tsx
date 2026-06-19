@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Slider from '@react-native-community/slider'
 import { useProfileStore } from '../../core/stores/profileStore'
 import { calibrationService } from '../../core/services/calibration'
-import type { CalibrationProfile, Stance } from '../../core/types'
+import type { CalibrationProfile } from '../../core/types'
 import { colors } from '../../theme'
 
 function SliderField({
@@ -68,7 +68,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
     if (!editing) return
     updateProfile(editing.id, {
       name: editing.name, threshold: editing.threshold,
-      sensitivity: editing.sensitivity, hookThreshold: editing.hookThreshold, stance: editing.stance
+      sensitivity: editing.sensitivity
     })
     setEditing(null)
   }
@@ -97,32 +97,6 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                 placeholderTextColor={colors.textMuted}
               />
 
-              {/* Guardia */}
-              <View style={s.fieldGroup}>
-                <Text style={s.fieldLabel}>Guardia</Text>
-                <Text style={s.fieldHint}>Define qué mano lanza el jab. El jab es siempre la mano delantera.</Text>
-                <View style={s.stanceRow}>
-                  {(['orthodox', 'southpaw'] as Stance[]).map((st) => (
-                    <TouchableOpacity
-                      key={st}
-                      style={[s.stanceBtn, editing.stance === st && s.stanceBtnActive]}
-                      onPress={() => setEditing({ ...editing, stance: st })}
-                    >
-                      <Text style={[s.stanceBtnText, editing.stance === st && s.stanceBtnTextActive]}>
-                        {st === 'orthodox' ? 'Ortodoxo · diestro' : 'Southpaw · zurdo'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <Text style={s.stanceDesc}>
-                  {editing.stance === 'orthodox'
-                    ? 'Jab = mano izquierda. Cross = mano derecha.'
-                    : 'Jab = mano derecha. Cross = mano izquierda.'}
-                </Text>
-              </View>
-
-              <View style={s.divider} />
-
               <SliderField
                 label="Mínimo de detección"
                 hint="Fuerza mínima del golpe para que la app lo registre. Súbelo si detecta golpes que no das. Bájalo si se pierden golpes suaves."
@@ -137,14 +111,6 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                 color={colors.secondary}
                 onChange={(v) => setEditing({ ...editing, sensitivity: v })}
               />
-              <SliderField
-                label="Detección de ganchos"
-                hint="Rotación mínima para clasificar un golpe como gancho en vez de directo."
-                value={editing.hookThreshold} min={40} max={200} step={5} unit="°/s"
-                color={colors.secondary}
-                onChange={(v) => setEditing({ ...editing, hookThreshold: v })}
-              />
-
               <View style={s.editActions}>
                 <TouchableOpacity style={s.saveBtn} onPress={handleSaveEdit}>
                   <Text style={s.saveBtnText}>Guardar</Text>
@@ -159,8 +125,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
               <View style={s.flex1}>
                 <Text style={s.profileName}>{p.name}</Text>
                 <Text style={s.profileMeta}>
-                  {p.stance === 'orthodox' ? 'Ortodoxo' : 'Southpaw'}
-                  {' · '}Detección {p.threshold} · Potencia {p.sensitivity}
+                  Detección {p.threshold} · Potencia {p.sensitivity}
                 </Text>
                 {selectedProfileId === p.id && (
                   <Text style={s.activeBadge}>● Activo</Text>
@@ -237,19 +202,7 @@ const s = StyleSheet.create({
   editBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
   editBtnText: { color: colors.textMuted, fontSize: 12 },
   editForm: { padding: 16, gap: 16 },
-  fieldGroup: { gap: 6 },
   fieldLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
-  fieldHint: { fontSize: 12, color: colors.textMuted, lineHeight: 18 },
-  stanceRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
-  stanceBtn: {
-    flex: 1, paddingVertical: 10, borderRadius: 10, borderWidth: 1,
-    borderColor: colors.border, backgroundColor: colors.bgTertiary, alignItems: 'center'
-  },
-  stanceBtnActive: { backgroundColor: `${colors.secondary}20`, borderColor: colors.secondary },
-  stanceBtnText: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
-  stanceBtnTextActive: { color: colors.secondary },
-  stanceDesc: { fontSize: 12, color: `${colors.textMuted}99`, marginTop: 4 },
-  divider: { height: 1, backgroundColor: colors.border },
   editActions: { flexDirection: 'row', gap: 10 },
   saveBtn: { flex: 1, backgroundColor: colors.accent, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
   saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },

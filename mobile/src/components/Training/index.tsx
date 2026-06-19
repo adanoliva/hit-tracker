@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
 import { audioService } from '../../services/audio'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -35,6 +36,15 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
   } = useTraining()
 
   const savedRef = useRef(false)
+
+  useEffect(() => {
+    if (phase !== 'idle') {
+      activateKeepAwakeAsync()
+    } else {
+      deactivateKeepAwake()
+    }
+    return () => { deactivateKeepAwake() }
+  }, [phase])
 
   useEffect(() => {
     if (finishedTraining && !savedRef.current) {

@@ -1,25 +1,11 @@
 import { useState, useCallback, useRef } from 'react'
-import type { SensorReading, Impact, CalibrationProfile, PunchType, PhoneSensorPlacement } from '../types'
+import type { SensorReading, Impact, CalibrationProfile, PhoneSensorPlacement } from '../types'
 import { calibrationService } from '../services/calibration'
 
 interface HPMStats {
   current: number
   average: number
   max: number
-}
-
-// Normaliza los ejes del sensor según su posición física en el saco
-function normalizeAxes(r: SensorReading, placement?: PhoneSensorPlacement): { ax: number; gz: number } {
-  if (placement === 'top-horizontal') {
-    // Sensor tumbado encima, pantalla hacia arriba:
-    // - ax sigue siendo el eje lateral (jab/cross) ✓
-    // - gz sigue siendo la rotación alrededor del eje vertical del saco (hooks) ✓
-    //   porque Z del sensor apunta hacia arriba, igual que el eje de cuelgue del saco
-    // - el eje de impacto directo cambia de Z a Y, pero magnitude ya lo captura
-    return { ax: r.ax, gz: r.gz }
-  }
-  // front-vertical (default): ejes directos del sensor
-  return { ax: r.ax, gz: r.gz }
 }
 
 interface UseSensorDataReturn {
@@ -33,20 +19,7 @@ interface UseSensorDataReturn {
 
 const PEAK_COOLDOWN_MS = 200
 
-function classifyPunch(ax: number, gz: number, profile: CalibrationProfile): PunchType {
-const isHook = Math.abs(gz) >= profile.hookThreshold
-
-  // Orthodox: jab = mano izquierda (ax negativo desde el sensor), cross = derecha (ax positivo)
-  // Southpaw: invertido — jab = mano derecha (ax positivo), cross = izquierda (ax negativo)
-  const jabSide  = profile.stance === 'orthodox' ? ax < 0 : ax >= 0
-
-  if ( jabSide && !isHook) return 'jab'
-  if (!jabSide && !isHook) return 'cross'
-  if ( jabSide && isHook)  return profile.stance === 'orthodox' ? 'left-hook'  : 'right-hook'
-  return                          profile.stance === 'orthodox' ? 'right-hook' : 'left-hook'
-}
-
-export function useSensorData(profile: CalibrationProfile, placement?: PhoneSensorPlacement): UseSensorDataReturn {
+export function useSensorData(profile: CalibrationProfile, _placement?: PhoneSensorPlacement): UseSensorDataReturn {
   const [impacts, setImpacts] = useState<Impact[]>([])
   const [powerMax, setPowerMax] = useState(0)
   const [powerMaxMag, setPowerMaxMag] = useState(0)
@@ -76,8 +49,6 @@ export function useSensorData(profile: CalibrationProfile, placement?: PhoneSens
 
       lastPeakTime.current = now
       const intensity  = calibrationService.calculateIntensity(prev.magnitude, profile)
-      const { ax, gz } = normalizeAxes(prev, placement)
-      const punchType  = classifyPunch(ax, gz, profile)
 
       const newPowerMax = Math.max(powerMaxRef.current, intensity)
       powerMaxRef.current = newPowerMax
@@ -92,10 +63,7 @@ export function useSensorData(profile: CalibrationProfile, placement?: PhoneSens
         intensity,
         magnitude: prev.magnitude,
         duration:  0,
-        isValid:   intensity >= newPowerMax * 0.8,
-        punchType,
-        peakAx:    prev.ax,
-        peakGz:    prev.gz
+        isValid:   intensity >= newPowerMax * 0.8
       }
 
       setImpacts((prevImpacts) => {
@@ -117,7 +85,7 @@ export function useSensorData(profile: CalibrationProfile, placement?: PhoneSens
 
       return impact
     },
-    [profile, placement]
+    [profile]
   )
 
   const reset = useCallback(() => {

@@ -9,8 +9,7 @@ const DEFAULT_PROFILE: CalibrationProfile = {
   name: 'Default',
   threshold: 15.0,
   sensitivity: 25.0,
-  hookThreshold: 80,
-  stance: 'orthodox',
+
   createdAt: 0
 }
 

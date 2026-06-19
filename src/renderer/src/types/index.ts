@@ -9,8 +9,6 @@ export interface SensorReading {
   magnitude: number
 }
 
-export type PunchType = 'jab' | 'cross' | 'right-hook' | 'left-hook' | 'unknown'
-
 export type SensorPlacement = 'front-vertical' | 'top-horizontal'
 
 export interface Impact {
@@ -19,10 +17,6 @@ export interface Impact {
   magnitude: number
   duration: number
   isValid: boolean
-  punchType: PunchType
-  // raw sensor values en el pico (para clasificación)
-  peakAx: number
-  peakGz: number
 }
 
 export interface Device {
@@ -43,15 +37,11 @@ export interface CalibrationData {
   }
 }
 
-export type Stance = 'orthodox' | 'southpaw'
-
 export interface CalibrationProfile {
   id: string
   name: string
   threshold: number
   sensitivity: number
-  hookThreshold: number  // |gz| mínimo para clasificar como hook (default 80)
-  stance: Stance         // orthodox (diestro) o southpaw (zurdo)
   calibrationData?: CalibrationData
   createdAt: number
 }

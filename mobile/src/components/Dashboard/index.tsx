@@ -110,9 +110,6 @@ export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
           <View style={[styles.card, styles.flex1]}>
             <Text style={styles.label}>Perfil activo</Text>
             <Text style={styles.valueBlue}>{profile.name}</Text>
-            <Text style={styles.muted}>
-              {profile.stance === 'orthodox' ? 'Ortodoxo' : 'Southpaw'}
-            </Text>
           </View>
         </View>
 

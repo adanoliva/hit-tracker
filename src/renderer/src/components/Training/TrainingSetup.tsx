@@ -119,7 +119,7 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps): JSX.Elem
             Descanso entre rondas
           </label>
           <div className="flex gap-2">
-            {[30, 60, 90].map((s) => (
+            {[10, 20, 30, 60, 90].map((s) => (
               <button
                 key={s}
                 onClick={() => setRestDuration(s)}
