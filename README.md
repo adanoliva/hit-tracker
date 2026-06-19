@@ -2,22 +2,11 @@
 
 > Monitoreo de entrenamiento de boxeo en tiempo real. Mide la potencia, el ritmo y la fatiga de cada golpe — ronda a ronda.
 
-<br>
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│   RONDA 2 / 3          ████████████████░░░░   2:14              │
-│                                                                  │
-│   Golpes    47          Válidos   31   (66%)                     │
-│   Potencia  MAX 94      HPM       38   golpes/min                │
-│                                                                  │
-│   ▁▃▅▇▆▅▇█▇▅▃▄▆▇▅▆▄▃▅▆▇▅▄▃▂▄▆▇▅▆▄▅▇▆▅▄▆▇█▇▅▄▅▆▇▅              │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Sesión en tiempo real](web/screenshoot/desktop/SesionRegistro.png)
 
-<br>
+![Dashboard](web/screenshoot/desktop/Dashboard.png)
+
 
 ## ¿Qué es?
 
