@@ -3,9 +3,6 @@
 > Monitoreo de entrenamiento de boxeo en tiempo real. Mide la potencia, el ritmo y la fatiga de cada golpe — ronda a ronda.
 
 
-![Sesión en tiempo real](web/screenshoot/desktop/SesionRegistro.png)
-
-![Dashboard](web/screenshoot/desktop/Dashboard.png)
 
 
 ## ¿Qué es?
@@ -245,4 +242,4 @@ Un golpe es válido si su intensidad supera el 80% del máximo detectado en la s
 
 ## Licencia
 
-MIT — libre para uso personal, educativo y comercial.
+GPL v3 — software libre; cualquier derivado debe distribuirse bajo la misma licencia.
