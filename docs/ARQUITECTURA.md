@@ -162,7 +162,7 @@ mobile/src/
 │  ├─ hooks/
 │  │  ├─ useSensorData.ts    Idéntico a desktop en lógica
 │  │  ├─ useTraining.ts      Idéntico a desktop en lógica
-│  │  └─ usePhoneSensor.ts   [solo mobile] react-native-sensors a 50Hz
+│  │  └─ usePhoneSensor.ts   [solo mobile, temporal] react-native-sensors a 50Hz — se elimina cuando el ESP32 esté disponible
 │  │
 │  ├─ stores/ (Zustand)
 │  │  ├─ deviceStore.ts
@@ -245,12 +245,15 @@ Training
 |---|---|---|
 | Framework | Electron 33 | Expo SDK 56 |
 | UI | React 18 + TypeScript 5 | React Native 0.85 + TypeScript 6 |
+| Estilos | Tailwind CSS 3 | StyleSheet (React Native) |
+| Iconos | lucide-react | lucide-react-native |
 | Estado | Zustand 4 | Zustand 5 |
 | BLE | Web Bluetooth API (Electron) | react-native-ble-plx 3 |
-| Sensor nativo | — | react-native-sensors (acelerómetro) |
+| Sensor nativo | — | react-native-sensors (temporal) |
 | Audio | HTMLAudioElement | expo-audio |
 | Persistencia | Node.js fs (via IPC) | expo-file-system |
 | Gráficos | Recharts 2 | react-native-svg |
+| Tests | Jest + ts-jest | Jest + ts-jest |
 | Build | electron-vite + electron-builder | expo run:android / EAS |
 | Firmware | Arduino IDE 2 + ESP32 DevKit C | — |
 

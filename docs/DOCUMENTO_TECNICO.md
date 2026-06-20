@@ -15,10 +15,12 @@ HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real 
 | Framework | Electron | 33 |
 | UI | React | 18 |
 | Lenguaje | TypeScript | 5.6 |
+| Estilos | Tailwind CSS | 3 |
+| Iconos | lucide-react | latest |
 | Estado | Zustand | 4 |
 | BLE | Web Bluetooth API (Electron) | — |
 | Gráficos | Recharts | 2 |
-| Estilos | Tailwind CSS | 3 |
+| Tests | Jest + ts-jest | — |
 | Build | electron-vite + electron-builder | — |
 
 ### Mobile
@@ -28,11 +30,13 @@ HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real 
 | Framework | Expo SDK | 56 |
 | UI | React Native | 0.85 |
 | Lenguaje | TypeScript | 6 |
+| Iconos | lucide-react-native | latest |
 | Estado | Zustand | 5 |
 | BLE | react-native-ble-plx | 3 |
-| Sensor nativo | react-native-sensors | 7 |
+| Sensor nativo | react-native-sensors (temporal) | 7 |
 | Audio | expo-audio | 56 |
 | Persistencia | expo-file-system | 56 |
+| Tests | Jest + ts-jest | — |
 
 ---
 
@@ -335,10 +339,13 @@ Usa `react-native-sensors` (acelerómetro + giroscopio) a 50Hz. Convierte radian
 ```typescript
 {
   profiles: CalibrationProfile[]
+  selectedProfileId: string          // ID del perfil activo
+  getSelected(): CalibrationProfile  // devuelve el perfil activo (o default si no hay)
   setProfiles(profiles): void
   addProfile(profile): void          // + persist()
   updateProfile(id, updates): void   // + persist()
   deleteProfile(id): void            // + persist()
+  selectProfile(id): void            // cambia el perfil activo + persist()
   persist(): void
 }
 ```
@@ -465,6 +472,7 @@ npm run dev      # electron-vite dev
 npm run build    # electron-vite build
 npm run pack     # electron-builder --publish never
 npm run release  # electron-builder --publish always
+npm run test     # Jest — tests unitarios
 ```
 Targets: Windows (.exe NSIS), macOS (.dmg + .zip), Linux (.AppImage + .deb)
 
@@ -472,6 +480,7 @@ Targets: Windows (.exe NSIS), macOS (.dmg + .zip), Linux (.AppImage + .deb)
 ```bash
 npm run start    # expo start
 npm run android  # expo run:android
+npm run test     # Jest — tests unitarios
 ```
 Build de producción: `eas build` (EAS Build de Expo).
 

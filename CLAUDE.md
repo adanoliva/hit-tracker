@@ -6,11 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real. Existe en dos plataformas:
 
-- **Desktop** (`src/`): Electron + React + TypeScript
+- **Desktop** (`src/`): Electron + React + TypeScript + Tailwind CSS
 - **Mobile** (`mobile/`): React Native + Expo (Android)
-- **Shared** (`shared/`): Tipos e servicios comunes a ambas plataformas
+- **Shared** (`shared/`): Tipos y servicios comunes a ambas plataformas
 
-El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acelerómetro/giroscopio via Bluetooth BLE. En mobile también existe el modo "Todo en 1" donde el propio móvil actúa como sensor (sin ESP32).
+El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acelerómetro/giroscopio via Bluetooth BLE.
+
+> **Nota temporal**: en mobile existe el modo "Todo en 1" donde el propio móvil actúa como sensor (`usePhoneSensor`, `PHONE_SENSOR_ID`). Esta implementación se eliminará cuando el sensor ESP32 físico esté disponible y probado.
 
 ## Convención de plataformas
 
@@ -43,6 +45,7 @@ npm run dev       # Desarrollo (electron-vite dev)
 npm run build     # Build completo
 npm run pack      # Genera ejecutable sin publicar
 npm run release   # Build + publica
+npm run test      # Jest — tests unitarios de lógica de negocio
 ```
 
 ### Mobile
@@ -50,6 +53,7 @@ npm run release   # Build + publica
 cd mobile
 npm run start     # expo start
 npm run android   # expo run:android
+npm run test      # Jest — tests unitarios de lógica de negocio
 ```
 
 Firmware ESP32: Arduino IDE 2.0+, board "ESP32 DevKit C", upload speed 921600, serial monitor 115200 baud.
@@ -63,9 +67,10 @@ Los tipos del dominio y los servicios de negocio son comunes a desktop y mobile:
 ```
 shared/
 ├─ types/index.ts           Todos los tipos: Training, Round, Impact, Device, CalibrationProfile...
-└─ services/
-   ├─ calibration.ts        calibrationService (detección, intensidad)
-   └─ training.ts           trainingService (singleton, gestiona rondas)
+├─ services/
+│  ├─ calibration.ts        calibrationService (detección, intensidad)
+│  └─ training.ts           trainingService (singleton, gestiona rondas)
+└─ __tests__/               Tests Jest de lógica compartida
 ```
 
 Los archivos locales de cada plataforma son **re-exports** de `@shared`:
@@ -123,9 +128,48 @@ En modo libre (`roundDuration = 0`): el timer sube y el usuario termina la ronda
 - `<documentDirectory>/HitTracker/trainings/training_<id>.json`
 - `devices.json`, `profiles.json`
 
+### UI e iconos
+
+- **Desktop**: Tailwind CSS para estilos. Iconos via `lucide-react`.
+- **Mobile**: `StyleSheet` de React Native. Colores siempre desde `colors` en `mobile/src/theme.ts`. Iconos via `lucide-react-native`.
+- Nunca usar emojis como iconos en la UI — usar Lucide en su lugar.
+- El catálogo completo de iconos disponibles está en [lucide.dev](https://lucide.dev).
+
+### Modal "Acerca de"
+
+Existe en `Profiles/index.tsx` (desktop y mobile). Muestra versión, descripción del proyecto y enlace al repositorio. El botón `ⓘ` está fijo en la esquina inferior derecha de la pantalla de Perfiles.
+
+## Tests
+
+Los tests usan **Jest + ts-jest** y cubren únicamente lógica de negocio pura (servicios y hooks puros). No se testean componentes React/React Native.
+
+Directorios de tests:
+- `shared/__tests__/` — lógica compartida (calibrationService, trainingService)
+- `src/renderer/src/__tests__/` — lógica exclusiva de desktop
+- `mobile/src/__tests__/` — lógica exclusiva de mobile
+
+Convención de nombre: `HT-XXX.test.ts` para tests asociados a una feature, `<nombre>.test.ts` para tests de servicios existentes.
+
+## Flujo de desarrollo de features
+
+Las features se definen, implementan y documentan mediante un flujo de agentes:
+
+```
+/feature-spec  →  /dev HT-XXX  →  /qa HT-XXX  →  /doc HT-XXX
+```
+
+- **`.claude/features/pending/`** — specs listas para implementar
+- **`.claude/features/in-progress/`** — en desarrollo
+- **`.claude/features/done/`** — completadas, testeadas y documentadas
+- **`.claude/FEATURES.md`** — índice con estado de todas las features
+
+Los agentes usan el ID de feature (ej. `HT-001`) para localizar el archivo. Si no existe, no continúan.
+
 ## Documentación
 
 - `docs/ARQUITECTURA.md` — arquitectura general del sistema
 - `docs/DOCUMENTO_TECNICO.md` — referencia técnica completa (tipos, hooks, stores, IPC API)
 - `docs/ROADMAP.md` — estado y próximos pasos
 - `docs/SENSOR-TECNICO-V*.md` — versiones del hardware ESP32
+- `.claude/FEATURES.md` — índice de features y su estado
+- `.claude/features/` — specs técnicas de cada feature
