@@ -17,9 +17,9 @@
 - Modo calibración guiado (series de golpes ligero / normal / fuerte)
 - % de valid hits configurable por perfil
 - Conexión BLE con sensor ESP32 en mobile
-- Haptics en golpes válidos (mobile)
 - **Nombre de dispositivo personalizado**: el usuario define `DEVICE_NAME` en el firmware antes de flashear — aparece en la lista de sensores de la app para identificar cada saco
 - **PIN de emparejamiento BLE**: el usuario define `BLE_PIN` en el firmware — solo dispositivos que lo conozcan pueden conectar al sensor
+- **Filtrado de compatibilidad BLE**: la app filtra el escaneo por el `SERVICE_UUID` fijo de HIT TRACKER (`4fafc201-1fb5-459e-8fcc-c5c9c331914b`) — solo los sensores HIT TRACKER aparecen en la lista; cualquier otro dispositivo BLE cercano queda invisible. El sensor ya anuncia este UUID en su advertising packet (ver `SENSOR-TECNICO-V1.md`)
 
 ### V3 — Entrenamiento
 - Sección Entrenamiento físico: rutinas de calentamiento, core y fullbody

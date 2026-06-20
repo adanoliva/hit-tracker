@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, useWindowDimensions, Alert } from 'react-native'
+import { Trash2 } from 'lucide-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Rect, Line, Circle, Text as SvgText } from 'react-native-svg'
 import { useTrainingStore } from '../../core/stores/trainingStore'
@@ -165,7 +166,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
                 <Text style={styles.muted}>Power máx: {sessionPowerMax(t)}</Text>
               </View>
               <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(t)}>
-                <Text style={styles.deleteIcon}>🗑</Text>
+                <Trash2 size={16} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
           )}
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
   sessionDevice: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
   sessionStats: { alignItems: 'flex-end' },
   deleteBtn: { padding: 6 },
-  deleteIcon: { fontSize: 16 }
+  deleteIcon: {}
 })
 
 const chart = StyleSheet.create({

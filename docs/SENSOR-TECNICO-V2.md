@@ -114,6 +114,8 @@ Dos LEDs recomendados:
 
 El firmware de V2 es el de V1 con el añadido de la gestión de LEDs. No hay botón de acción en V2.
 
+El `SERVICE_UUID` es el mismo que V1 — el filtrado de compatibilidad funciona igual: la app solo muestra sensores que anuncien ese UUID. Ver `SENSOR-TECNICO-V1.md § Filtrado de compatibilidad`.
+
 El único cambio en la sección de identidad es `SENSOR_VERSION`:
 
 ```cpp

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Linking } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import appJson from '../../../app.json'
 import Slider from '@react-native-community/slider'
 import { useProfileStore } from '../../core/stores/profileStore'
 import { calibrationService } from '../../core/services/calibration'
@@ -50,12 +51,16 @@ const sf = StyleSheet.create({
   end: { fontSize: 11, color: `${colors.textMuted}80` }
 })
 
+const APP_VERSION = appJson.expo.version
+const REPO_URL = 'https://github.com/adanoliva/hit-tracker'
+
 export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   const { top } = useSafeAreaInsets()
   const { profiles, selectedProfileId, addProfile, updateProfile, deleteProfile, selectProfile } = useProfileStore()
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [editing, setEditing] = useState<CalibrationProfile | null>(null)
+  const [showAbout, setShowAbout] = useState(false)
 
   const handleCreate = () => {
     if (!newName.trim()) return
@@ -74,6 +79,25 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   }
 
   return (
+    <View style={s.wrapper}>
+    <Modal visible={showAbout} transparent animationType="fade" onRequestClose={() => setShowAbout(false)}>
+      <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={() => setShowAbout(false)}>
+        <View style={s.modal}>
+          <Text style={s.modalTitle}>HIT TRACKER</Text>
+          <Text style={s.modalVersion}>v{APP_VERSION}</Text>
+          <Text style={s.modalDesc}>
+            Sistema de monitoreo de entrenamiento de boxeo en tiempo real. Detecta y registra golpes al saco mediante un sensor ESP32 conectado por Bluetooth.
+          </Text>
+          <TouchableOpacity onPress={() => Linking.openURL(REPO_URL)}>
+            <Text style={s.modalLink}>{REPO_URL}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.modalClose} onPress={() => setShowAbout(false)}>
+            <Text style={s.modalCloseText}>Cerrar</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+
     <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: top + 16 }]}>
       {onBack && (
         <View style={s.header}>
@@ -178,12 +202,39 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
         </TouchableOpacity>
       )}
     </ScrollView>
+
+    <TouchableOpacity style={s.aboutBtn} onPress={() => setShowAbout(true)}>
+      <Text style={s.aboutBtnText}>ⓘ</Text>
+    </TouchableOpacity>
+    </View>
   )
 }
 
 const s = StyleSheet.create({
+  wrapper: { flex: 1 },
   container: { flex: 1, backgroundColor: colors.bgPrimary },
-  content: { paddingHorizontal: 16, gap: 10, paddingBottom: 32 },
+  content: { paddingHorizontal: 16, gap: 10, paddingBottom: 80 },
+  aboutBtn: {
+    position: 'absolute', bottom: 20, right: 20,
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: colors.bgSecondary, borderWidth: 1, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center'
+  },
+  aboutBtnText: { fontSize: 18, color: colors.textMuted },
+  overlay: { flex: 1, backgroundColor: '#000000aa', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modal: {
+    backgroundColor: colors.bgSecondary, borderRadius: 16, padding: 24,
+    width: '100%', gap: 12, borderWidth: 1, borderColor: colors.border
+  },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: colors.textPrimary },
+  modalVersion: { fontSize: 13, color: colors.textMuted, marginTop: -6 },
+  modalDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 21 },
+  modalLink: { fontSize: 13, color: colors.accent, textDecorationLine: 'underline' },
+  modalClose: {
+    marginTop: 4, backgroundColor: colors.bgTertiary, borderRadius: 10,
+    paddingVertical: 10, alignItems: 'center'
+  },
+  modalCloseText: { color: colors.textSecondary, fontSize: 14 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6 },
   back: { fontSize: 22, color: colors.textMuted },
   title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },

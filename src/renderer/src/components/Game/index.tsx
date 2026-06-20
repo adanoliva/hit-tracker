@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Dumbbell } from 'lucide-react'
 import { useDeviceStore } from '../../stores/deviceStore'
 import { useSensorData } from '../../hooks/useSensorData'
 import { mockSensorConnection, MOCK_DEVICE_ID } from '../../services/mockSensor'
@@ -54,7 +55,7 @@ export function GamePage(): JSX.Element {
   if (!connected) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 bg-bg-primary">
-        <span className="text-5xl">🥊</span>
+        <Dumbbell size={48} className="text-text-muted" />
         <p className="text-text-muted text-center text-sm">Conecta un dispositivo<br />para jugar</p>
       </div>
     )

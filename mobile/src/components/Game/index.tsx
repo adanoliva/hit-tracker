@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native'
+import { Dumbbell } from 'lucide-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useSensorData } from '../../core/hooks/useSensorData'
@@ -65,7 +66,7 @@ export function GamePage() {
   if (!connected) {
     return (
       <View style={[s.center, { paddingTop: top }]}>
-        <Text style={s.emptyIcon}>🥊</Text>
+        <Dumbbell size={48} color={colors.textMuted} />
         <Text style={s.emptyText}>Conecta un dispositivo{'\n'}para jugar</Text>
       </View>
     )
@@ -112,7 +113,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.accent,
     zIndex: 0,
   },
-  emptyIcon: { fontSize: 48 },
+  emptyIcon: {},
   emptyText: {
     fontSize: 16,
     color: colors.textMuted,

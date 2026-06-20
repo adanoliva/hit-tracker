@@ -263,6 +263,10 @@ void loop() {
 
 Cuando la app se conecta al sensor, puede solicitar la lista de sesiones guardadas e importarlas.
 
+### UUID de servicio — filtrado de compatibilidad
+
+El `SERVICE_UUID` es el mismo en V1, V2 y V3. El sensor lo anuncia en su advertising packet y la app filtra el escaneo por él — solo los sensores HIT TRACKER aparecen en la lista. Ver `SENSOR-TECNICO-V1.md § Filtrado de compatibilidad`.
+
 ### Characteristics BLE adicionales — V3
 
 | UUID | Tipo | Función |

@@ -164,6 +164,8 @@ Rango esperado:
 #define VERSION_CHARACTERISTIC_UUID  "beb5483e-36e1-4688-b7f5-ea07361b26a9"  // versión (READ)
 ```
 
+> **Filtrado de compatibilidad**: el sensor anuncia `SERVICE_UUID` en su advertising packet (ver `pAdvertising->addServiceUUID` en `initBLE()`). La app filtra el escaneo BLE por este UUID, de modo que solo los sensores HIT TRACKER aparecen en la lista de dispositivos — cualquier otro dispositivo BLE cercano queda invisible para la app.
+
 ### Configuración Inicial
 
 ```cpp

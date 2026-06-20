@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { Text, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
+import { LayoutDashboard, Dumbbell, Gamepad2, Bluetooth, SlidersHorizontal, type LucideProps } from 'lucide-react-native'
 import { Dashboard } from '../components/Dashboard'
 import { TrainingPage } from '../components/Training'
 import { GamePage } from '../components/Game'
@@ -10,8 +11,14 @@ import { colors } from '../theme'
 
 const Tab = createBottomTabNavigator()
 
-const TAB_ICONS: Record<string, string> = {
-  Inicio: '🏠', Entrenar: '🥊', Game: '🎯', Dispositivos: '📡', Perfiles: '⚙️'
+type IconComponent = (props: LucideProps) => JSX.Element
+
+const TAB_ICONS: Record<string, IconComponent> = {
+  Inicio: LayoutDashboard,
+  Entrenar: Dumbbell,
+  Game: Gamepad2,
+  Dispositivos: Bluetooth,
+  Perfiles: SlidersHorizontal
 }
 
 const SESSION_PHASES = ['preparing', 'round', 'resting']
@@ -28,7 +35,10 @@ export function MobileLayout() {
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontSize: 11 },
-        tabBarIcon: () => <Text style={{ fontSize: 20 }}>{TAB_ICONS[route.name]}</Text>,
+        tabBarIcon: ({ color }) => {
+          const Icon = TAB_ICONS[route.name]
+          return Icon ? <Icon size={22} color={color} /> : null
+        },
         tabBarButton: sessionActive && route.name !== 'Entrenar'
           ? (props) => <TouchableOpacity {...(props as any)} disabled style={[props.style as any, { opacity: 0.3 }]} />
           : undefined

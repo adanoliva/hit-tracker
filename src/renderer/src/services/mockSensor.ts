@@ -1,7 +1,7 @@
 import type { SensorReading } from '../types'
 
 export const MOCK_DEVICE_ID = 'SIMULATOR'
-export const MOCK_DEVICE_NAME = '🥊 Simulador (local)'
+export const MOCK_DEVICE_NAME = 'Simulador (local)'
 const MOCK_URL = 'http://localhost:7331'
 const MOCK_WS  = 'ws://localhost:7331'
 

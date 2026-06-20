@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { LayoutDashboard, Dumbbell, Gamepad2, Bluetooth, SlidersHorizontal } from 'lucide-react'
 import { useDeviceStore } from './stores/deviceStore'
 import { useProfileStore } from './stores/profileStore'
 import { useTrainingStore } from './stores/trainingStore'
@@ -13,11 +14,11 @@ import { ProfilesPage } from './components/Profiles'
 type Page = 'dashboard' | 'training' | 'game' | 'devices' | 'profiles'
 
 const NAV = [
-  { id: 'dashboard', label: 'Inicio', icon: '🏠' },
-  { id: 'training', label: 'Entrenar', icon: '🥊' },
-  { id: 'game', label: 'Game', icon: '🎯' },
-  { id: 'devices', label: 'Dispositivos', icon: '📡' },
-  { id: 'profiles', label: 'Perfiles', icon: '⚙️' }
+  { id: 'dashboard', label: 'Inicio',       Icon: LayoutDashboard },
+  { id: 'training',  label: 'Entrenar',     Icon: Dumbbell },
+  { id: 'game',      label: 'Game',         Icon: Gamepad2 },
+  { id: 'devices',   label: 'Dispositivos', Icon: Bluetooth },
+  { id: 'profiles',  label: 'Perfiles',     Icon: SlidersHorizontal }
 ] as const
 
 export function App(): JSX.Element {
@@ -75,7 +76,7 @@ export function App(): JSX.Element {
                     : 'text-text-muted hover:text-text-secondary'
               }`}
             >
-              <span className="text-xl">{item.icon}</span>
+              <item.Icon size={20} />
               <span>{item.label}</span>
             </button>
           )

@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { useProfileStore } from '../../stores/profileStore'
 import { calibrationService } from '../../services/calibration'
 import type { CalibrationProfile } from '../../types'
+import pkg from '../../../../../package.json'
+
+const APP_VERSION = pkg.version
+const REPO_URL = 'https://github.com/adanoliva/hit-tracker'
 
 interface ProfilesPageProps {
   onBack: () => void
@@ -58,6 +62,7 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [editing, setEditing] = useState<CalibrationProfile | null>(null)
+  const [showAbout, setShowAbout] = useState(false)
 
   const handleCreate = () => {
     if (!newName.trim()) return
@@ -78,7 +83,42 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
   }
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="flex flex-col h-full relative">
+      {showAbout && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-6"
+          onClick={() => setShowAbout(false)}
+        >
+          <div
+            className="bg-bg-secondary border border-border rounded-2xl p-6 max-w-sm w-full space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <h2 className="text-lg font-bold text-text-primary">HIT TRACKER</h2>
+              <p className="text-xs text-text-muted">v{APP_VERSION}</p>
+            </div>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Sistema de monitoreo de entrenamiento de boxeo en tiempo real. Detecta y registra golpes al saco mediante un sensor ESP32 conectado por Bluetooth.
+            </p>
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-accent underline block"
+            >
+              {REPO_URL}
+            </a>
+            <button
+              onClick={() => setShowAbout(false)}
+              className="w-full bg-bg-tertiary text-text-secondary py-2 rounded-lg text-sm mt-2"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-5">
       <h1 className="text-xl font-bold text-text-primary">Perfiles</h1>
 
       <div className="space-y-2">
@@ -215,6 +255,16 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
           + Nuevo perfil
         </button>
       )}
+
+      </div>
+
+      <button
+        onClick={() => setShowAbout(true)}
+        className="absolute bottom-4 right-4 w-7 h-7 rounded-full bg-bg-secondary border border-border text-text-muted hover:text-text-primary hover:border-accent/40 text-xs font-bold transition-colors flex items-center justify-center"
+        title="Acerca de"
+      >
+        i
+      </button>
     </div>
   )
 }
