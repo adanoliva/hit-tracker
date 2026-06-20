@@ -3,5 +3,6 @@ out/
 dist/
 .env
 *.local
+*.tsbuildinfo
 mobile/node_modules/
 mobile/.expo/
