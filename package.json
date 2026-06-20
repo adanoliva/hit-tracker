@@ -11,7 +11,16 @@
     "preview": "electron-vite preview",
     "pack": "npm run build && electron-builder --publish never",
     "release": "npm run build && electron-builder --publish always",
-    "mock": "node tools/mock-sensor.mjs"
+    "mock": "node tools/mock-sensor.mjs",
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/shared/__tests__", "<rootDir>/src/renderer/src/__tests__"],
+    "moduleNameMapper": {
+      "^@shared/(.*)$": "<rootDir>/shared/$1"
+    }
   },
   "dependencies": {
     "@electron-toolkit/utils": "^4.0.0",
@@ -22,6 +31,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/ws": "^8.18.1",
@@ -30,8 +40,10 @@
     "electron": "^33.2.1",
     "electron-builder": "^25.1.8",
     "electron-vite": "^3.1.0",
+    "jest": "^30.4.2",
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.19",
+    "ts-jest": "^29.4.11",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "ws": "^8.21.0"
