@@ -1,11 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { ElectronAPI, BleDevice } from '../../preload/index'
-
-declare global {
-  interface Window {
-    api: ElectronAPI
-  }
+export interface BleDevice {
+  deviceId: string
+  deviceName: string
 }
-
-export type { BleDevice }

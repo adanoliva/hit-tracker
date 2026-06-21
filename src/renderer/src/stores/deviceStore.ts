@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { invoke } from '@tauri-apps/api/core'
 import type { Device } from '../types'
 
 interface DeviceState {
@@ -47,6 +48,6 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   },
 
   persist: () => {
-    window.api.saveDevices(get().devices)
+    invoke('save_devices', { devices: get().devices })
   }
 }))

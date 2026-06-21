@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { invoke } from '@tauri-apps/api/core'
 import { LayoutDashboard, Dumbbell, Gamepad2, Bluetooth, SlidersHorizontal } from 'lucide-react'
 import { useDeviceStore } from './stores/deviceStore'
 import { useProfileStore } from './stores/profileStore'
@@ -31,9 +32,9 @@ export function App(): JSX.Element {
 
   useEffect(() => {
     Promise.all([
-      window.api.loadDevices(),
-      window.api.loadProfiles(),
-      window.api.loadTrainings()
+      invoke<Parameters<typeof setDevices>[0]>('load_devices'),
+      invoke<Parameters<typeof setProfiles>[0]>('load_profiles'),
+      invoke<Parameters<typeof setTrainings>[0]>('load_trainings')
     ]).then(([devices, profiles, trainings]) => {
       setDevices(devices)
       if (profiles.length > 0) setProfiles(profiles)

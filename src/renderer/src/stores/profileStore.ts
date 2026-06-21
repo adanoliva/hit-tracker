@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { invoke } from '@tauri-apps/api/core'
 import type { CalibrationProfile } from '../types'
 
 const DEFAULT_PROFILE: CalibrationProfile = {
@@ -59,6 +60,6 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
 
   persist: () => {
-    window.api.saveProfiles(get().profiles)
+    invoke('save_profiles', { profiles: get().profiles })
   }
 }))

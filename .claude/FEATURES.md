@@ -21,6 +21,7 @@
 | HT-006-a | Calibración: nuevo modelo de datos Perfil-Sensor (DeviceCalibration) | v3 | shared | high | pending | — |
 | HT-006-b | Calibración: pantalla "Sesión activa" combinada sensor + perfil | v3 | both | high | pending | HT-006-a |
 | HT-006-c | Calibración: asistente guiado 3 series de golpes | v3 | both | high | pending | HT-006-a, HT-006-b |
+| HT-007 | Umbral de golpe válido configurable por perfil | v1 | both | medium | pending | — |
 
 ## Leyenda
 

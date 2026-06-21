@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import { useDeviceStore } from '../../stores/deviceStore'
 import { detectMockSensor, MOCK_DEVICE_ID, MOCK_DEVICE_NAME } from '../../services/mockSensor'
 import type { Device } from '../../types'
@@ -27,16 +29,16 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
     else dialogRef.current?.close()
   }, [showPlacement])
 
-  // Escucha dispositivos BLE encontrados desde main process
+  // Escucha dispositivos BLE encontrados desde Rust
   useEffect(() => {
-    const unsub = window.api.onBleDevicesUpdated((list) => {
+    let unlisten: (() => void) | null = null
+    listen<BleDevice[]>('ble-devices-updated', (event) => {
       setFoundDevices((prev) => {
-        // Mantiene el simulador si ya estaba en la lista
         const mock = prev.find((d) => d.deviceId === MOCK_DEVICE_ID)
-        return mock ? [mock, ...list] : list
+        return mock ? [mock, ...event.payload] : event.payload
       })
-    })
-    return unsub
+    }).then((fn) => { unlisten = fn })
+    return () => { unlisten?.() }
   }, [])
 
   const startScan = useCallback(async () => {
@@ -44,46 +46,24 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
     setScanError('')
     setFoundDevices([])
 
-    // Comprueba si el simulador está corriendo antes de arrancar BLE
     const mockRunning = await detectMockSensor()
     if (mockRunning) {
       setFoundDevices([{ deviceId: MOCK_DEVICE_ID, deviceName: MOCK_DEVICE_NAME }])
     }
 
     try {
-      const device = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: ['battery_service']
-      })
-
-      const newDevice: Device = {
-        mac: device.id,
-        name: device.name || 'Dispositivo BLE',
-        createdAt: Date.now(),
-        lastSeen: Date.now()
-      }
-      if (!devices.find((d) => d.mac === device.id)) {
-        addDevice(newDevice)
-      }
-
-      setScanState('idle')
-      setFoundDevices([])
+      await invoke('start_ble_scan')
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
-      if (msg.toLowerCase().includes('cancel') || msg.toLowerCase().includes('user')) {
-        setScanState('idle')
-      } else {
-        setScanState('error')
-        setScanError(msg)
-      }
+      setScanState('error')
+      setScanError(msg)
       setFoundDevices([])
     }
-  }, [devices, addDevice])
+  }, [])
 
   const selectFound = (ble: BleDevice) => {
     if (ble.deviceId === MOCK_DEVICE_ID) {
-      // Añade el simulador directamente sin pasar por BLE
-      window.api.cancelBleScan()
+      invoke('cancel_ble_scan')
       const mockDevice: Device = {
         mac: MOCK_DEVICE_ID,
         name: MOCK_DEVICE_NAME,
@@ -94,15 +74,24 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
         addDevice(mockDevice)
       }
       setConnected(MOCK_DEVICE_ID)
-      setScanState('idle')
-      setFoundDevices([])
     } else {
-      window.api.selectBleDevice(ble.deviceId)
+      invoke('select_ble_device')
+      const newDevice: Device = {
+        mac: ble.deviceId,
+        name: ble.deviceName || 'Dispositivo BLE',
+        createdAt: Date.now(),
+        lastSeen: Date.now()
+      }
+      if (!devices.find((d) => d.mac === ble.deviceId)) {
+        addDevice(newDevice)
+      }
     }
+    setScanState('idle')
+    setFoundDevices([])
   }
 
   const cancelScan = () => {
-    window.api.cancelBleScan()
+    invoke('cancel_ble_scan')
     setScanState('idle')
     setFoundDevices([])
   }
