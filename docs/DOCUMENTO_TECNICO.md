@@ -53,7 +53,7 @@ hit-tracker/
 │     ├─ calibration.ts            calibrationService
 │     └─ training.ts               trainingService (TrainingService class)
 │
-├─ src-tauri/                       ← Backend Rust (Tauri 2)
+├─ src/tauri/                       ← Backend Rust (Tauri 2)
 │  └─ src/main.rs                   Comandos invoke, BLE, file system
 │
 ├─ src/                            ← Desktop (Renderer React)

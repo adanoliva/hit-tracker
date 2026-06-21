@@ -25,7 +25,7 @@ El hardware consiste en un **ESP32 + GY-521 (MPU-6050)** que transmite datos de 
 ┌──────────────────────────────────┐   ┌──────────────────────────────┐
 │        DESKTOP (Tauri 2)         │   │     MOBILE (Expo/RN)         │
 │                                  │   │                              │
-│  Rust backend (src-tauri/)       │   │  App.tsx                     │
+│  Rust backend (src/tauri/)       │   │  App.tsx                     │
 │  ├─ BLE scan/connect             │   │  ├─ BLE (ble.ts)             │
 │  └─ File system (JSON)           │   │  └─ PhoneSensor (sensors)    │
 │       ↕ invoke() / events        │   │                              │
@@ -112,7 +112,7 @@ Frecuencia de muestreo: ~50Hz (20ms por muestra).
 
 ### 3. Desktop — Backend Rust (Tauri 2)
 
-`src-tauri/src/main.rs` — comandos Tauri y file system:
+`src/tauri/src/main.rs` — comandos Tauri y file system:
 
 | Comando (`invoke`) | Operación |
 |---|---|
@@ -244,7 +244,7 @@ Training
 |---|---|---|
 | Framework | Tauri 2 | Expo SDK 56 |
 | UI | React 18 + TypeScript 5 | React Native 0.85 + TypeScript 6 |
-| Backend | Rust (src-tauri/) | — |
+| Backend | Rust (src/tauri/) | — |
 | Estilos | Tailwind CSS 3 | StyleSheet (React Native) |
 | Iconos | lucide-react | lucide-react-native |
 | Estado | Zustand 4 | Zustand 5 |

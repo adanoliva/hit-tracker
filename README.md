@@ -142,7 +142,7 @@ hit-tracker/
 │     ├─ calibration.ts       calibrationService
 │     └─ training.ts          trainingService
 │
-├─ src-tauri/                  ← Backend Rust (Tauri 2)
+├─ src/tauri/                  ← Backend Rust (Tauri 2)
 │  └─ src/main.rs             Comandos IPC, BLE scan, file system
 │
 ├─ src/                       ← App Desktop (Renderer React)
