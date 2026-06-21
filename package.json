@@ -2,12 +2,11 @@
   "name": "hit-tracker",
   "version": "1.0.0",
   "description": "Sistema integrado de captura y análisis de impactos en entrenamiento de boxeo",
-  "main": "out/main/index.js",
   "author": "Adán",
   "license": "MIT",
   "scripts": {
-    "dev": "tauri dev",
-    "build": "tauri build",
+    "dev": "tauri dev --config src/tauri/tauri.conf.json",
+    "build": "tauri build --config src/tauri/tauri.conf.json",
     "vite:dev": "vite",
     "vite:build": "vite build",
     "mock": "node tools/mock-sensor.mjs",
@@ -25,7 +24,6 @@
     }
   },
   "dependencies": {
-    "@electron-toolkit/utils": "^4.0.0",
     "@tauri-apps/api": "^2.11.1",
     "lucide-react": "^1.21.0",
     "react": "^18.3.1",
@@ -38,12 +36,8 @@
     "@types/jest": "^30.0.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.5.0",
-    "electron": "^33.2.1",
-    "electron-builder": "^25.1.8",
-    "electron-vite": "^3.1.0",
     "jest": "^30.4.2",
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.19",
@@ -51,30 +45,5 @@
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "ws": "^8.21.0"
-  },
-  "build": {
-    "appId": "com.hittracker.app",
-    "productName": "HIT TRACKER",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "out/**/*"
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    }
   }
 }

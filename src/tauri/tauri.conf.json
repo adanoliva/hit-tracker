@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "identifier": "com.hittracker.desktop",
   "build": {
-    "frontendDist": "../dist",
+    "frontendDist": "../../dist",
     "devUrl": "http://localhost:5173",
     "beforeDevCommand": "npm run vite:dev",
     "beforeBuildCommand": "npm run vite:build"
