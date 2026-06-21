@@ -243,7 +243,7 @@ Un golpe es válido si su intensidad supera el umbral configurado en el perfil (
 
 El repositorio oficial del proyecto es **[github.com/adanoliva/hit-tracker](https://github.com/adanoliva/hit-tracker)**.
 
-Las distribuciones obtenidas fuera de este repositorio (forks, re-empaquetados, instaladores de terceros) **no están verificadas ni respaldadas** por los autores originales. Pueden contener modificaciones, código adicional o malware. Descarga siempre desde el repositorio oficial o compila desde el código fuente.
+Las distribuciones obtenidas fuera de este repositorio (forks, re-empaquetados, instaladores de terceros) **no están verificadas ni respaldadas** por los autores originales. Pueden contener modificaciones o código adicional. Antes de instalar cualquier build, verifica la fiabilidad de la fuente.
 
 ## Aviso legal
 
