@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { invoke } from '@tauri-apps/api/core'
 import type { Training } from '../types'
 
 type TrainingPhase = 'idle' | 'preparing' | 'round' | 'resting' | 'finished'
@@ -24,12 +25,12 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
     set((state) => ({
       trainings: [training, ...state.trainings]
     }))
-    window.api.saveTraining(training)
+    invoke('save_training', { training })
   },
 
   deleteTraining: (id) => {
     set((state) => ({ trainings: state.trainings.filter((t) => t.id !== id) }))
-    window.api.deleteTraining(id)
+    invoke('delete_training', { id })
   },
 
   getProgressions: () => {
