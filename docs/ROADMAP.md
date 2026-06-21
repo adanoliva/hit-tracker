@@ -16,6 +16,7 @@
 | ⬜ | `HT-002` Pantalla de detalle de sesión con gráfico de golpes por round |
 | ⬜ | `HT-003` Compartir sesión en redes sociales (mobile) |
 | ⬜ | `HT-005` Modo Game mejorado: TOP 3 y entrada de iniciales estilo arcade |
+| ⬜ | `HT-007` Umbral de golpe válido configurable por perfil |
 
 > Con V1 completo y el sensor físico (Fase 1 hardware) ya hay un producto real y demostrable, aunque el sensor sea un ESP32 con cables pegado al saco.
 
@@ -26,7 +27,6 @@
 | ⬜ | `HT-004-a` Google Drive: autenticación y gestión de cuenta |
 | ⬜ | `HT-004-b` Google Drive: sincronización automática de sesiones |
 | ⬜ | `HT-004-c` Google Drive: sincronización de perfiles con resolución de conflictos |
-| ⬜ | % de valid hits configurable por perfil |
 | ⬜ | **Nombre de dispositivo personalizado**: el usuario define `DEVICE_NAME` en el firmware antes de flashear — aparece en la lista de sensores de la app para identificar cada saco |
 | ⬜ | **PIN de emparejamiento BLE**: el usuario define `BLE_PIN` en el firmware — solo dispositivos que lo conozcan pueden conectar al sensor |
 | ⬜ | **Filtrado de compatibilidad BLE**: la app filtra el escaneo por el `SERVICE_UUID` fijo de HIT TRACKER (`4fafc201-1fb5-459e-8fcc-c5c9c331914b`) — solo los sensores HIT TRACKER aparecen en la lista; cualquier otro dispositivo BLE cercano queda invisible |
