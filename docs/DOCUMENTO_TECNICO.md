@@ -2,7 +2,7 @@
 
 ## Descripción General
 
-HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real con dos plataformas: una app de escritorio (Electron + React) y una app móvil (React Native + Expo). Ambas comparten tipos e lógica de negocio mediante una carpeta `shared/` con alias TypeScript `@shared`.
+HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real con dos plataformas: una app de escritorio (Tauri 2 + React) y una app móvil (React Native + Expo). Ambas comparten tipos y lógica de negocio mediante una carpeta `shared/` con alias TypeScript `@shared`.
 
 ---
 
@@ -12,16 +12,17 @@ HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real 
 
 | Capa | Tecnología | Versión |
 |---|---|---|
-| Framework | Electron | 33 |
+| Framework | Tauri | 2 |
+| Backend | Rust | — |
 | UI | React | 18 |
 | Lenguaje | TypeScript | 5.6 |
 | Estilos | Tailwind CSS | 3 |
 | Iconos | lucide-react | latest |
 | Estado | Zustand | 4 |
-| BLE | Web Bluetooth API (Electron) | — |
+| BLE | Rust (Tauri commands + events) | — |
 | Gráficos | Recharts | 2 |
 | Tests | Jest + ts-jest | — |
-| Build | electron-vite + electron-builder | — |
+| Build | tauri build | — |
 
 ### Mobile
 
@@ -52,14 +53,10 @@ hit-tracker/
 │     ├─ calibration.ts            calibrationService
 │     └─ training.ts               trainingService (TrainingService class)
 │
-├─ src/                            ← Desktop (Electron)
-│  ├─ main/
-│  │  ├─ index.ts                  Entry point Electron, BrowserWindow
-│  │  └─ ipc-handlers.ts           Handlers fs: trainings, devices, profiles, config
-│  │
-│  ├─ preload/
-│  │  └─ index.ts                  contextBridge → window.api
-│  │
+├─ src-tauri/                       ← Backend Rust (Tauri 2)
+│  └─ src/main.rs                   Comandos invoke, BLE, file system
+│
+├─ src/                            ← Desktop (Renderer React)
 │  └─ renderer/src/
 │     ├─ types/index.ts            → re-export @shared/types
 │     ├─ services/
@@ -114,7 +111,7 @@ hit-tracker/
 │  ├─ metro.config.js              watchFolders + extraNodeModules para @shared
 │  └─ tsconfig.json                paths: @shared/* → ../shared/*
 │
-├─ electron.vite.config.ts         alias @shared → shared/
+├─ vite.config.ts                  alias @shared → shared/
 ├─ tsconfig.web.json               paths: @shared/* → ./shared/*
 └─ docs/
 ```
@@ -140,7 +137,7 @@ interface Impact {
   intensity: number    // 0-100
   magnitude: number    // raw
   duration: number     // ms (actualmente 0, reservado)
-  isValid: boolean     // intensity >= powerMax * 0.8
+  isValid: boolean     // intensity >= powerMax * (profile.validHitThreshold / 100)
 }
 
 interface Device {
@@ -155,8 +152,9 @@ interface Device {
 interface CalibrationProfile {
   id: string
   name: string
-  threshold: number       // umbral de detección (default 15.0)
-  sensitivity: number     // escala de intensidad (default 25.0)
+  threshold: number            // umbral de detección (default 15.0)
+  sensitivity: number          // escala de intensidad (default 25.0)
+  validHitThreshold: number    // % del powerMax para golpe válido (default 80, rango 50-100) — ver HT-007
   calibrationData?: {
     calibratedAt: number
     samples: { light: number[]; normal: number[]; heavy: number[] }
@@ -224,8 +222,9 @@ calibrationService.calculateIntensity(magnitude: number, profile: CalibrationPro
 // raw = (magnitude - threshold) * sensitivity
 // → clamp(0, 100, round(raw))
 
-calibrationService.isValidHit(impact: Impact, powerMax: number): boolean
-// → impact.intensity >= powerMax * 0.8
+calibrationService.isValidHit(impact: Impact, powerMax: number, validRatio: number): boolean
+// → impact.intensity >= powerMax * validRatio
+// validRatio = profile.validHitThreshold / 100  (default 0.8)
 ```
 
 ### trainingService (`shared/services/training.ts`)
@@ -330,7 +329,7 @@ Usa `react-native-sensors` (acelerómetro + giroscopio) a 50Hz. Convierte radian
   updateDevice(mac, updates): void // + persist()
   removeDevice(mac): void          // + persist()
   setConnected(mac | null): void
-  persist(): void                  // window.api.saveDevices() / storage.saveDevices()
+  persist(): void                  // invoke('save_devices') / storage.saveDevices()
 }
 ```
 
@@ -358,8 +357,8 @@ Usa `react-native-sensors` (acelerómetro + giroscopio) a 50Hz. Convierte radian
   activePhase: TrainingPhase
   setActivePhase(phase): void
   setTrainings(trainings): void
-  addTraining(training): void        // + window.api.saveTraining() / storage.saveTraining()
-  deleteTraining(id): void           // + elimina del fs
+  addTraining(training): void        // + invoke('save_training') / storage.saveTraining()
+  deleteTraining(id): void           // + invoke('delete_training') / storage.deleteTraining()
   getProgressions(): {
     powerTrend: number[]             // powerMax por ronda del último entrenamiento
     hpmTrend: number[]               // hpmAverage por ronda
@@ -370,32 +369,31 @@ Usa `react-native-sensors` (acelerómetro + giroscopio) a 50Hz. Convierte radian
 
 ---
 
-## IPC API (Desktop)
+## Tauri API (Desktop)
 
-`window.api` expuesto por el preload:
+El renderer llama al backend Rust mediante `invoke()` de `@tauri-apps/api/core` y escucha eventos con `listen()` de `@tauri-apps/api/event`:
 
 ```typescript
 // Entrenamientos
-saveTraining(training: Training): Promise<boolean>
-loadTrainings(): Promise<Training[]>
-deleteTraining(id: string): Promise<boolean>
+invoke('save_training', { training: Training }): Promise<void>
+invoke('load_trainings'): Promise<Training[]>
+invoke('delete_training', { id: string }): Promise<void>
 
 // Dispositivos
-loadDevices(): Promise<Device[]>
-saveDevices(devices: Device[]): Promise<boolean>
+invoke('load_devices'): Promise<Device[]>
+invoke('save_devices', { devices: Device[] }): Promise<void>
 
 // Perfiles
-loadProfiles(): Promise<CalibrationProfile[]>
-saveProfiles(profiles: CalibrationProfile[]): Promise<boolean>
-
-// Configuración
-loadConfig(): Promise<AppConfig>
-saveConfig(config: Record<string, unknown>): Promise<boolean>
+invoke('load_profiles'): Promise<CalibrationProfile[]>
+invoke('save_profiles', { profiles: CalibrationProfile[] }): Promise<void>
 
 // BLE
-selectBleDevice(deviceId: string): void
-cancelBleScan(): void
-onBleDevicesUpdated(callback: (devices: BleDevice[]) => void): () => void
+invoke('start_ble_scan'): Promise<void>
+invoke('cancel_ble_scan'): Promise<void>
+invoke('select_ble_device'): Promise<void>
+
+// Eventos recibidos del backend
+listen('ble-devices-updated', (event: { payload: BleDevice[] }) => void): Promise<UnlistenFn>
 ```
 
 ---
@@ -441,7 +439,7 @@ Cache de `HTMLAudioElement`. Ficheros en `public/sounds/`.
 }
 ```
 
-**`electron.vite.config.ts`**:
+**`vite.config.ts`**:
 ```typescript
 alias: {
   '@renderer': resolve('src/renderer/src'),
@@ -468,13 +466,11 @@ config.resolver.extraNodeModules = { '@shared': sharedRoot }
 
 ### Desktop
 ```bash
-npm run dev      # electron-vite dev
-npm run build    # electron-vite build
-npm run pack     # electron-builder --publish never
-npm run release  # electron-builder --publish always
+npm run dev      # tauri dev
+npm run build    # tauri build
 npm run test     # Jest — tests unitarios
 ```
-Targets: Windows (.exe NSIS), macOS (.dmg + .zip), Linux (.AppImage + .deb)
+Requisitos: Node.js 18+, Rust toolchain. Targets: Windows (.exe / .msi), macOS (.dmg), Linux (.AppImage / .deb).
 
 ### Mobile
 ```bash

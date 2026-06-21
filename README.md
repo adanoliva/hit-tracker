@@ -17,7 +17,7 @@ No requiere cámara, ni visión artificial, ni suscripción. Solo hardware de 15
 
 | | Desktop | Mobile |
 |---|---|---|
-| **Stack** | Electron + React + TypeScript | React Native + Expo (Android) |
+| **Stack** | Tauri 2 + React + TypeScript | React Native + Expo (Android) |
 | **Sensor** | ESP32 vía Bluetooth BLE | ESP32 BLE **o** el propio móvil |
 | **Modo "Todo en 1"** | — | El móvil actúa como sensor sin ESP32 |
 | **Persistencia** | JSON local (`%AppData%`) | JSON local (`documentDirectory`) |
@@ -67,7 +67,7 @@ npm install
 npm run dev
 ```
 
-Requisitos: Node.js 18+, npm 9+. Bluetooth habilitado en el PC.
+Requisitos: Node.js 18+, npm 9+, Rust toolchain. Bluetooth habilitado en el PC.
 
 ### 3. App Mobile
 
@@ -92,7 +92,7 @@ magnitude = √(ax² + ay² + az²)
 
 Si magnitude > threshold  →  detecta pico
 intensity = clamp(0-100, (magnitude - threshold) × sensitivity)
-isValid   = intensity ≥ powerMax × 0.8
+isValid   = intensity ≥ powerMax × (validHitThreshold / 100)  ← configurable por perfil (default 80%)
 ```
 
 ### Estructura de un entrenamiento
@@ -142,11 +142,10 @@ hit-tracker/
 │     ├─ calibration.ts       calibrationService
 │     └─ training.ts          trainingService
 │
-├─ src/                       ← App Desktop (Electron)
-│  ├─ main/
-│  │  ├─ index.ts             Entry point + BrowserWindow
-│  │  └─ ipc-handlers.ts      File system via IPC
-│  ├─ preload/index.ts        window.api (contextBridge)
+├─ src-tauri/                  ← Backend Rust (Tauri 2)
+│  └─ src/main.rs             Comandos IPC, BLE scan, file system
+│
+├─ src/                       ← App Desktop (Renderer React)
 │  └─ renderer/src/
 │     ├─ hooks/               useSensorData · useTraining
 │     ├─ stores/              deviceStore · profileStore · trainingStore
@@ -182,7 +181,7 @@ Métrica de velocidad/cadencia. Se calcula en dos ventanas:
 
 ### Valid Hit — Golpe Válido
 
-Un golpe es válido si su intensidad supera el 80% del máximo detectado en la sesión. Filtra golpes débiles o involuntarios y refleja el esfuerzo real.
+Un golpe es válido si su intensidad supera el umbral configurado en el perfil (por defecto 80%) del máximo detectado en la sesión. Filtra golpes débiles o involuntarios y refleja el esfuerzo real.
 
 ### Fatiga de ronda
 
@@ -194,15 +193,15 @@ Un golpe es válido si su intensidad supera el 80% del máximo detectado en la s
 
 | Capa | Desktop | Mobile |
 |---|---|---|
-| Framework | Electron 33 | Expo SDK 56 |
-| UI | React 18 + TypeScript 5 | React Native 0.85 + TypeScript 6 |
+| Framework | Tauri 2 + React 18 + TypeScript 5 | Expo SDK 56 + React Native 0.85 + TypeScript 6 |
+| Backend | Rust (Tauri) | — |
 | Estado | Zustand 4 | Zustand 5 |
-| BLE | Web Bluetooth API | react-native-ble-plx 3 |
+| BLE | Rust via Tauri invoke/events | react-native-ble-plx 3 |
 | Sensor nativo | — | react-native-sensors 7 |
 | Audio | HTMLAudioElement | expo-audio 56 |
 | Gráficos | Recharts 2 | react-native-svg 15 |
 | Estilos | Tailwind CSS 3 | StyleSheet (RN) |
-| Build | electron-vite + electron-builder | EAS Build |
+| Build | tauri build | EAS Build |
 
 ---
 

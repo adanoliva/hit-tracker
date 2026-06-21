@@ -4,7 +4,7 @@
 
 HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real. Existe en dos plataformas independientes que comparten lógica de negocio:
 
-- **Desktop** (`src/`): Electron + React + TypeScript
+- **Desktop** (`src/`): Tauri 2 + React + TypeScript
 - **Mobile** (`mobile/`): React Native + Expo (Android)
 - **Shared** (`shared/`): Tipos y servicios comunes a ambas plataformas
 
@@ -23,19 +23,19 @@ El hardware consiste en un **ESP32 + GY-521 (MPU-6050)** que transmite datos de 
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────┐   ┌──────────────────────────────┐
-│        DESKTOP (Electron)        │   │     MOBILE (Expo/RN)         │
+│        DESKTOP (Tauri 2)         │   │     MOBILE (Expo/RN)         │
 │                                  │   │                              │
-│  Main Process                    │   │  App.tsx                     │
-│  ├─ BLE scan/connect (Web BT API)│   │  ├─ BLE (ble.ts)             │
-│  ├─ ipc-handlers.ts              │   │  └─ PhoneSensor (sensors)    │
-│  └─ preload → window.api         │   │                              │
-│                                  │   │  core/                       │
-│  Renderer (React)                │   │  ├─ hooks/                   │
-│  ├─ services/ (audio, mock)      │   │  ├─ stores/                  │
-│  ├─ hooks/ (useSensorData,       │   │  └─ types/ → @shared/types   │
-│  │          useTraining)         │   │                              │
-│  ├─ stores/ (Zustand)            │   │  services/                   │
-│  └─ components/                  │   │  ├─ audio.ts (expo-audio)    │
+│  Rust backend (src-tauri/)       │   │  App.tsx                     │
+│  ├─ BLE scan/connect             │   │  ├─ BLE (ble.ts)             │
+│  └─ File system (JSON)           │   │  └─ PhoneSensor (sensors)    │
+│       ↕ invoke() / events        │   │                              │
+│  Renderer (React)                │   │  core/                       │
+│  ├─ services/ (audio, mock)      │   │  ├─ hooks/                   │
+│  ├─ hooks/ (useSensorData,       │   │  ├─ stores/                  │
+│  │          useTraining)         │   │  └─ types/ → @shared/types   │
+│  ├─ stores/ (Zustand)            │   │                              │
+│  └─ components/                  │   │  services/                   │
+│                                  │   │  ├─ audio.ts (expo-audio)    │
 │                                  │   │  └─ storage.ts (expo-fs)     │
 └──────────────┬───────────────────┘   └──────────────┬───────────────┘
                │                                       │
@@ -61,7 +61,7 @@ Hardware/Sensor
 useSensorData()
   ├─ Detecta pico: magnitude > threshold && cooldown > 200ms
   ├─ calculateIntensity() → escala 0-100 con sensitivity
-  ├─ isValid: intensity >= powerMax * 0.8
+  ├─ isValid: intensity >= powerMax * (profile.validHitThreshold / 100)
   └─ emite Impact → onImpactDetected()
       │
       ▼
@@ -75,7 +75,7 @@ useTraining()
 trainingStore.addTraining(training)
       │
       ▼
-Persistencia (IPC/expo-fs)
+Persistencia (Tauri invoke/expo-fs)
 ```
 
 ---
@@ -110,19 +110,18 @@ Frecuencia de muestreo: ~50Hz (20ms por muestra).
 - `onImpactDetected(impact)` — acumula impacts en la ronda activa
 - `getPreviousRoundStats(n)` — comparativa entre rondas
 
-### 3. Desktop — Proceso Main (Electron)
+### 3. Desktop — Backend Rust (Tauri 2)
 
-`src/main/ipc-handlers.ts` — handlers de file system:
+`src-tauri/src/main.rs` — comandos Tauri y file system:
 
-| Canal IPC | Operación |
+| Comando (`invoke`) | Operación |
 |---|---|
-| `save-training` / `load-trainings` / `delete-training` | JSON en `<userData>/HitTracker/trainings/` |
-| `save-devices` / `load-devices` | `devices.json` |
-| `save-profiles` / `load-profiles` | `profiles.json` |
-| `save-config` / `load-config` | `app-config.json` |
-| `ble-select-device` / `ble-cancel-scan` | Web Bluetooth API vía `webContents` |
+| `save_training` / `load_trainings` / `delete_training` | JSON en `<appData>/HitTracker/trainings/` |
+| `save_devices` / `load_devices` | `devices.json` |
+| `save_profiles` / `load_profiles` | `profiles.json` |
+| `start_ble_scan` / `cancel_ble_scan` / `select_ble_device` | BLE nativo desde Rust |
 
-`src/preload/index.ts` — expone `window.api` al renderer mediante `contextBridge`.
+Eventos emitidos al renderer: `ble-devices-updated` (lista de dispositivos encontrados).
 
 ### 4. Desktop — Renderer (React)
 
@@ -139,7 +138,7 @@ src/renderer/src/
 │  └─ useTraining.ts    Orquesta fases y timers de rondas/descansos
 │
 ├─ stores/ (Zustand)
-│  ├─ deviceStore.ts    Dispositivos BLE + persistencia vía window.api
+│  ├─ deviceStore.ts    Dispositivos BLE + persistencia vía invoke()
 │  ├─ profileStore.ts   Perfiles de calibración + persistencia
 │  └─ trainingStore.ts  Historial de entrenamientos + fase activa
 │
@@ -243,18 +242,19 @@ Training
 
 | Capa | Desktop | Mobile |
 |---|---|---|
-| Framework | Electron 33 | Expo SDK 56 |
+| Framework | Tauri 2 | Expo SDK 56 |
 | UI | React 18 + TypeScript 5 | React Native 0.85 + TypeScript 6 |
+| Backend | Rust (src-tauri/) | — |
 | Estilos | Tailwind CSS 3 | StyleSheet (React Native) |
 | Iconos | lucide-react | lucide-react-native |
 | Estado | Zustand 4 | Zustand 5 |
-| BLE | Web Bluetooth API (Electron) | react-native-ble-plx 3 |
+| BLE | Rust (Tauri commands + events) | react-native-ble-plx 3 |
 | Sensor nativo | — | react-native-sensors (temporal) |
 | Audio | HTMLAudioElement | expo-audio |
-| Persistencia | Node.js fs (via IPC) | expo-file-system |
+| Persistencia | Rust fs (via invoke) | expo-file-system |
 | Gráficos | Recharts 2 | react-native-svg |
 | Tests | Jest + ts-jest | Jest + ts-jest |
-| Build | electron-vite + electron-builder | expo run:android / EAS |
+| Build | tauri build | expo run:android / EAS |
 | Firmware | Arduino IDE 2 + ESP32 DevKit C | — |
 
 ---

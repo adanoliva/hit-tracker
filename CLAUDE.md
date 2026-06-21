@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real. Existe en dos plataformas:
 
-- **Desktop** (`src/`): Electron + React + TypeScript + Tailwind CSS
+- **Desktop** (`src/`): Tauri 2 + React + TypeScript + Tailwind CSS
 - **Mobile** (`mobile/`): React Native + Expo (Android)
 - **Shared** (`shared/`): Tipos y servicios comunes a ambas plataformas
 
@@ -41,10 +41,8 @@ Las versiones siguen [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PA
 
 ### Desktop
 ```bash
-npm run dev       # Desarrollo (electron-vite dev)
-npm run build     # Build completo
-npm run pack      # Genera ejecutable sin publicar
-npm run release   # Build + publica
+npm run dev       # Desarrollo (tauri dev)
+npm run build     # Build completo (tauri build)
 npm run test      # Jest — tests unitarios de lógica de negocio
 ```
 
