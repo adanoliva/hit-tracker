@@ -105,7 +105,13 @@ Resume:
 - ✅ Tests globales: N/N pasando (o lista de fallos)
 - Cualquier problema que requiera atención manual
 
-Indica que el siguiente paso es `/doc HT-XXX`.
+Al terminar, ejecuta automáticamente el agente de documentación:
+
+```
+/doc HT-XXX
+```
+
+Sustituye HT-XXX por el ID de la feature que acabas de validar.
 
 ## Reglas
 

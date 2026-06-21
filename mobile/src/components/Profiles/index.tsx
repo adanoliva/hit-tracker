@@ -73,7 +73,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
     if (!editing) return
     updateProfile(editing.id, {
       name: editing.name, threshold: editing.threshold,
-      sensitivity: editing.sensitivity
+      sensitivity: editing.sensitivity, validHitThreshold: editing.validHitThreshold
     })
     setEditing(null)
   }
@@ -135,6 +135,14 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                 color={colors.secondary}
                 onChange={(v) => setEditing({ ...editing, sensitivity: v })}
               />
+              <SliderField
+                label="Umbral golpe válido"
+                hint="Un golpe cuenta como válido si supera este porcentaje de tu golpe más fuerte de la sesión. Con 80%, solo cuentan los golpes de al menos el 80% de tu máximo. Con 0%, todos los golpes son válidos."
+                value={editing.validHitThreshold ?? 80} min={0} max={100} step={5}
+                unit="%"
+                color={colors.textPrimary}
+                onChange={(v) => setEditing({ ...editing, validHitThreshold: v })}
+              />
               <View style={s.editActions}>
                 <TouchableOpacity style={s.saveBtn} onPress={handleSaveEdit}>
                   <Text style={s.saveBtnText}>Guardar</Text>
@@ -149,7 +157,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
               <View style={s.flex1}>
                 <Text style={s.profileName}>{p.name}</Text>
                 <Text style={s.profileMeta}>
-                  Detección {p.threshold} · Potencia {p.sensitivity}
+                  Detección {p.threshold} · Potencia {p.sensitivity} · Válido ≥{p.validHitThreshold ?? 80}%
                 </Text>
                 {selectedProfileId === p.id && (
                   <Text style={s.activeBadge}>● Activo</Text>

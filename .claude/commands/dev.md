@@ -90,3 +90,13 @@ Resume qué se implementó, qué archivos se modificaron y si hay algo que deba 
 - Si algo de la spec es ambiguo o contradictorio, detente y pregunta al usuario — no inventes comportamiento.
 - No hagas commits — eso lo decide el usuario.
 - No toques archivos fuera del alcance de la spec.
+
+## Paso final obligatorio
+
+Al terminar la implementación, ejecuta automáticamente el agente de QA:
+
+```
+/qa HT-XXX
+```
+
+Sustituye HT-XXX por el ID de la feature que acabas de implementar.

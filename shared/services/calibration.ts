@@ -11,6 +11,7 @@ export const calibrationService = {
       name,
       threshold: 15.0,
       sensitivity: 25.0,
+      validHitThreshold: 80,
       createdAt: Date.now()
     }
   },
@@ -37,7 +38,7 @@ export const calibrationService = {
     return Math.min(100, Math.max(0, Math.round(raw)))
   },
 
-  isValidHit(impact: Impact, powerMax: number): boolean {
-    return impact.intensity >= powerMax * 0.8
+  isValidHit(impact: Impact, powerMax: number, validRatio: number = 0.8): boolean {
+    return impact.intensity >= powerMax * validRatio
   }
 }

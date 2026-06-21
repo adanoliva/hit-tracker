@@ -46,6 +46,7 @@ export interface CalibrationProfile {
   name: string
   threshold: number
   sensitivity: number
+  validHitThreshold: number
   calibrationData?: CalibrationData
   createdAt: number
 }

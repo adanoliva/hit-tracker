@@ -12,6 +12,7 @@ interface TrainingState {
   addTraining: (training: Training) => void
   deleteTraining: (id: string) => void
   getProgressions: () => { powerTrend: number[]; hpmTrend: number[]; isFatigued: boolean }
+  getUserPowerMax: (profileId: string) => number
 }
 
 export const useTrainingStore = create<TrainingState>((set, get) => ({
@@ -45,5 +46,12 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
       powerTrend[powerTrend.length - 1] < powerTrend[0] * 0.85
 
     return { powerTrend, hpmTrend, isFatigued }
+  },
+
+  getUserPowerMax: (profileId: string): number => {
+    const { trainings } = get()
+    const sessions = trainings.filter((t) => t.profile?.id === profileId).slice(0, 5)
+    if (sessions.length === 0) return 0
+    return Math.round(sessions.reduce((sum, t) => sum + t.powerMax, 0) / sessions.length)
   }
 }))

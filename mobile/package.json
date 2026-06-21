@@ -1,6 +1,6 @@
 {
   "name": "mobile",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "main": "index.ts",
   "dependencies": {
     "@react-native-community/slider": "^5.2.0",

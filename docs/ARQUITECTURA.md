@@ -102,7 +102,7 @@ Frecuencia de muestreo: ~50Hz (20ms por muestra).
 - `createProfile(name)` — perfil con valores por defecto (threshold 15.0, sensitivity 25.0)
 - `analyzeCalibrationSamples(light, normal, heavy)` — sugiere threshold y sensitivity
 - `calculateIntensity(magnitude, profile)` — escala 0-100
-- `isValidHit(impact, powerMax)` — intensity ≥ powerMax × 0.8
+- `isValidHit(impact, powerMax, validRatio)` — intensity ≥ powerMax × validRatio (default 0.8)
 
 `shared/services/training.ts` — `trainingService` (singleton):
 - `startTraining(config)` / `finishTraining()` → `Training`

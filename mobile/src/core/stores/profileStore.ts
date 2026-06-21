@@ -7,7 +7,7 @@ const DEFAULT_PROFILE: CalibrationProfile = {
   name: 'Default',
   threshold: 15.0,
   sensitivity: 25.0,
-
+  validHitThreshold: 80,
   createdAt: Date.now()
 }
 
@@ -28,7 +28,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   selectedProfileId: DEFAULT_PROFILE.id,
 
   setProfiles: (profiles) =>
-    set({ profiles: profiles.length > 0 ? profiles : [DEFAULT_PROFILE] }),
+    set({ profiles: profiles.length > 0 ? profiles.map((p) => ({ ...p, validHitThreshold: p.validHitThreshold ?? 80 })) : [DEFAULT_PROFILE] }),
 
   addProfile: (profile) => {
     set((state) => ({ profiles: [...state.profiles, profile] }))

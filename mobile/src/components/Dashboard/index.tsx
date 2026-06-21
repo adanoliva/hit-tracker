@@ -75,9 +75,11 @@ export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
   const { width } = useWindowDimensions()
   const trainings = useTrainingStore((s) => s.trainings)
   const removeTraining = useTrainingStore((s) => s.deleteTraining)
+  const getUserPowerMax = useTrainingStore((s) => s.getUserPowerMax)
   const connected = useDeviceStore((s) => s.connected)
   const getSelected = useProfileStore((s) => s.getSelected)
   const profile = getSelected()
+  const userPower = getUserPowerMax(profile.id)
   const profileSessions = trainings.filter((t) => t.profile?.id === profile.id)
 
   const handleDelete = (t: Training) => {
@@ -111,6 +113,9 @@ export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
           <View style={[styles.card, styles.flex1]}>
             <Text style={styles.label}>Perfil activo</Text>
             <Text style={styles.valueBlue}>{profile.name}</Text>
+            <Text style={styles.muted}>
+              Tu power: <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>{userPower > 0 ? userPower : '—'}</Text>
+            </Text>
           </View>
         </View>
 

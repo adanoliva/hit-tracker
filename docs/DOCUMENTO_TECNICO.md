@@ -364,6 +364,7 @@ Usa `react-native-sensors` (acelerómetro + giroscopio) a 50Hz. Convierte radian
     hpmTrend: number[]               // hpmAverage por ronda
     isFatigued: boolean
   }
+  getUserPowerMax(profileId: string): number  // media aritmética del powerMax de las últimas 5 sesiones del perfil; 0 si no hay sesiones
 }
 ```
 

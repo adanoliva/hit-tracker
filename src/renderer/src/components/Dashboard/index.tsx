@@ -94,9 +94,11 @@ function ProgressChart({ sessions }: { sessions: Training[] }): JSX.Element {
 export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
   const trainings = useTrainingStore((s) => s.trainings)
   const deleteTraining = useTrainingStore((s) => s.deleteTraining)
+  const getUserPowerMax = useTrainingStore((s) => s.getUserPowerMax)
   const connected = useDeviceStore((s) => s.connected)
   const getSelected = useProfileStore((s) => s.getSelected)
   const profile = getSelected()
+  const userPower = getUserPowerMax(profile.id)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const profileSessions = trainings.filter((t) => t.profile?.id === profile.id)
@@ -120,6 +122,9 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
         <div className="bg-bg-secondary rounded-xl p-4 border border-border">
           <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Perfil activo</p>
           <p className="font-semibold text-secondary">{profile.name}</p>
+          <p className="text-xs text-text-muted mt-1">
+            Tu power: <span className="text-text-primary font-bold">{userPower > 0 ? userPower : '—'}</span>
+          </p>
         </div>
       </div>
 

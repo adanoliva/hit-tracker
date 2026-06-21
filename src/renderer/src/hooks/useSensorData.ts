@@ -56,7 +56,7 @@ export function useSensorData(profile: CalibrationProfile, _placement?: SensorPl
         intensity,
         magnitude: prev.magnitude,
         duration:  0,
-        isValid:   intensity >= newPowerMax * 0.8
+        isValid:   intensity >= newPowerMax * ((profile.validHitThreshold ?? 80) / 100)
       }
 
       setImpacts((prevImpacts) => {
