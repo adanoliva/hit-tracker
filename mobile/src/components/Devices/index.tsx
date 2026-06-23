@@ -6,6 +6,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import type { Device } from '../../core/types'
+import type { BleError, Device as BleDevice } from 'react-native-ble-plx'
 import { getBleManager, isBleAvailable } from '../../services/ble'
 import { connectBleDevice, disconnectBleDevice } from '../../services/bleConnection'
 import { colors } from '../../theme'
@@ -55,7 +56,7 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
     setFound([])
 
     const ble = getBleManager()!
-    ble.startDeviceScan(['4fafc201-1fb5-459e-8fcc-c5c9c331914b'], null, (error, device) => {
+    ble.startDeviceScan(['4fafc201-1fb5-459e-8fcc-c5c9c331914b'], null, (error: BleError | null, device: BleDevice | null) => {
       if (error) {
         ble.stopDeviceScan()
         setScanState('error')

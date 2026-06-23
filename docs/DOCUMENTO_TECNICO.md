@@ -37,6 +37,8 @@ HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real 
 | Sensor nativo | react-native-sensors (temporal) | 7 |
 | Audio | expo-audio | 56 |
 | Persistencia | expo-file-system | 56 |
+| Captura de vista | react-native-view-shot | 5 |
+| Share nativo | expo-sharing | 56 |
 | Tests | Jest + ts-jest | — |
 
 ---
@@ -76,7 +78,8 @@ hit-tracker/
 │        ├─ Profiles/
 │        ├─ Training/
 │        ├─ Game/
-│        └─ Progress/
+│        ├─ Progress/
+│        └─ SessionDetail/
 │
 ├─ mobile/                         ← Mobile (Expo / React Native)
 │  ├─ src/
@@ -94,6 +97,12 @@ hit-tracker/
 │  │  │     ├─ profileStore.ts
 │  │  │     └─ trainingStore.ts
 │  │  │
+│  │  ├─ hooks/
+│  │  │  └─ useShareSession.ts     Captura View como PNG + share sheet nativo
+│  │  │
+│  │  ├─ utils/
+│  │  │  └─ shareText.ts           generateShareText(training) → plantilla share
+│  │  │
 │  │  ├─ services/
 │  │  │  ├─ audio.ts               expo-audio
 │  │  │  ├─ ble.ts                 react-native-ble-plx (BleManager singleton)
@@ -105,7 +114,8 @@ hit-tracker/
 │  │     ├─ Devices/
 │  │     ├─ Profiles/
 │  │     ├─ Training/
-│  │     └─ Game/
+│  │     ├─ Game/
+│  │     └─ SessionDetail/
 │  │
 │  ├─ App.tsx
 │  ├─ metro.config.js              watchFolders + extraNodeModules para @shared
@@ -195,6 +205,14 @@ interface Training {
   powerMax: number
   hpmAverage: number
 }
+
+interface GameScore {
+  initials: string  // 1–4 chars, uppercase
+  score: number     // impact.magnitude (entero raw)
+  date: number      // timestamp ms
+}
+
+type GameTopThree = [GameScore | null, GameScore | null, GameScore | null]
 
 ```
 
@@ -298,6 +316,31 @@ Transiciones de fase:
 - `resting` → `round`: timer llega a 0 — `trainingService.startRound(n+1)`
 - `round` → `finished`: última ronda termina — `trainingService.finishTraining()`
 
+### useShareSession `[solo mobile]`
+
+```typescript
+function useShareSession(options: {
+  training: Training
+  chartRef: React.RefObject<View | null>   // ref a la View a capturar como PNG
+}): {
+  share: () => Promise<void>
+  isSharing: boolean
+}
+```
+
+Flujo al llamar `share()`:
+1. Captura `chartRef` como PNG con `react-native-view-shot` → guarda en `cacheDirectory/hit-tracker-share.png`
+2. Abre el share sheet nativo vía `expo-sharing`
+3. Si la captura falla → fallback a `Share.share({ message: text })` (solo texto)
+4. `isSharing` es `true` durante todo el proceso; el botón que lo invoca debe deshabilitarse mientras sea `true`
+
+Texto generado por `generateShareText(training)` (`mobile/src/utils/shareText.ts`):
+```
+¡Vaya sesión! {X} min y una media de {Y} HPM. ¡A tope! 💪
+#hittracker #boxing #training
+```
+Donde `X = Math.round(totalDurationMs / 60000)` (o `"< 1 min"` si el resultado es 0) e `Y = Math.round(training.hpmAverage)`.
+
 ### useBleReading `[solo mobile]`
 
 ```typescript
@@ -345,6 +388,32 @@ Conecta al sensor BLE por `deviceId` (vía `bleConnection.connectBleDevice`) cua
 }
 ```
 
+### gameStore
+
+Presente en desktop (`src/renderer/src/stores/gameStore.ts`) y mobile (`mobile/src/core/stores/gameStore.ts`). Lógica idéntica.
+
+```typescript
+type GamePhase = 'idle' | 'waiting' | 'new-record' | 'loser'
+
+{
+  topThree: GameTopThree        // persiste en disco; null = posición vacía
+  phase: GamePhase
+  lastScore: number | null      // magnitude del golpe registrado
+  pendingScore: number | null   // score en espera de iniciales (solo en 'new-record')
+  startGame(): void             // idle → waiting
+  cancelGame(): void            // waiting → idle, limpia scores
+  registerHit(magnitude): void  // registra primer golpe; → new-record | loser
+  submitInitials(initials): Promise<void>  // inserta en TOP 3, persiste, → idle
+  resetToIdle(): void           // loser → idle
+  loadScores(): Promise<void>   // carga game-scores.json desde disco
+}
+```
+
+Lógica de negocio pura (funciones internas):
+- `entersTopThree(score, top)` — `true` si hay hueco libre **o** `score > min` del TOP 3 lleno (estrictamente mayor)
+- `insertScore(entry, top)` — ordena por score descendente, trunca a 3 entradas
+- `minScoreForTop3(top)` — exportada; devuelve `min+1` si lleno, `0` si hay hueco
+
 ### trainingStore
 
 ```typescript
@@ -384,6 +453,10 @@ invoke('save_devices', { devices: Device[] }): Promise<void>
 invoke('load_profiles'): Promise<CalibrationProfile[]>
 invoke('save_profiles', { profiles: CalibrationProfile[] }): Promise<void>
 
+// Game scores
+invoke('load_game_scores'): Promise<GameTopThree>
+invoke('save_game_scores', { scores: GameTopThree }): Promise<void>
+
 // BLE
 invoke('start_ble_scan'): Promise<void>
 invoke('cancel_ble_scan'): Promise<void>
@@ -407,6 +480,8 @@ storage.saveProfiles(profiles)        // → profiles.json
 storage.loadProfiles(): CalibrationProfile[]
 storage.saveDevices(devices)          // → devices.json
 storage.loadDevices(): Device[]
+storage.loadGameScores(): GameTopThree  // → game-scores.json (fallback: [null,null,null])
+storage.saveGameScores(scores)          // → game-scores.json
 ```
 
 ---

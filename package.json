@@ -1,6 +1,6 @@
 {
   "name": "hit-tracker",
-  "version": "1.4.0",
+  "version": "1.7.0",
   "description": "Sistema integrado de captura y análisis de impactos en entrenamiento de boxeo",
   "author": "Adán",
   "license": "MIT",
@@ -20,6 +20,11 @@
     ],
     "moduleNameMapper": {
       "^@shared/(.*)$": "<rootDir>/shared/$1"
+    },
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
     }
   },
   "dependencies": {

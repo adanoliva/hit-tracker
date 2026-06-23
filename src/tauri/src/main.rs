@@ -152,6 +152,20 @@ async fn save_profiles(app: AppHandle, profiles: Value) -> Result<bool, String> 
     Ok(true)
 }
 
+// ── Game score commands ───────────────────────────────────────────────────────
+
+#[tauri::command]
+async fn load_game_scores(app: AppHandle) -> Result<Value, String> {
+    ensure_dirs(&app)?;
+    Ok(read_json(&data_dir(&app).join("game-scores.json"), Value::Array(vec![Value::Null, Value::Null, Value::Null])))
+}
+
+#[tauri::command]
+async fn save_game_scores(app: AppHandle, scores: Value) -> Result<bool, String> {
+    write_json(&data_dir(&app).join("game-scores.json"), &scores)?;
+    Ok(true)
+}
+
 // ── Config commands ───────────────────────────────────────────────────────────
 
 #[tauri::command]
@@ -375,6 +389,8 @@ fn main() {
             load_profiles,
             save_config,
             load_config,
+            load_game_scores,
+            save_game_scores,
             start_ble_scan,
             cancel_ble_scan,
             connect_ble_device,

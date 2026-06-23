@@ -1,4 +1,5 @@
 import type { Training, Round, RoundStats, Impact, CalibrationProfile, Device } from '../types'
+import { APP_VERSION } from '../constants'
 
 export interface TrainingConfig {
   device: Device
@@ -105,6 +106,7 @@ class TrainingService {
     this.current.hpmAverage =
       durationMin > 0 ? Math.round(allImpacts.length / durationMin) : 0
 
+    this.current.appVersion = APP_VERSION
     const training = this.current
     this.current = null
     return training

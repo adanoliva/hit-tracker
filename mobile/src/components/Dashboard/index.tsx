@@ -70,7 +70,7 @@ function ProgressChart({ sessions, width }: { sessions: Training[]; width: numbe
   )
 }
 
-export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
+export function Dashboard({ onNavigate, onSelectTraining }: { onNavigate: (s: string) => void; onSelectTraining: (t: Training) => void }) {
   const { top } = useSafeAreaInsets()
   const { width } = useWindowDimensions()
   const trainings = useTrainingStore((s) => s.trainings)
@@ -157,7 +157,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
           data={[...profileSessions].reverse()}
           keyExtractor={(t) => t.id}
           renderItem={({ item: t }) => (
-            <View style={styles.sessionCard}>
+            <TouchableOpacity style={styles.sessionCard} onPress={() => onSelectTraining(t)} activeOpacity={0.7}>
               <View style={styles.sessionInfo}>
                 <Text style={styles.sessionDevice}>{t.device.name}</Text>
                 <Text style={styles.muted}>
@@ -170,10 +170,10 @@ export function Dashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
                 <Text style={styles.valueRed}>{t.totalImpacts} golpes</Text>
                 <Text style={styles.muted}>Power máx: {sessionPowerMax(t)}</Text>
               </View>
-              <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(t)}>
+              <TouchableOpacity style={styles.deleteBtn} onPress={(e) => { e.stopPropagation?.(); handleDelete(t) }}>
                 <Trash2 size={16} color={colors.textMuted} />
               </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}

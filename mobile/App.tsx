@@ -11,6 +11,7 @@ import { useProfileStore } from './src/core/stores/profileStore'
 import { useDeviceStore } from './src/core/stores/deviceStore'
 import { storage } from './src/services/storage'
 import { colors } from './src/theme'
+import { migrationService } from '@shared/services/migration'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -54,7 +55,11 @@ export default function App() {
       storage.loadProfiles(),
       storage.loadDevices()
     ]).then(([trainings, profiles, devices]) => {
-      setTrainings(trainings)
+      const migrated = migrationService.migrate(trainings)
+      migrated
+        .filter((t, i) => t.appVersion !== trainings[i].appVersion)
+        .forEach((t) => storage.saveTraining(t))
+      setTrainings(migrated)
       if (profiles.length > 0) setProfiles(profiles)
       setDevices(devices)
       setReady(true)
@@ -77,7 +82,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <NavigationContainer theme={NAV_THEME}>
-        <StatusBar style="light" backgroundColor={colors.bgPrimary} translucent={false} />
+        <StatusBar style="light" />
         <RootNavigator />
       </NavigationContainer>
     </GestureHandlerRootView>

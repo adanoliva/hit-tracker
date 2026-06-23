@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import type { Training, CalibrationProfile, Device } from '../core/types'
+import type { Training, CalibrationProfile, Device, GameTopThree } from '../core/types'
 
 // Compatibilidad con entrenamientos grabados antes del renombrado rpm → hpm
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,5 +73,14 @@ export const storage = {
 
   async loadDevices(): Promise<Device[]> {
     return readJson<Device[]>(BASE + 'devices.json', [])
+  },
+
+  async loadGameScores(): Promise<GameTopThree> {
+    return readJson<GameTopThree>(BASE + 'game-scores.json', [null, null, null])
+  },
+
+  async saveGameScores(scores: GameTopThree) {
+    await ensureDir(BASE)
+    await FileSystem.writeAsStringAsync(BASE + 'game-scores.json', JSON.stringify(scores))
   }
 }

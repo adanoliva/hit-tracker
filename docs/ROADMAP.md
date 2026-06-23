@@ -14,8 +14,8 @@
 | ✅ | Sensor ESP32 conectado via BLE en desktop y mobile |
 | ⬜ | `HT-001` Eliminación de modos de prueba (mock desktop y teléfono como sensor mobile) |
 | ⬜ | `HT-002` Pantalla de detalle de sesión con gráfico de golpes por round |
-| ⬜ | `HT-003` Compartir sesión en redes sociales (mobile) |
-| ⬜ | `HT-005` Modo Game mejorado: TOP 3 y entrada de iniciales estilo arcade |
+| ✅ | `HT-003` Compartir sesión en redes sociales (mobile) |
+| ✅ | `HT-005` Modo Game mejorado: TOP 3 y entrada de iniciales estilo arcade |
 | ⬜ | `HT-007` Umbral de golpe válido configurable por perfil |
 
 > Con V1 completo y el sensor físico (Fase 1 hardware) ya hay un producto real y demostrable, aunque el sensor sea un ESP32 con cables pegado al saco.

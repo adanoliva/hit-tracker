@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Vibration } from 'react-native'
 import { Dumbbell } from 'lucide-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useSensorData } from '../../core/hooks/useSensorData'
 import { useBleReading } from '../../core/hooks/useBleReading'
+import { useGameStore, minScoreForTop3 } from '../../core/stores/gameStore'
 import type { CalibrationProfile } from '../../core/types'
 import { colors } from '../../theme'
 
@@ -20,44 +21,58 @@ const DEFAULT_PROFILE: CalibrationProfile = {
 export function GamePage() {
   const connected = useDeviceStore((s) => s.connected)
   const { top, bottom } = useSafeAreaInsets()
-
   const { impacts, processReading, reset } = useSensorData(DEFAULT_PROFILE)
-  const [bestHit, setBestHit] = useState(0)
-  const [lastHit, setLastHit] = useState(0)
-  const [isRecord, setIsRecord] = useState(false)
+  const { topThree, phase, lastScore, pendingScore, startGame, cancelGame, registerHit, submitInitials, resetToIdle, loadScores } = useGameStore()
+  const [initials, setInitials] = useState('')
+  const hitRegistered = useRef(false)
+  const pulseAnim = useRef(new Animated.Value(1)).current
+  const pulseLoop = useRef<Animated.CompositeAnimation | null>(null)
 
-  const flashAnim = useRef(new Animated.Value(0)).current
-  const active = !!connected
+  useEffect(() => { loadScores() }, [])
 
-  useBleReading({
-    deviceId: connected?.mac ?? null,
-    active,
-    onReading: processReading
-  })
+  useBleReading({ deviceId: connected?.mac ?? null, active: !!connected, onReading: processReading })
 
   useEffect(() => {
-    if (impacts.length === 0) return
-    const last = impacts[impacts.length - 1]
-    const mag = Math.round(last.magnitude)
-    setLastHit(mag)
-    if (mag > bestHit) {
-      setBestHit(mag)
-      setIsRecord(true)
-      Animated.sequence([
-        Animated.timing(flashAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
-        Animated.timing(flashAnim, { toValue: 0, duration: 400, useNativeDriver: true })
-      ]).start(() => setIsRecord(false))
+    if (phase === 'waiting') {
+      hitRegistered.current = false
+      pulseLoop.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.15, duration: 400, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 400, useNativeDriver: true })
+        ])
+      )
+      pulseLoop.current.start()
+    } else {
+      pulseLoop.current?.stop()
+      pulseAnim.setValue(1)
     }
-  }, [impacts])
+  }, [phase])
 
-  const handleReset = () => {
-    reset()
-    setBestHit(0)
-    setLastHit(0)
-    setIsRecord(false)
+  useEffect(() => {
+    if (phase === 'waiting' && impacts.length > 0 && !hitRegistered.current) {
+      hitRegistered.current = true
+      const last = impacts[impacts.length - 1]
+      registerHit(last.magnitude)
+      reset()
+    }
+  }, [impacts, phase])
+
+  useEffect(() => {
+    if (phase === 'new-record') {
+      setInitials('')
+      Vibration.vibrate([0, 100, 50, 100])
+    } else if (phase === 'loser') {
+      Vibration.vibrate(200)
+    }
+  }, [phase])
+
+  const handleStart = () => { reset(); startGame() }
+
+  const handleSubmit = async () => {
+    if (initials.length === 0) return
+    await submitInitials(initials)
+    setInitials('')
   }
-
-  const flashOpacity = flashAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.3] })
 
   if (!connected) {
     return (
@@ -69,101 +84,131 @@ export function GamePage() {
   }
 
   return (
-    <View style={[s.root, { paddingTop: top, paddingBottom: bottom + 16 }]}>
-      <Animated.View style={[s.flash, { opacity: flashOpacity }]} pointerEvents="none" />
-
-      <View style={s.bestWrap}>
-        <Text style={s.bestLabel}>MEJOR</Text>
-        <Text style={[s.bestValue, isRecord && s.bestValueRecord]}>{bestHit}</Text>
+    <View style={[s.root, { paddingTop: top + 16, paddingBottom: bottom + 16 }]}>
+      {/* TOP 3 */}
+      <View style={s.topThreeWrap}>
+        <Text style={s.label}>TOP 3</Text>
+        {topThree.map((entry, i) => (
+          <View key={i} style={s.scoreRow}>
+            <Text style={s.scorePos}>{i + 1}.</Text>
+            {entry ? (
+              <>
+                <Text style={s.scoreInitials}>{entry.initials}</Text>
+                <Text style={s.scoreValue}>{entry.score}</Text>
+              </>
+            ) : (
+              <>
+                <Text style={s.scoreEmpty}>---</Text>
+                <Text style={s.scoreEmpty}>---</Text>
+              </>
+            )}
+          </View>
+        ))}
       </View>
 
-      <View style={s.currentWrap}>
-        <Text style={s.currentLabel}>ACTUAL</Text>
-        <Text style={s.currentValue}>{lastHit > 0 ? lastHit : '—'}</Text>
-      </View>
+      {/* Center */}
+      <View style={s.centerWrap}>
+        {phase === 'idle' && (
+          <TouchableOpacity style={s.startBtn} onPress={handleStart} activeOpacity={0.8}>
+            <Text style={s.startText}>EMPEZAR</Text>
+          </TouchableOpacity>
+        )}
 
-      <TouchableOpacity style={s.resetBtn} onPress={handleReset} activeOpacity={0.7}>
-        <Text style={s.resetText}>RESET</Text>
-      </TouchableOpacity>
+        {phase === 'waiting' && (
+          <View style={s.waitingWrap}>
+            <Animated.Text style={[s.golpea, { transform: [{ scale: pulseAnim }] }]}>
+              ¡GOLPEA!
+            </Animated.Text>
+            <TouchableOpacity style={s.cancelBtn} onPress={cancelGame} activeOpacity={0.7}>
+              <Text style={s.cancelText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {phase === 'new-record' && (
+          <View style={s.resultWrap}>
+            <Text style={[s.resultLabel, { color: '#facc15' }]}>¡NUEVO RÉCORD!</Text>
+            <Text style={[s.resultScore, { color: '#facc15' }]}>{pendingScore}</Text>
+            <Text style={s.initialsLabel}>INTRODUCE TUS INICIALES</Text>
+            <TextInput
+              value={initials}
+              onChangeText={t => setInitials(t.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 4))}
+              autoCapitalize="characters"
+              maxLength={4}
+              autoFocus
+              style={s.initialsInput}
+              placeholder="AAA"
+              placeholderTextColor={colors.textMuted}
+            />
+            <TouchableOpacity
+              style={[s.confirmBtn, initials.length === 0 && s.confirmBtnDisabled]}
+              onPress={handleSubmit}
+              disabled={initials.length === 0}
+              activeOpacity={0.8}
+            >
+              <Text style={s.confirmText}>CONFIRMAR</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {phase === 'loser' && (
+          <View style={s.resultWrap}>
+            <Text style={[s.resultLabel, { color: colors.accent }]}>LOSER</Text>
+            <Text style={[s.resultScore, { color: colors.accent }]}>{lastScore}</Text>
+            <Text style={s.minScore}>
+              Necesitabas al menos{' '}
+              <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>
+                {minScoreForTop3(topThree)}
+              </Text>{' '}
+              para entrar
+            </Text>
+            <TouchableOpacity style={s.backBtn} onPress={resetToIdle} activeOpacity={0.7}>
+              <Text style={s.backText}>VOLVER</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     </View>
   )
 }
 
 const s = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.bgPrimary,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
+  root: { flex: 1, backgroundColor: colors.bgPrimary, paddingHorizontal: 24 },
+  center: { flex: 1, backgroundColor: colors.bgPrimary, alignItems: 'center', justifyContent: 'center', gap: 16 },
+  emptyText: { fontSize: 16, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
+  label: { fontSize: 11, letterSpacing: 3, color: colors.textMuted, textAlign: 'center', marginBottom: 8 },
+  topThreeWrap: { gap: 6 },
+  scoreRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: colors.bgSecondary, borderRadius: 10,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderWidth: 1, borderColor: colors.border
   },
-  center: {
-    flex: 1,
-    backgroundColor: colors.bgPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
+  scorePos: { fontSize: 12, color: colors.textMuted, fontFamily: 'monospace', width: 20 },
+  scoreInitials: { flex: 1, fontSize: 16, fontWeight: '700', color: colors.textPrimary, fontFamily: 'monospace', letterSpacing: 4, textAlign: 'center' },
+  scoreValue: { fontSize: 18, fontWeight: '700', color: colors.secondary, fontFamily: 'monospace' },
+  scoreEmpty: { flex: 1, fontSize: 14, color: colors.textMuted, fontFamily: 'monospace', textAlign: 'center' },
+  centerWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  startBtn: { backgroundColor: colors.accent, borderRadius: 14, paddingHorizontal: 48, paddingVertical: 20 },
+  startText: { color: '#fff', fontSize: 20, fontWeight: '800', letterSpacing: 3 },
+  waitingWrap: { alignItems: 'center', gap: 24 },
+  golpea: { fontSize: 52, fontWeight: '800', color: colors.accent, letterSpacing: 2 },
+  cancelBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 24, paddingVertical: 10 },
+  cancelText: { fontSize: 13, color: colors.textMuted, letterSpacing: 2 },
+  resultWrap: { alignItems: 'center', gap: 16, width: '100%' },
+  resultLabel: { fontSize: 11, letterSpacing: 4 },
+  resultScore: { fontSize: 80, fontWeight: '800', fontFamily: 'monospace', lineHeight: 88 },
+  initialsLabel: { fontSize: 11, letterSpacing: 3, color: colors.textMuted },
+  initialsInput: {
+    width: '100%', textAlign: 'center', fontSize: 32, fontWeight: '700',
+    fontFamily: 'monospace', letterSpacing: 8, color: colors.textPrimary,
+    backgroundColor: colors.bgSecondary, borderWidth: 1, borderColor: colors.border,
+    borderRadius: 10, paddingVertical: 12
   },
-  flash: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.accent,
-    zIndex: 0,
-  },
-  emptyIcon: {},
-  emptyText: {
-    fontSize: 16,
-    color: colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  bestWrap: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  bestLabel: {
-    fontSize: 11,
-    letterSpacing: 3,
-    color: colors.textMuted,
-  },
-  bestValue: {
-    fontSize: 32,
-    fontWeight: '700',
-    fontFamily: 'monospace',
-    color: colors.textMuted,
-  },
-  bestValueRecord: {
-    color: colors.accent,
-  },
-  currentWrap: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  currentLabel: {
-    fontSize: 13,
-    letterSpacing: 3,
-    color: colors.textMuted,
-    marginBottom: 8,
-  },
-  currentValue: {
-    fontSize: 120,
-    fontWeight: '800',
-    fontFamily: 'monospace',
-    color: colors.textPrimary,
-  },
-  resetBtn: {
-    width: '100%',
-    paddingVertical: 16,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    backgroundColor: colors.bgSecondary,
-  },
-  resetText: {
-    fontSize: 14,
-    letterSpacing: 2,
-    color: colors.textMuted,
-    fontWeight: '600',
-  },
+  confirmBtn: { width: '100%', paddingVertical: 14, borderRadius: 12, backgroundColor: '#facc15', alignItems: 'center' },
+  confirmBtnDisabled: { opacity: 0.4 },
+  confirmText: { fontSize: 14, fontWeight: '800', color: '#1a1a1a', letterSpacing: 3 },
+  minScore: { fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  backBtn: { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.border, alignItems: 'center' },
+  backText: { fontSize: 13, letterSpacing: 2, color: colors.textMuted, fontWeight: '600' }
 })

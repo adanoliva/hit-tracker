@@ -66,6 +66,7 @@ export interface Round {
 
 export interface Training {
   id: string
+  appVersion?: string
   createdAt: number
   device: {
     mac: string
@@ -87,3 +88,11 @@ export interface AppConfig {
   defaultProfileId?: string
   defaultDeviceMac?: string
 }
+
+export interface GameScore {
+  initials: string  // 1–4 chars, uppercase
+  score: number     // impact.magnitude (raw integer)
+  date: number      // timestamp ms
+}
+
+export type GameTopThree = [GameScore | null, GameScore | null, GameScore | null]

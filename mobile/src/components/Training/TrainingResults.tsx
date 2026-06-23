@@ -1,7 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { useRef } from 'react'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Share2 } from 'lucide-react-native'
 import type { Training } from '../../core/types'
 import { colors } from '../../theme'
+import { useShareSession } from '../../hooks/useShareSession'
 
 interface TrainingResultsProps {
   training: Training
@@ -19,6 +22,8 @@ function Stat({ label, value, color = colors.textPrimary }: { label: string; val
 
 export function TrainingResults({ training, onDone }: TrainingResultsProps) {
   const { top } = useSafeAreaInsets()
+  const statsRef = useRef<View>(null)
+  const { share, isSharing } = useShareSession({ training, chartRef: statsRef })
   const bestRound = training.rounds.reduce(
     (best, r) => (r.stats.powerMax > best.stats.powerMax ? r : best),
     training.rounds[0]
@@ -32,7 +37,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
         <Text style={s.muted}>{training.rounds.length} rondas · {training.device.name}</Text>
       </View>
 
-      <View style={s.statsGrid}>
+      <View style={s.statsGrid} ref={statsRef}>
         <Stat label="Total golpes" value={training.totalImpacts} />
         <Stat label="Golpes válidos" value={training.validHits} color={colors.accent} />
         <Stat label="Power máximo" value={Math.max(0, ...training.rounds.flatMap(r => r.impacts).map(i => Math.round(i.magnitude)))} color={colors.accent} />
@@ -62,6 +67,14 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
           </View>
         ))}
       </View>
+
+      <TouchableOpacity style={s.shareBtn} onPress={share} disabled={isSharing} activeOpacity={0.7}>
+        {isSharing
+          ? <ActivityIndicator size={18} color="#fff" />
+          : <Share2 size={18} color="#fff" />
+        }
+        <Text style={s.shareBtnText}>{isSharing ? 'Compartiendo…' : 'Compartir sesión'}</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity style={s.doneBtn} onPress={onDone}>
         <Text style={s.doneBtnText}>▶ Nueva sesión</Text>
@@ -97,6 +110,12 @@ const s = StyleSheet.create({
   bestBadge: { fontSize: 12, color: colors.accent },
   roundRight: { alignItems: 'flex-end' },
   roundValue: { fontSize: 18, fontWeight: '800' },
+  shareBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    borderWidth: 1, borderColor: colors.border, borderRadius: 12,
+    paddingVertical: 14, backgroundColor: colors.bgSecondary
+  },
+  shareBtnText: { fontSize: 15, fontWeight: '600', color: colors.textMuted },
   doneBtn: { backgroundColor: colors.accent, borderRadius: 12, paddingVertical: 18, alignItems: 'center' },
   doneBtnText: { fontSize: 17, fontWeight: '800', color: '#fff' }
 })

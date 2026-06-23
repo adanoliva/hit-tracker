@@ -119,6 +119,7 @@ Frecuencia de muestreo: ~50Hz (20ms por muestra).
 | `save_training` / `load_trainings` / `delete_training` | JSON en `<appData>/HitTracker/trainings/` |
 | `save_devices` / `load_devices` | `devices.json` |
 | `save_profiles` / `load_profiles` | `profiles.json` |
+| `save_game_scores` / `load_game_scores` | `game-scores.json` |
 | `start_ble_scan` / `cancel_ble_scan` / `select_ble_device` | BLE nativo desde Rust |
 
 Eventos emitidos al renderer: `ble-devices-updated` (lista de dispositivos encontrados).
@@ -140,17 +141,19 @@ src/renderer/src/
 ├─ stores/ (Zustand)
 │  ├─ deviceStore.ts    Dispositivos BLE + persistencia vía invoke()
 │  ├─ profileStore.ts   Perfiles de calibración + persistencia
-│  └─ trainingStore.ts  Historial de entrenamientos + fase activa
+│  ├─ trainingStore.ts  Historial de entrenamientos + fase activa
+│  └─ gameStore.ts      TOP 3 del modo Game + máquina de estados de partida
 │
 ├─ types/index.ts       → re-export de @shared/types
 │
 └─ components/
-   ├─ Dashboard/        Resumen y acceso rápido
+   ├─ Dashboard/        Resumen y acceso rápido; click en sesión → SessionDetail
    ├─ Devices/          Gestión de dispositivos BLE
    ├─ Profiles/         Perfiles de calibración
    ├─ Training/         Sesión en tiempo real (rondas)
    ├─ Game/             Modo juego
-   └─ Progress/         Historial y tendencias
+   ├─ Progress/         Historial y tendencias
+   └─ SessionDetail/    Detalle de sesión: gráfico scatter por round, eliminar
 ```
 
 ### 5. Mobile — Expo/React Native
@@ -166,13 +169,20 @@ mobile/src/
 │  ├─ stores/ (Zustand)
 │  │  ├─ deviceStore.ts
 │  │  ├─ profileStore.ts
-│  │  └─ trainingStore.ts
+│  │  ├─ trainingStore.ts
+│  │  └─ gameStore.ts
 │  │
 │  ├─ services/
 │  │  ├─ calibration.ts      → re-export de @shared/services/calibration
 │  │  └─ trainingService.ts  → re-export de @shared/services/training
 │  │
 │  └─ types/index.ts         → re-export de @shared/types
+│
+├─ hooks/
+│  └─ useShareSession.ts  captura PNG + share sheet nativo (react-native-view-shot + expo-sharing)
+│
+├─ utils/
+│  └─ shareText.ts        generateShareText(training) — texto para share
 │
 ├─ services/
 │  ├─ audio.ts     expo-audio; bell, beep, countdown
@@ -181,10 +191,11 @@ mobile/src/
 │
 └─ components/
    ├─ Dashboard/
-   ├─ Devices/    Incluye PhoneSensorPicker (modo "Todo en 1")
+   ├─ Devices/      Incluye PhoneSensorPicker (modo "Todo en 1")
    ├─ Profiles/
    ├─ Training/
-   └─ Game/
+   ├─ Game/
+   └─ SessionDetail/ Detalle de sesión: gráfico scatter por round, eliminar
 ```
 
 ---
@@ -224,6 +235,7 @@ Training
 │  └─ training-<ISO>.json     (un archivo por entrenamiento)
 ├─ devices.json
 ├─ profiles.json
+├─ game-scores.json
 └─ app-config.json
 ```
 
@@ -233,7 +245,8 @@ Training
 ├─ trainings/
 │  └─ training_<id>.json
 ├─ devices.json
-└─ profiles.json
+├─ profiles.json
+└─ game-scores.json
 ```
 
 ---

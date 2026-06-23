@@ -16,6 +16,7 @@ import type { Training } from '../../types'
 
 interface DashboardProps {
   onNavigate: (page: string) => void
+  onSelectTraining: (training: Training) => void
 }
 
 function formatDate(ts: number): string {
@@ -91,7 +92,7 @@ function ProgressChart({ sessions }: { sessions: Training[] }): JSX.Element {
   )
 }
 
-export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
+export function Dashboard({ onNavigate, onSelectTraining }: DashboardProps): JSX.Element {
   const trainings = useTrainingStore((s) => s.trainings)
   const deleteTraining = useTrainingStore((s) => s.deleteTraining)
   const getUserPowerMax = useTrainingStore((s) => s.getUserPowerMax)
@@ -170,10 +171,11 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
             {recent.map((t) => (
               <div
                 key={t.id}
-                className="bg-bg-secondary rounded-lg p-3 border border-border hover:border-accent/40 transition-all"
+                className="bg-bg-secondary rounded-lg p-3 border border-border hover:border-accent/40 transition-all cursor-pointer"
+                onClick={() => confirmDelete !== t.id && onSelectTraining(t)}
               >
                 {confirmDelete === t.id ? (
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center justify-between gap-3" onClick={(e) => e.stopPropagation()}>
                     <p className="text-sm text-text-primary">¿Eliminar esta sesión?</p>
                     <div className="flex gap-2 shrink-0">
                       <button
@@ -210,7 +212,7 @@ export function Dashboard({ onNavigate }: DashboardProps): JSX.Element {
                         <p className="text-xs text-text-muted">Power máx: {t.powerMax}</p>
                       </div>
                       <button
-                        onClick={() => setConfirmDelete(t.id)}
+                        onClick={(e) => { e.stopPropagation(); setConfirmDelete(t.id) }}
                         className="text-text-muted hover:text-accent transition-colors mt-0.5"
                         title="Eliminar sesión"
                       >

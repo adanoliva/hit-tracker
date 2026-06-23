@@ -1,6 +1,6 @@
 {
   "name": "mobile",
-  "version": "1.4.0",
+  "version": "1.8.0",
   "main": "index.ts",
   "dependencies": {
     "@react-native-community/slider": "^5.2.0",
@@ -12,6 +12,7 @@
     "expo-file-system": "^56.0.8",
     "expo-keep-awake": "^56.0.3",
     "expo-screen-orientation": "~56.0.5",
+    "expo-sharing": "^56.0.18",
     "expo-splash-screen": "~56.0.10",
     "expo-status-bar": "~56.0.4",
     "lucide-react-native": "^1.21.0",
@@ -23,6 +24,7 @@
     "react-native-screens": "^4.25.2",
     "react-native-sensors": "^7.3.6",
     "react-native-svg": "^15.15.5",
+    "react-native-view-shot": "^5.1.1",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
@@ -35,6 +37,8 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
+    "android:release": "expo run:android --variant release",
+    "android:apk": "cd android && ./gradlew assembleRelease",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest"
@@ -42,9 +46,16 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "roots": ["<rootDir>/src/__tests__"],
+    "roots": [
+      "<rootDir>/src/__tests__"
+    ],
     "moduleNameMapper": {
       "^@shared/(.*)$": "<rootDir>/../shared/$1"
+    },
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
     }
   },
   "private": true

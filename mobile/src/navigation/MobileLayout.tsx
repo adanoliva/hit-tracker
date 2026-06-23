@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { TouchableOpacity } from 'react-native'
 import { LayoutDashboard, Dumbbell, Gamepad2, Bluetooth, SlidersHorizontal, type LucideProps } from 'lucide-react-native'
@@ -6,12 +7,14 @@ import { TrainingPage } from '../components/Training'
 import { GamePage } from '../components/Game'
 import { DevicesPage } from '../components/Devices'
 import { ProfilesPage } from '../components/Profiles'
+import { SessionDetail } from '../components/SessionDetail'
 import { useTrainingStore } from '../core/stores/trainingStore'
 import { colors } from '../theme'
+import type { Training } from '../core/types'
 
 const Tab = createBottomTabNavigator()
 
-type IconComponent = (props: LucideProps) => JSX.Element
+type IconComponent = React.ComponentType<LucideProps>
 
 const TAB_ICONS: Record<string, IconComponent> = {
   Inicio: LayoutDashboard,
@@ -26,6 +29,17 @@ const SESSION_PHASES = ['preparing', 'round', 'resting']
 export function MobileLayout() {
   const activePhase = useTrainingStore((s) => s.activePhase)
   const sessionActive = SESSION_PHASES.includes(activePhase)
+  const [selectedTraining, setSelectedTraining] = useState<Training | null>(null)
+
+  if (selectedTraining) {
+    return (
+      <SessionDetail
+        training={selectedTraining}
+        onBack={() => setSelectedTraining(null)}
+        onDelete={() => setSelectedTraining(null)}
+      />
+    )
+  }
 
   return (
     <Tab.Navigator
@@ -45,7 +59,12 @@ export function MobileLayout() {
       })}
     >
       <Tab.Screen name="Inicio">
-        {({ navigation }) => <Dashboard onNavigate={(p) => navigation.navigate(p === 'training' ? 'Entrenar' : p)} />}
+        {({ navigation }) => (
+          <Dashboard
+            onNavigate={(p) => navigation.navigate(p === 'training' ? 'Entrenar' : p)}
+            onSelectTraining={setSelectedTraining}
+          />
+        )}
       </Tab.Screen>
       <Tab.Screen name="Entrenar" component={TrainingPage} />
       <Tab.Screen name="Game" component={GamePage} />

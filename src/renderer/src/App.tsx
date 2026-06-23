@@ -4,6 +4,7 @@ import { LayoutDashboard, Dumbbell, Gamepad2, Bluetooth, SlidersHorizontal } fro
 import { useDeviceStore } from './stores/deviceStore'
 import { useProfileStore } from './stores/profileStore'
 import { useTrainingStore } from './stores/trainingStore'
+import { migrationService } from '@shared/services/migration'
 
 const SESSION_PHASES = ['preparing', 'round', 'resting']
 import { Dashboard } from './components/Dashboard'
@@ -11,6 +12,8 @@ import { TrainingPage } from './components/Training'
 import { GamePage } from './components/Game'
 import { DevicesPage } from './components/Devices'
 import { ProfilesPage } from './components/Profiles'
+import { SessionDetail } from './components/SessionDetail'
+import type { Training } from './types'
 
 type Page = 'dashboard' | 'training' | 'game' | 'devices' | 'profiles'
 
@@ -24,6 +27,7 @@ const NAV = [
 
 export function App(): JSX.Element {
   const [page, setPage] = useState<Page>('dashboard')
+  const [selectedTraining, setSelectedTraining] = useState<Training | null>(null)
   const activePhase = useTrainingStore((s) => s.activePhase)
   const sessionActive = SESSION_PHASES.includes(activePhase)
   const setDevices = useDeviceStore((s) => s.setDevices)
@@ -38,14 +42,27 @@ export function App(): JSX.Element {
     ]).then(([devices, profiles, trainings]) => {
       setDevices(devices)
       if (profiles.length > 0) setProfiles(profiles)
-      setTrainings(trainings)
+      const migrated = migrationService.migrate(trainings)
+      migrated
+        .filter((t, i) => t.appVersion !== trainings[i].appVersion)
+        .forEach((t) => invoke('save_training', { training: t }))
+      setTrainings(migrated)
     })
   }, [])
 
   const renderPage = () => {
+    if (selectedTraining) {
+      return (
+        <SessionDetail
+          training={selectedTraining}
+          onBack={() => setSelectedTraining(null)}
+          onDelete={() => setSelectedTraining(null)}
+        />
+      )
+    }
     switch (page) {
       case 'dashboard':
-        return <Dashboard onNavigate={(p) => setPage(p as Page)} />
+        return <Dashboard onNavigate={(p) => setPage(p as Page)} onSelectTraining={setSelectedTraining} />
       case 'training':
         return <TrainingPage onBack={() => setPage('dashboard')} />
       case 'game':
