@@ -4,10 +4,8 @@ import { Dumbbell } from 'lucide-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useSensorData } from '../../core/hooks/useSensorData'
-import { usePhoneSensor } from '../../core/hooks/usePhoneSensor'
 import { useBleReading } from '../../core/hooks/useBleReading'
-import { PHONE_SENSOR_ID } from '../../core/types'
-import type { CalibrationProfile, PhoneSensorPlacement } from '../../core/types'
+import type { CalibrationProfile } from '../../core/types'
 import { colors } from '../../theme'
 
 const DEFAULT_PROFILE: CalibrationProfile = {
@@ -23,9 +21,6 @@ export function GamePage() {
   const connected = useDeviceStore((s) => s.connected)
   const { top, bottom } = useSafeAreaInsets()
 
-  const isPhoneSensor = connected?.mac === PHONE_SENSOR_ID
-  const phonePlacement = (connected as any)?.placement as PhoneSensorPlacement | undefined
-
   const { impacts, processReading, reset } = useSensorData(DEFAULT_PROFILE)
   const [bestHit, setBestHit] = useState(0)
   const [lastHit, setLastHit] = useState(0)
@@ -34,14 +29,8 @@ export function GamePage() {
   const flashAnim = useRef(new Animated.Value(0)).current
   const active = !!connected
 
-  usePhoneSensor({
-    placement: phonePlacement ?? 'front-vertical',
-    active: isPhoneSensor && active,
-    onReading: processReading
-  })
-
   useBleReading({
-    deviceId: !isPhoneSensor ? (connected?.mac ?? null) : null,
+    deviceId: connected?.mac ?? null,
     active,
     onReading: processReading
   })

@@ -12,8 +12,6 @@ HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real.
 
 El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acelerómetro/giroscopio via Bluetooth BLE.
 
-> **Nota temporal**: en mobile existe el modo "Todo en 1" donde el propio móvil actúa como sensor (`usePhoneSensor`, `PHONE_SENSOR_ID`). Esta implementación se eliminará cuando el sensor ESP32 físico esté disponible y probado.
-
 ## Convención de plataformas
 
 **Toda mejora o feature se aplica a DESKTOP y MOBILE salvo que se indique explícitamente lo contrario.**
@@ -26,8 +24,8 @@ Cuando una feature sea exclusiva de una plataforma, indicarlo así:
 
 | Plataforma | Archivo | Versión actual |
 |---|---|---|
-| Desktop | `package.json` | 1.0.0 |
-| Mobile | `mobile/package.json` | 1.0.0 |
+| Desktop | `package.json` | 1.2.1 |
+| Mobile | `mobile/package.json` | 1.2.1 |
 
 Las versiones siguen [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
@@ -88,7 +86,7 @@ La comunicación entre main process y React UI va por IPC. El preload expone `wi
 ### Capas de la app
 
 ```
-Sensor (BLE/móvil) → useSensorData() → useTraining() → trainingStore → UI
+Sensor (BLE) → useSensorData() → useTraining() → trainingStore → UI
 ```
 
 - **`shared/services/`**: Lógica de negocio pura. `calibrationService`, `trainingService` (singleton con estado de la ronda activa).

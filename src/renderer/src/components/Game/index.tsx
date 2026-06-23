@@ -3,7 +3,6 @@ import { listen } from '@tauri-apps/api/event'
 import { Dumbbell } from 'lucide-react'
 import { useDeviceStore } from '../../stores/deviceStore'
 import { useSensorData } from '../../hooks/useSensorData'
-import { mockSensorConnection, MOCK_DEVICE_ID } from '../../services/mockSensor'
 import type { CalibrationProfile } from '../../types'
 
 const DEFAULT_PROFILE: CalibrationProfile = {
@@ -17,8 +16,6 @@ const DEFAULT_PROFILE: CalibrationProfile = {
 
 export function GamePage(): JSX.Element {
   const connected = useDeviceStore((s) => s.connected)
-  const isMock = connected?.mac === MOCK_DEVICE_ID
-
   const { impacts, processReading, reset } = useSensorData(DEFAULT_PROFILE)
   const [bestHit, setBestHit] = useState(0)
   const [lastHit, setLastHit] = useState(0)
@@ -28,13 +25,7 @@ export function GamePage(): JSX.Element {
   const active = !!connected
 
   useEffect(() => {
-    if (!isMock || !active) return
-    mockSensorConnection.connect(processReading)
-    return () => mockSensorConnection.disconnect()
-  }, [active, isMock, processReading])
-
-  useEffect(() => {
-    if (isMock || !active) return
+    if (!active) return
     let unlisten: (() => void) | null = null
     listen<{ ax: number; ay: number; az: number }>('ble-sensor-data', (e) => {
       const { ax, ay, az } = e.payload
@@ -42,7 +33,7 @@ export function GamePage(): JSX.Element {
       processReading({ ax, ay, az, gx: 0, gy: 0, gz: 0, magnitude, timestamp: Date.now() })
     }).then((fn) => { unlisten = fn })
     return () => { unlisten?.() }
-  }, [active, isMock, processReading])
+  }, [active, processReading])
 
   useEffect(() => {
     if (impacts.length === 0) return

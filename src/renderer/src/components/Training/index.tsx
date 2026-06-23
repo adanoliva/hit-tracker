@@ -7,7 +7,6 @@ import { useTrainingStore } from '../../stores/trainingStore'
 import { useTraining } from '../../hooks/useTraining'
 import { useSensorData } from '../../hooks/useSensorData'
 import { trainingService } from '../../services/training'
-import { mockSensorConnection, MOCK_DEVICE_ID } from '../../services/mockSensor'
 import { TrainingSetup } from './TrainingSetup'
 import { TrainingRound } from './TrainingRound'
 import { TrainingRest } from './TrainingRest'
@@ -23,9 +22,10 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
   const addTraining = useTrainingStore((s) => s.addTraining)
 
   const profile = getSelected()
-  const isMock  = connected?.mac === MOCK_DEVICE_ID
+  const getUserPowerMax = useTrainingStore((s) => s.getUserPowerMax)
+  const userPowerRef = useRef(getUserPowerMax(profile.id))
 
-  const { impacts, powerMax, hpmStats, processReading, reset } = useSensorData(profile, connected?.placement)
+  const { impacts, powerMax, powerMaxMag, hpmStats, processReading, reset } = useSensorData(profile)
   const {
     phase,
     currentRoundNumber,
@@ -90,20 +90,9 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
     if (restTimeRemaining === 1) audioService.longBeep()
   }, [restTimeRemaining, phase])
 
-  // Mock sensor: conectar/desconectar según la fase
-  useEffect(() => {
-    if (!isMock) return
-    if (phase === 'round') {
-      mockSensorConnection.connect(processReading)
-    } else {
-      mockSensorConnection.disconnect()
-    }
-    return () => mockSensorConnection.disconnect()
-  }, [phase, isMock, processReading])
-
   // BLE sensor real: escuchar datos solo durante la ronda
   useEffect(() => {
-    if (isMock || !connected || phase !== 'round') return
+    if (!connected || phase !== 'round') return
     let unlisten: (() => void) | null = null
     listen<{ ax: number; ay: number; az: number }>('ble-sensor-data', (e) => {
       const { ax, ay, az } = e.payload
@@ -111,7 +100,7 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
       processReading({ ax, ay, az, gx: 0, gy: 0, gz: 0, magnitude, timestamp: Date.now() })
     }).then((fn) => { unlisten = fn })
     return () => { unlisten?.() }
-  }, [phase, isMock, connected, processReading])
+  }, [phase, connected, processReading])
 
   // Registrar impactos en el servicio de entrenamiento
   useEffect(() => {
@@ -182,6 +171,8 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
       isFreeMode={isFreeMode}
       impacts={impacts}
       powerMax={powerMax}
+      powerMaxMag={powerMaxMag}
+      userPowerRef={userPowerRef.current}
       hpmStats={hpmStats}
       onAbort={handleAbort}
       onFinish={finishCurrentRound}

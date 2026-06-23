@@ -1,19 +1,13 @@
 export interface SensorReading {
   timestamp: number
-  ax: number
+  ax: number        // V1: m/s² (float) | V2: raw ADC / 16 (integer)
   ay: number
   az: number
   gx: number
   gy: number
   gz: number
-  magnitude: number
+  magnitude: number // V1: m/s² float | V2: entero positivo (≈128 reposo, 600-1500+ golpe)
 }
-
-export type SensorPlacement = 'front-vertical' | 'top-horizontal'
-
-// [solo mobile]
-export type PhoneSensorPlacement = SensorPlacement
-export const PHONE_SENSOR_ID = 'PHONE_SENSOR'
 
 export interface Impact {
   time: number
@@ -29,7 +23,6 @@ export interface Device {
   createdAt: number
   lastSeen: number
   isConnected?: boolean
-  placement?: SensorPlacement
 }
 
 export interface CalibrationData {

@@ -8,11 +8,8 @@ import { useProfileStore } from '../../core/stores/profileStore'
 import { useTrainingStore } from '../../core/stores/trainingStore'
 import { useTraining } from '../../core/hooks/useTraining'
 import { useSensorData } from '../../core/hooks/useSensorData'
-import { usePhoneSensor } from '../../core/hooks/usePhoneSensor'
 import { useBleReading } from '../../core/hooks/useBleReading'
 import { trainingService } from '../../core/services/trainingService'
-import { PHONE_SENSOR_ID } from '../../core/types'
-import type { PhoneSensorPlacement } from '../../core/types'
 import { TrainingSetup } from './TrainingSetup'
 import { TrainingRound } from './TrainingRound'
 import { TrainingRest } from './TrainingRest'
@@ -25,11 +22,11 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
   const addTraining = useTrainingStore((s) => s.addTraining)
   const profile     = getSelected()
 
-  const isPhoneSensor = connected?.mac === PHONE_SENSOR_ID
-  const phonePlacement = (connected as any)?.placement as PhoneSensorPlacement | undefined
-
   const { top } = useSafeAreaInsets()
-  const { impacts, powerMax, powerMaxMag, hpmStats, processReading, reset } = useSensorData(profile, connected?.placement)
+  const getUserPowerMax = useTrainingStore((s) => s.getUserPowerMax)
+  const userPowerRef = useRef(getUserPowerMax(profile.id))
+
+  const { impacts, powerMax, powerMaxMag, hpmStats, processReading, reset } = useSensorData(profile)
   const {
     phase, currentRoundNumber, totalRounds, roundTimeRemaining, roundTimeElapsed,
     restTimeRemaining, prepTimeRemaining, completedRounds, isFreeMode,
@@ -91,22 +88,11 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
     trainingService.onImpactDetected(impacts[impacts.length - 1])
   }, [impacts, phase])
 
-  // [solo mobile] Modo Todo en 1: el propio móvil actúa como sensor
-  usePhoneSensor({
-    placement: phonePlacement ?? 'front-vertical',
-    active: isPhoneSensor && phase === 'round',
-    onReading: processReading
-  })
-
-  // Sensor BLE externo
   useBleReading({
-    deviceId: !isPhoneSensor ? (connected?.mac ?? null) : null,
+    deviceId: connected?.mac ?? null,
     active: phase === 'round',
     onReading: processReading
   })
-
-  // TODO: BLE externo (ESP32) — cuando phase === 'round' y !isPhoneSensor,
-  // suscribirse a la característica GATT y llamar processReading() por notificación
 
   const handleStart = (roundDuration: number, numRounds: number, restDuration: number) => {
     if (!connected) return
@@ -165,6 +151,7 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
       impacts={impacts}
       powerMax={powerMax}
       powerMaxMag={powerMaxMag}
+      userPowerRef={userPowerRef.current}
       timeElapsed={roundTimeElapsed}
       isFreeMode={isFreeMode}
       onFinish={finishCurrentRound}

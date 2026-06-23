@@ -5,9 +5,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
-import type { Device, PhoneSensorPlacement } from '../../core/types'
-import { PHONE_SENSOR_ID } from '../../core/types'
-import { PhoneSensorPicker } from './PhoneSensorPicker'
+import type { Device } from '../../core/types'
 import { getBleManager, isBleAvailable } from '../../services/ble'
 import { connectBleDevice, disconnectBleDevice } from '../../services/bleConnection'
 import { colors } from '../../theme'
@@ -34,35 +32,15 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
   const [found, setFound] = useState<FoundDevice[]>([])
   const [editingMac, setEditingMac] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
-  const [showPhonePicker, setShowPhonePicker] = useState(false)
   const [showPlacement, setShowPlacement] = useState(false)
   const [connectingMac, setConnectingMac] = useState<string | null>(null)
   const { width } = useWindowDimensions()
-
-  const phoneDevice = devices.find((d) => d.mac === PHONE_SENSOR_ID)
-
-  const handleAddPhone = (placement: PhoneSensorPlacement) => {
-    setShowPhonePicker(false)
-    const device: Device = {
-      mac: PHONE_SENSOR_ID,
-      name: placement === 'front-vertical' ? '📱 Este móvil — frontal' : '📱 Este móvil — encima',
-      createdAt: Date.now(),
-      lastSeen: Date.now(),
-      placement
-    }
-    if (phoneDevice) {
-      updateDevice(PHONE_SENSOR_ID, { name: device.name, placement })
-    } else {
-      addDevice(device)
-    }
-    setConnected(PHONE_SENSOR_ID)
-  }
 
   useEffect(() => () => { getBleManager()?.stopDeviceScan() }, [])
 
   const startScan = useCallback(async () => {
     if (!isBleAvailable) {
-      Alert.alert('BLE no disponible', 'Este build no tiene soporte Bluetooth. Usa el modo "Este móvil como sensor" o haz un build de producción.')
+      Alert.alert('BLE no disponible', 'Este build no tiene soporte Bluetooth. Haz un build de producción para usar el sensor.')
       return
     }
 
@@ -206,19 +184,13 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
             <View style={s.cardRow}>
               <View style={s.flex1}>
                 <Text style={s.deviceName}>{d.name}</Text>
-                {d.mac !== PHONE_SENSOR_ID && (
-                  <Text style={[s.muted, { fontFamily: 'monospace' }]}>{d.mac}</Text>
-                )}
+                <Text style={[s.muted, { fontFamily: 'monospace' }]}>{d.mac}</Text>
                 {connected?.mac === d.mac && <Text style={s.activeBadge}>● Activo</Text>}
               </View>
               <View style={s.actions}>
                 {connected?.mac === d.mac ? (
                   <TouchableOpacity style={s.btnDanger} onPress={() => { disconnectBleDevice(); setConnected(null) }}>
                     <Text style={s.btnDangerText}>Desconectar</Text>
-                  </TouchableOpacity>
-                ) : d.mac === PHONE_SENSOR_ID ? (
-                  <TouchableOpacity style={s.btn} onPress={() => setConnected(d.mac)}>
-                    <Text style={s.btnText}>Usar</Text>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
@@ -242,18 +214,12 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
                     }
                   </TouchableOpacity>
                 )}
-                {d.mac === PHONE_SENSOR_ID ? (
-                  <TouchableOpacity style={s.btnMuted} onPress={() => setShowPhonePicker(true)}>
-                    <Text style={s.btnMutedText}>Cambiar posición</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={s.btnMuted}
-                    onPress={() => { setEditingMac(d.mac); setEditName(d.name) }}
-                  >
-                    <Text style={s.btnMutedText}>Renombrar</Text>
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                  style={s.btnMuted}
+                  onPress={() => { setEditingMac(d.mac); setEditName(d.name) }}
+                >
+                  <Text style={s.btnMutedText}>Renombrar</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={s.btnMuted}
                   onPress={() =>
@@ -270,18 +236,6 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
           )}
         </View>
       ))}
-
-      {/* [solo mobile] Usar este móvil como sensor */}
-      {scanState === 'idle' && (
-        <TouchableOpacity style={s.phoneBtn} onPress={() => setShowPhonePicker(true)}>
-          <Text style={s.phoneBtnTitle}>📱 Usar este móvil como sensor</Text>
-          <Text style={s.phoneBtnSub}>
-            {phoneDevice
-              ? `Configurado: ${phoneDevice.placement === 'front-vertical' ? 'Frontal vertical' : 'Horizontal encima'}`
-              : 'El móvil detecta golpes con sus propios sensores'}
-          </Text>
-        </TouchableOpacity>
-      )}
 
       {scanState === 'idle' && (
         <TouchableOpacity style={s.scanBtn} onPress={startScan}>
@@ -328,12 +282,6 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
         </View>
       )}
 
-      {showPhonePicker && (
-        <PhoneSensorPicker
-          onConfirm={handleAddPhone}
-          onCancel={() => setShowPhonePicker(false)}
-        />
-      )}
     </ScrollView>
   )
 }
@@ -368,12 +316,6 @@ const s = StyleSheet.create({
     color: colors.textPrimary, fontSize: 14
   },
   saveText: { color: colors.secondary, fontSize: 14 },
-  phoneBtn: {
-    borderWidth: 1, borderColor: `${colors.secondary}66`,
-    borderRadius: 12, padding: 14, backgroundColor: `${colors.secondary}0d`
-  },
-  phoneBtnTitle: { fontSize: 14, fontWeight: '700', color: colors.secondary },
-  phoneBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 3 },
   scanBtn: {
     borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border,
     borderRadius: 12, paddingVertical: 16, alignItems: 'center'

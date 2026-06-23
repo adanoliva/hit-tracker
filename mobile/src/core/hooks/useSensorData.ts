@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import type { SensorReading, Impact, CalibrationProfile, PhoneSensorPlacement } from '../types'
+import type { SensorReading, Impact, CalibrationProfile } from '../types'
 import { calibrationService } from '../services/calibration'
 
 interface HPMStats {
@@ -19,7 +19,7 @@ interface UseSensorDataReturn {
 
 const PEAK_COOLDOWN_MS = 200
 
-export function useSensorData(profile: CalibrationProfile, _placement?: PhoneSensorPlacement): UseSensorDataReturn {
+export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn {
   const [impacts, setImpacts] = useState<Impact[]>([])
   const [powerMax, setPowerMax] = useState(0)
   const [powerMaxMag, setPowerMaxMag] = useState(0)

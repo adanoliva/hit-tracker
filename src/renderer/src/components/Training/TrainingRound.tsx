@@ -9,6 +9,8 @@ interface TrainingRoundProps {
   isFreeMode: boolean
   impacts: Impact[]
   powerMax: number
+  powerMaxMag: number
+  userPowerRef: number
   hpmStats: { current: number; average: number; max: number }
   onAbort: () => void
   onFinish: () => void
@@ -39,15 +41,19 @@ function ImpactDot(props: any): JSX.Element {
 
 export function TrainingRound({
   roundNumber, totalRounds, timeRemaining, timeElapsed, isFreeMode,
-  impacts, powerMax, hpmStats, onAbort, onFinish
+  impacts, powerMax, powerMaxMag, userPowerRef, hpmStats, onAbort, onFinish
 }: TrainingRoundProps): JSX.Element {
   const validHits = impacts.filter((i) => i.isValid).length
 
   const chartData = impacts.map((i) => ({
-    time:      i.time,
-    intensity: i.intensity,
-    isValid:   i.isValid
+    time:    i.time,
+    value:   userPowerRef > 0 ? Math.round((i.magnitude / userPowerRef) * 100) : i.intensity,
+    isValid: i.isValid
   }))
+
+  const maxChartValue = chartData.length > 0 ? Math.max(...chartData.map(d => d.value)) : 100
+  const yDomain: [number, number] = [0, Math.max(105, maxChartValue + 5)]
+  const refLineY = userPowerRef > 0 ? 80 : (powerMax > 0 ? powerMax * 0.8 : null)
 
   const xDomain: [number, number] = impacts.length > 0
     ? [impacts[0].time, Math.max(impacts[impacts.length - 1].time, impacts[0].time + 2000)]
@@ -90,15 +96,15 @@ export function TrainingRound({
           <LineChart data={chartData} margin={{ top: 12, right: 8, bottom: 0, left: 0 }}>
             <XAxis dataKey="time" type="number" domain={xDomain} hide />
             <YAxis
-              dataKey="intensity"
+              dataKey="value"
               type="number"
-              domain={[0, 105]}
+              domain={yDomain}
               tick={{ fontSize: 10, fill: '#808080' }}
               width={28}
             />
-            {powerMax > 0 && (
+            {refLineY != null && (
               <ReferenceLine
-                y={powerMax * 0.8}
+                y={refLineY}
                 stroke="#808080"
                 strokeDasharray="4 4"
                 opacity={0.4}
@@ -106,7 +112,7 @@ export function TrainingRound({
               />
             )}
             <Line
-              dataKey="intensity"
+              dataKey="value"
               type="monotone"
               stroke="#2a2a2a"
               strokeWidth={1}
@@ -122,7 +128,7 @@ export function TrainingRound({
       <div className="grid grid-cols-4 gap-3">
         <Stat label="Golpes" value={impacts.length} />
         <Stat label="Válidos" value={validHits} color="text-accent" />
-        <Stat label="Power máx" value={powerMax} color="text-accent" />
+        <Stat label="Power máx" value={powerMaxMag} color="text-accent" />
         <Stat label="HPM" value={hpmStats.current} color="text-secondary" />
       </div>
     </div>

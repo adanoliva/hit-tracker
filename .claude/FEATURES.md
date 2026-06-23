@@ -11,7 +11,7 @@
 
 | ID | Título | Versión | Plataforma | Prioridad | Estado | Depende de |
 |---|---|---|---|---|---|---|
-| HT-001 | Eliminación de modos de prueba (mock desktop y teléfono como sensor mobile) | v1 | both | high | pending | — |
+| HT-001 | Eliminación de modos de prueba (mock desktop y teléfono como sensor mobile) | v1 | both | high | done | — |
 | HT-002 | Pantalla de detalle de sesión con gráfico de golpes por round | v1 | both | high | pending | HT-009-b |
 | HT-003 | Compartir sesión en redes sociales desde mobile | v1 | mobile | medium | pending | HT-002 |
 | HT-005 | Modo Game mejorado con TOP 3 y entrada de iniciales estilo arcade | v1 | both | medium | pending | HT-009-b |
@@ -23,8 +23,8 @@
 | HT-006-c | Calibración: asistente guiado 3 series de golpes | v3 | both | high | pending | HT-006-a, HT-006-b |
 | HT-007 | Umbral de golpe válido configurable por perfil | v1 | both | medium | done | — |
 | HT-008 | Power máximo del usuario basado en media de las últimas 5 sesiones | v1 | both | medium | done | — |
-| HT-009-a | Potencia real: firmware V2 con raw int16 escalado (/16) | v1 | both | high | pending | HT-008 |
-| HT-009-b | Potencia real: display raw durante sesión y gráfica en % con referencia de 5 sesiones | v1 | both | high | pending | HT-008, HT-009-a |
+| HT-009-a | Potencia real: firmware V2 con raw int16 escalado (/16) | v1 | both | high | done | HT-008 |
+| HT-009-b | Potencia real: display raw durante sesión y gráfica en % con referencia de 5 sesiones | v1 | both | high | done | HT-008, HT-009-a |
 | HT-010 | Sistema de migraciones de datos — appVersion en Training y migrationService | v1 | both | high | pending | HT-009-a |
 
 ## Leyenda

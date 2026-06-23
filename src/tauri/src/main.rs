@@ -19,6 +19,7 @@ use uuid::Uuid;
 // Service / characteristic UUIDs matching the firmware
 const SERVICE_UUID: &str = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
 const CHARACTERISTIC_UUID: &str = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+const VERSION_CHARACTERISTIC_UUID: &str = "beb5483e-36e1-4688-b7f5-ea07361b26a9";
 
 struct BleState {
     scanning: Arc<AtomicBool>,
@@ -26,6 +27,7 @@ struct BleState {
     found: Arc<Mutex<HashMap<String, Peripheral>>>,
     connected: Arc<Mutex<Option<Peripheral>>>,
     reading: Arc<AtomicBool>,
+    sensor_version: Arc<Mutex<u8>>,
 }
 
 // ── Paths ────────────────────────────────────────────────────────────────────
@@ -275,17 +277,29 @@ async fn connect_ble_device(
 
     let svc_uuid = Uuid::parse_str(SERVICE_UUID).map_err(|e| e.to_string())?;
     let chr_uuid = Uuid::parse_str(CHARACTERISTIC_UUID).map_err(|e| e.to_string())?;
+    let ver_uuid = Uuid::parse_str(VERSION_CHARACTERISTIC_UUID).map_err(|e| e.to_string())?;
 
-    let characteristic = peripheral
+    let service = peripheral
         .services()
         .iter()
         .find(|s| s.uuid == svc_uuid)
         .ok_or("HIT TRACKER service not found")?
+        .clone();
+
+    let characteristic = service
         .characteristics
         .iter()
         .find(|c| c.uuid == chr_uuid)
         .ok_or("Sensor characteristic not found")?
         .clone();
+
+    // Read sensor version (default 1 if characteristic absent)
+    let version: u8 = if let Some(ver_char) = service.characteristics.iter().find(|c| c.uuid == ver_uuid) {
+        peripheral.read(ver_char).await.ok().and_then(|b| b.first().copied()).unwrap_or(1)
+    } else {
+        1
+    };
+    *state.sensor_version.lock().unwrap() = version;
 
     peripheral.subscribe(&characteristic).await.map_err(|e| e.to_string())?;
 
@@ -307,7 +321,12 @@ async fn connect_ble_device(
         while reading_flag.load(Ordering::SeqCst) {
             match tokio::time::timeout(Duration::from_secs(5), stream.next()).await {
                 Ok(Some(data)) => {
-                    if data.value.len() == 28 {
+                    if version == 2 && data.value.len() == 16 {
+                        let ax = i16::from_le_bytes(data.value[4..6].try_into().unwrap()) as f64;
+                        let ay = i16::from_le_bytes(data.value[6..8].try_into().unwrap()) as f64;
+                        let az = i16::from_le_bytes(data.value[8..10].try_into().unwrap()) as f64;
+                        let _ = app.emit("ble-sensor-data", serde_json::json!({ "ax": ax, "ay": ay, "az": az }));
+                    } else if version != 2 && data.value.len() == 28 {
                         let ax = f32::from_le_bytes(data.value[4..8].try_into().unwrap());
                         let ay = f32::from_le_bytes(data.value[8..12].try_into().unwrap());
                         let az = f32::from_le_bytes(data.value[12..16].try_into().unwrap());
@@ -344,6 +363,7 @@ fn main() {
             found: Arc::new(Mutex::new(HashMap::new())),
             connected: Arc::new(Mutex::new(None)),
             reading: Arc::new(AtomicBool::new(false)),
+            sensor_version: Arc::new(Mutex::new(1)),
         })
         .invoke_handler(tauri::generate_handler![
             save_training,

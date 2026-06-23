@@ -61,7 +61,6 @@ hit-tracker/
 │     ├─ types/index.ts            → re-export @shared/types
 │     ├─ services/
 │     │  ├─ audio.ts               HTMLAudioElement cache
-│     │  ├─ mockSensor.ts          Sensor sintético para desarrollo
 │     │  ├─ calibration.ts         → re-export @shared/services/calibration
 │     │  └─ training.ts            → re-export @shared/services/training
 │     ├─ hooks/
@@ -89,7 +88,7 @@ hit-tracker/
 │  │  │  ├─ hooks/
 │  │  │  │  ├─ useSensorData.ts    Idéntico a desktop en lógica
 │  │  │  │  ├─ useTraining.ts      Idéntico a desktop en lógica
-│  │  │  │  └─ usePhoneSensor.ts   [solo mobile] react-native-sensors
+│  │  │  │  └─ useBleReading.ts    Suscribe lecturas BLE al callback activo
 │  │  │  └─ stores/
 │  │  │     ├─ deviceStore.ts
 │  │  │     ├─ profileStore.ts
@@ -97,12 +96,13 @@ hit-tracker/
 │  │  │
 │  │  ├─ services/
 │  │  │  ├─ audio.ts               expo-audio
-│  │  │  ├─ ble.ts                 react-native-ble-plx
+│  │  │  ├─ ble.ts                 react-native-ble-plx (BleManager singleton)
+│  │  │  ├─ bleConnection.ts       connect/disconnect/parse sensor BLE
 │  │  │  └─ storage.ts             expo-file-system
 │  │  │
 │  │  └─ components/
 │  │     ├─ Dashboard/
-│  │     ├─ Devices/               Incluye PhoneSensorPicker
+│  │     ├─ Devices/
 │  │     ├─ Profiles/
 │  │     ├─ Training/
 │  │     └─ Game/
@@ -146,7 +146,6 @@ interface Device {
   createdAt: number
   lastSeen: number
   isConnected?: boolean
-  placement?: SensorPlacement
 }
 
 interface CalibrationProfile {
@@ -197,9 +196,6 @@ interface Training {
   hpmAverage: number
 }
 
-type SensorPlacement = 'front-vertical' | 'top-horizontal'
-type PhoneSensorPlacement = SensorPlacement  // alias mobile
-const PHONE_SENSOR_ID = 'PHONE_SENSOR'       // mac virtual del móvil como sensor
 ```
 
 ---
@@ -254,7 +250,7 @@ trainingService.getPreviousRoundStats(roundNumber: number): RoundStats | null
 Presente en desktop (`src/renderer/src/hooks/`) y mobile (`mobile/src/core/hooks/`). Lógica idéntica.
 
 ```typescript
-function useSensorData(profile: CalibrationProfile, placement?: SensorPlacement): {
+function useSensorData(profile: CalibrationProfile): {
   impacts: Impact[]
   powerMax: number
   hpmStats: { current: number; average: number; max: number }
@@ -302,17 +298,17 @@ Transiciones de fase:
 - `resting` → `round`: timer llega a 0 — `trainingService.startRound(n+1)`
 - `round` → `finished`: última ronda termina — `trainingService.finishTraining()`
 
-### usePhoneSensor `[solo mobile]`
+### useBleReading `[solo mobile]`
 
 ```typescript
-function usePhoneSensor(options: {
-  placement: PhoneSensorPlacement
+function useBleReading(options: {
+  deviceId: string | null
   active: boolean
   onReading: (reading: SensorReading) => void
 }): void
 ```
 
-Usa `react-native-sensors` (acelerómetro + giroscopio) a 50Hz. Convierte radianes a grados para `gx/gy/gz`. No devuelve estado — llama `onReading` directamente.
+Conecta al sensor BLE por `deviceId` (vía `bleConnection.connectBleDevice`) cuando `active` es `true`. Redirige las notificaciones GATT al callback `onReading`. Se desactiva automáticamente al desmontar o cuando `active` cambia a `false`.
 
 ---
 

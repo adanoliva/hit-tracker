@@ -1,203 +1,165 @@
-# HIT TRACKER — Sensor V2 (Batería + LEDs)
+# Sensor Técnico V2 — ESP32 + MPU-6050
 
-Evolución del prototipo V1 (breadboard + USB). V2 es un sensor autónomo con batería integrada, carga USB-C y LEDs indicadores de estado. El firmware es idéntico al de V1 — el único añadido es la gestión de los LEDs.
+## Descripción
 
----
+El firmware V2 envía valores de aceleración y giroscopio como `int16` divididos por 16 (raw ADC / 16) en lugar de floats en m/s². Esto produce valores enteros en el rango ~100-1500+ que se corresponden mejor con la percepción de potencia real.
 
-## Cambios respecto a V1
+## Hardware
 
-| Aspecto | V1 | V2 |
+- Board: ESP32 DevKit C
+- Sensor: GY-521 (MPU-6050)
+- IDE: Arduino IDE 2.0+
+- Upload speed: 921600
+- Serial monitor: 115200 baud
+
+## Protocolo BLE
+
+**Service UUID**: `4fafc201-1fb5-459e-8fcc-c5c9c331914b`
+
+| UUID | Tipo | Descripción |
 |---|---|---|
-| Alimentación | USB (cable) | Batería LiPo 1000 mAh |
-| Carga | Por USB del ordenador | Puerto USB-C dedicado (TP4056) |
-| Encendido | Siempre encendido si hay cable | Interruptor on/off físico |
-| Feedback visual | Ninguno | LEDs indicadores de estado |
-| Botón de acción | No | No (llega en V3) |
-| PCB | Breadboard | PCB personalizada compacta |
-| Montaje | Bridas / cinta provisional | Fijación definitiva al saco |
+| `beb5483e-36e1-4688-b7f5-ea07361b26a8` | NOTIFY | Datos del sensor (16 bytes) |
+| `beb5483e-36e1-4688-b7f5-ea07361b26a9` | READ | Versión del firmware (1 byte: `0x02`) |
 
----
-
-## Componentes
-
-### 1. ESP32 + GY-521 (igual que V1)
-
-Ver `SENSOR-TECNICO-V1.md` para especificaciones completas.
-
-### 2. Batería LiPo
-
-| Especificación | Valor |
-|---|---|
-| Capacidad | 1000 mAh (recomendado) |
-| Voltaje | 3.7V nominal |
-| Conector | JST PH 2.0 |
-| Tiempo estimado | ~6-8 horas a 80 mA |
-
-### 3. Módulo de carga LiPo — TP4056
-
-| Especificación | Valor |
-|---|---|
-| Chip | TP4056 (con protección) |
-| Entrada | USB-C 5V |
-| Corriente de carga | 1A máx |
-| Protección | Sobrecarga, sobredescarga, cortocircuito |
-| Voltaje de salida | 3.7-4.2V |
-
-> Usar el módulo TP4056 **con protección integrada** (tiene 6 pines, no 4). El de 4 pines no protege la batería.
-
-### 4. Interruptor on/off
-
-| Tipo | Descripción |
-|---|---|
-| Interruptor deslizante | Simple, barato, sin riesgo de activación accidental |
-
-El interruptor va en serie entre la salida del TP4056 y el VIN del ESP32. Con él en OFF el sensor no consume nada de batería.
-
-### 5. LEDs indicadores
-
-Dos LEDs recomendados:
-
-| LED | Color | Función |
-|---|---|---|
-| Estado BLE | Azul | Indica conexión / actividad BLE |
-| Batería | Rojo | Batería baja |
-
----
-
-## Diagrama de Conexión
+### Packet V2 — 16 bytes
 
 ```
-                    ┌─────────────────────────────┐
-                    │         BATERÍA LiPo         │
-                    │         3.7V / 1000mAh       │
-                    └────────┬────────┬────────────┘
-                             │+       │-
-                    ┌────────▼────────▼────────────┐
-                    │       TP4056 + protección     │
-                    │  USB-C ──→ IN   BAT ──→ LiPo │
-                    │            OUT+ / OUT-        │
-                    └────────┬────────┬────────────┘
-                             │+       │-
-                    ┌────────▼────────▼────────────┐
-                    │    INTERRUPTOR ON/OFF         │
-                    └────────┬────────┬────────────┘
-                             │        │
-                    ┌────────▼────────▼────────────┐
-                    │            ESP32              │
-                    │  GPIO 21 ──→ SDA (MPU-6050)  │
-                    │  GPIO 22 ──→ SCL (MPU-6050)  │
-                    │  GPIO  2 ──→ LED azul (BLE)  │
-                    │  GPIO 4  ──→ LED rojo (bat)  │
-                    └───────────────────────────────┘
-                                    │ I2C
-                    ┌───────────────▼───────────────┐
-                    │         GY-521 (MPU-6050)     │
-                    └───────────────────────────────┘
+bytes 0-3:   uint32  timestamp (ms)
+bytes 4-5:   int16   ax  (raw ADC / 16)
+bytes 6-7:   int16   ay  (raw ADC / 16)
+bytes 8-9:   int16   az  (raw ADC / 16)
+bytes 10-11: int16   gx  (raw ADC / 16)
+bytes 12-13: int16   gy  (raw ADC / 16)
+bytes 14-15: int16   gz  (raw ADC / 16)
 ```
 
-### Pines ESP32 — V2
+### Rangos esperados (±16g, MPU-6050)
 
-| GPIO | Función |
-|---|---|
-| 21 | SDA (I2C → MPU-6050) |
-| 22 | SCL (I2C → MPU-6050) |
-| 2 | LED azul — estado BLE |
-| 4 | LED rojo — batería baja |
-| - | 3.3V → VCC MPU-6050 |
-| - | GND compartido |
+| Estado | ax/ay (raw/16) | az (raw/16) | magnitude |
+|---|---|---|---|
+| Reposo | ≈0 | ≈128 (gravedad) | ≈128 |
+| Golpe normal (~5g) | ≈640 | ≈128 | ≈650 |
+| Golpe fuerte (~10g+) | ≈1280 | ≈128 | ≈1284+ |
 
-> Los LEDs necesitan resistencia en serie (~220Ω a 3.3V).
-
----
-
-## Firmware — Cambios respecto a V1
-
-El firmware de V2 es el de V1 con el añadido de la gestión de LEDs. No hay botón de acción en V2.
-
-El `SERVICE_UUID` es el mismo que V1 — el filtrado de compatibilidad funciona igual: la app solo muestra sensores que anuncien ese UUID. Ver `SENSOR-TECNICO-V1.md § Filtrado de compatibilidad`.
-
-El único cambio en la sección de identidad es `SENSOR_VERSION`:
+## Firmware completo (Arduino)
 
 ```cpp
-#define SENSOR_VERSION 2   // indica a la app que es hardware V2
-```
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+#include <BLE2902.h>
+#include <I2Cdev.h>
+#include <MPU6050.h>
+#include <Wire.h>
+#include <math.h>
 
-```cpp
-#define LED_BLE_PIN  2   // azul — estado BLE
-#define LED_BAT_PIN  4   // rojo — batería baja
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define VERSION_UUID        "beb5483e-36e1-4688-b7f5-ea07361b26a9"
+#define SENSOR_VERSION      2
+
+// Umbral de notificación (magnitude raw/16 — ajustar según perfil)
+#define NOTIFY_THRESHOLD    150
+
+MPU6050 mpu;
+BLECharacteristic* pDataChar;
+BLECharacteristic* pVersionChar;
+bool deviceConnected = false;
+
+class ServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer) override { deviceConnected = true; }
+  void onDisconnect(BLEServer* pServer) override {
+    deviceConnected = false;
+    BLEDevice::startAdvertising();
+  }
+};
 
 void setup() {
-  // ... setup existente de V1 ...
-
-  pinMode(LED_BLE_PIN, OUTPUT);
-  pinMode(LED_BAT_PIN, OUTPUT);
-
-  digitalWrite(LED_BLE_PIN, LOW);
-  digitalWrite(LED_BAT_PIN, LOW);
-}
-```
-
-### Gestión de LEDs en el loop
-
-```cpp
-void updateLEDs() {
-  // LED azul: estado BLE
-  if (deviceConnected) {
-    // Parpadeo lento = conectado
-    digitalWrite(LED_BLE_PIN, (millis() / 1000) % 2);
-  } else {
-    // Encendido fijo = esperando conexión
-    digitalWrite(LED_BLE_PIN, HIGH);
+  Serial.begin(115200);
+  Wire.begin();
+  mpu.initialize();
+  if (!mpu.testConnection()) {
+    Serial.println("MPU6050 connection failed");
+    while (1) {}
   }
 
-  // LED rojo: batería baja (lectura ADC del pin de batería del TP4056)
-  // El TP4056 expone CHRG y STDBY; si ambos están en HIGH = batería baja
-  // Alternativa: leer voltaje de batería con divisor resistivo en GPIO34
+  BLEDevice::init("HIT_TRACKER_PROTOTIPO");
+  BLEServer* pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new ServerCallbacks());
+
+  BLEService* pService = pServer->createService(SERVICE_UUID);
+
+  pDataChar = pService->createCharacteristic(
+    CHARACTERISTIC_UUID,
+    BLECharacteristic::PROPERTY_NOTIFY
+  );
+  pDataChar->addDescriptor(new BLE2902());
+
+  uint8_t ver = SENSOR_VERSION;
+  pVersionChar = pService->createCharacteristic(
+    VERSION_UUID,
+    BLECharacteristic::PROPERTY_READ
+  );
+  pVersionChar->setValue(&ver, 1);
+
+  pService->start();
+  BLEAdvertising* pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(true);
+  BLEDevice::startAdvertising();
+
+  Serial.println("HIT TRACKER V2 listo");
 }
 
 void loop() {
-  updateLEDs();
-  // ... loop existente de V1 ...
+  if (!deviceConnected) {
+    delay(20);
+    return;
+  }
+
+  int16_t ax_raw, ay_raw, az_raw, gx_raw, gy_raw, gz_raw;
+  mpu.getAcceleration(&ax_raw, &ay_raw, &az_raw);
+  mpu.getRotation(&gx_raw, &gy_raw, &gz_raw);
+
+  int16_t ax = ax_raw / 16;
+  int16_t ay = ay_raw / 16;
+  int16_t az = az_raw / 16;
+  int16_t gx = gx_raw / 16;
+  int16_t gy = gy_raw / 16;
+  int16_t gz = gz_raw / 16;
+
+  int32_t mag2 = (int32_t)ax * ax + (int32_t)ay * ay + (int32_t)az * az;
+  float magnitude = sqrtf((float)mag2);
+
+  if (magnitude > NOTIFY_THRESHOLD) {
+    uint32_t timestamp = millis();
+    uint8_t buffer[16];
+    memcpy(&buffer[0],  &timestamp, 4);
+    memcpy(&buffer[4],  &ax, 2);
+    memcpy(&buffer[6],  &ay, 2);
+    memcpy(&buffer[8],  &az, 2);
+    memcpy(&buffer[10], &gx, 2);
+    memcpy(&buffer[12], &gy, 2);
+    memcpy(&buffer[14], &gz, 2);
+
+    pDataChar->setValue(buffer, 16);
+    pDataChar->notify();
+  }
+
+  delay(20); // ~50 Hz
 }
 ```
 
-### Estados del LED azul (BLE)
+## Diferencias respecto a V1
 
-| Estado | LED azul |
-|---|---|
-| Encendido, sin conexión BLE | Encendido fijo |
-| Conectado vía BLE | Parpadeo lento (1s) |
-| Transmitiendo datos activamente | Parpadeo rápido (100ms) |
-
-### LED rojo (batería)
-
-El TP4056 expone dos pines de estado (`CHRG` y `STDBY`) que se pueden leer desde el ESP32, o alternativamente medir el voltaje de la batería con un divisor resistivo en un pin ADC. Cuando el voltaje cae por debajo de ~3.5V, encender el LED rojo fijo como aviso.
-
----
-
-## PCB — Consideraciones de diseño
-
-- Dimensiones objetivo: < 50mm x 40mm
-- Puerto USB-C en el borde de la placa (carga sin abrir carcasa)
-- Interruptor on/off accesible desde el exterior
-- LEDs visibles desde fuera de la carcasa (guías de luz o agujeros)
-- Dejar footprint para el botón de acción de V3 aunque no se pueble en V2
-
----
-
-## Problemas comunes — Nuevos en V2
-
-| Problema | Causa | Solución |
+| Aspecto | V1 | V2 |
 |---|---|---|
-| Sensor no enciende con batería | TP4056 sin protección o batería descargada | Verificar módulo con 6 pines; cargar batería |
-| Batería se descarga rápido | BLE advertising continuo en reposo | Implementar deep sleep cuando no hay cliente |
-| LED siempre apagado | Pin incorrecto, resistencia faltante o lógica invertida | Verificar pin, resistencia en serie y nivel activo |
+| Packet | 28 bytes | 16 bytes |
+| Valores ax/ay/az | float32 m/s² | int16 raw/16 |
+| magnitude (reposo) | ≈9.8 | ≈128 |
+| magnitude (golpe fuerte) | ≈50-100 | ≈800-1500+ |
+| `SENSOR_VERSION` | 1 | 2 |
 
----
+## Nota de calibración
 
-## Referencias adicionales
-
-- [TP4056 Datasheet](https://dlnmh9ip6v2uc.cloudfront.net/datasheets/Prototyping/TP4056.pdf)
-- [ESP32 Deep Sleep](https://randomnerdtutorials.com/esp32-deep-sleep-arduino-ide-wake-up-sources/)
-- Ver `SENSOR-TECNICO-V1.md` para firmware base completo
-- Ver `SENSOR-TECNICO-V3.md` para la incorporación del botón de acción y SD
+Los perfiles de calibración (`threshold`, `sensitivity`) creados con V1 están ajustados para magnitudes en m/s² (típicamente threshold=12-15). Con V2 los valores son ~10× mayores — será necesario recalibrar los perfiles tras flashear el firmware V2.

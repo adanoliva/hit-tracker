@@ -3,23 +3,43 @@ import type { SensorReading } from '../core/types'
 
 const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'
 const CHAR_UUID    = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'
+const VERSION_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a9'
 
 type ReadingCallback = (r: SensorReading) => void
 
 let _device: any = null
 let _subscription: any = null
+let _sensorVersion = 1
+
+function parseV1(raw: Uint8Array): SensorReading | null {
+  if (raw.length < 16) return null
+  const view = new DataView(raw.buffer)
+  const ts = view.getUint32(0, true)
+  const ax = view.getFloat32(4, true)
+  const ay = view.getFloat32(8, true)
+  const az = view.getFloat32(12, true)
+  const magnitude = Math.sqrt(ax * ax + ay * ay + az * az)
+  return { ax, ay, az, gx: 0, gy: 0, gz: 0, magnitude, timestamp: ts }
+}
+
+function parseV2(raw: Uint8Array): SensorReading | null {
+  if (raw.length < 16) return null
+  const view = new DataView(raw.buffer)
+  const ts = view.getUint32(0, true)
+  const ax = view.getInt16(4, true)
+  const ay = view.getInt16(6, true)
+  const az = view.getInt16(8, true)
+  const gx = view.getInt16(10, true)
+  const gy = view.getInt16(12, true)
+  const gz = view.getInt16(14, true)
+  const magnitude = Math.round(Math.sqrt(ax * ax + ay * ay + az * az))
+  return { ax, ay, az, gx, gy, gz, magnitude, timestamp: ts }
+}
 
 function parseReading(base64: string): SensorReading | null {
   try {
     const raw = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
-    if (raw.length < 16) return null
-    const view = new DataView(raw.buffer)
-    const ts = view.getUint32(0, true)
-    const ax = view.getFloat32(4, true)
-    const ay = view.getFloat32(8, true)
-    const az = view.getFloat32(12, true)
-    const magnitude = Math.sqrt(ax * ax + ay * ay + az * az)
-    return { ax, ay, az, gx: 0, gy: 0, gz: 0, magnitude, timestamp: ts }
+    return _sensorVersion === 2 ? parseV2(raw) : parseV1(raw)
   } catch {
     return null
   }
@@ -33,6 +53,17 @@ export async function connectBleDevice(deviceId: string, onReading: ReadingCallb
 
   _device = await ble.connectToDevice(deviceId)
   await _device.discoverAllServicesAndCharacteristics()
+
+  // Read sensor version (default 1 if characteristic absent)
+  try {
+    const verChar = await _device.readCharacteristicForService(SERVICE_UUID, VERSION_UUID)
+    if (verChar?.value) {
+      const bytes = Uint8Array.from(atob(verChar.value), (c) => c.charCodeAt(0))
+      _sensorVersion = bytes[0] ?? 1
+    }
+  } catch {
+    _sensorVersion = 1
+  }
 
   _subscription = _device.monitorCharacteristicForService(
     SERVICE_UUID,
@@ -50,4 +81,5 @@ export async function disconnectBleDevice(): Promise<void> {
   _subscription = null
   try { await _device?.cancelConnection() } catch {}
   _device = null
+  _sensorVersion = 1
 }

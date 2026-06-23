@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { useDeviceStore } from '../../stores/deviceStore'
-import { detectMockSensor, MOCK_DEVICE_ID, MOCK_DEVICE_NAME } from '../../services/mockSensor'
 import type { Device } from '../../types'
 import type { BleDevice } from '../../env'
 
@@ -34,10 +33,7 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
   useEffect(() => {
     let unlisten: (() => void) | null = null
     listen<BleDevice[]>('ble-devices-updated', (event) => {
-      setFoundDevices((prev) => {
-        const mock = prev.find((d) => d.deviceId === MOCK_DEVICE_ID)
-        return mock ? [mock, ...event.payload] : event.payload
-      })
+      setFoundDevices(event.payload)
     }).then((fn) => { unlisten = fn })
     return () => { unlisten?.() }
   }, [])
@@ -46,12 +42,6 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
     setScanState('scanning')
     setScanError('')
     setFoundDevices([])
-
-    const mockRunning = await detectMockSensor()
-    if (mockRunning) {
-      setFoundDevices([{ deviceId: MOCK_DEVICE_ID, deviceName: MOCK_DEVICE_NAME }])
-    }
-
     try {
       await invoke('start_ble_scan')
     } catch (err: unknown) {
@@ -63,31 +53,17 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
   }, [])
 
   const selectFound = (ble: BleDevice) => {
-    if (ble.deviceId === MOCK_DEVICE_ID) {
-      invoke('cancel_ble_scan')
-      const mockDevice: Device = {
-        mac: MOCK_DEVICE_ID,
-        name: MOCK_DEVICE_NAME,
-        createdAt: Date.now(),
-        lastSeen: Date.now()
-      }
-      if (!devices.find((d) => d.mac === MOCK_DEVICE_ID)) {
-        addDevice(mockDevice)
-      }
-      setConnected(MOCK_DEVICE_ID)
-    } else {
-      invoke('connect_ble_device', { deviceId: ble.deviceId })
-      const newDevice: Device = {
-        mac: ble.deviceId,
-        name: ble.deviceName || 'Dispositivo BLE',
-        createdAt: Date.now(),
-        lastSeen: Date.now()
-      }
-      if (!devices.find((d) => d.mac === ble.deviceId)) {
-        addDevice(newDevice)
-      }
-      setConnected(ble.deviceId)
+    invoke('connect_ble_device', { deviceId: ble.deviceId })
+    const newDevice: Device = {
+      mac: ble.deviceId,
+      name: ble.deviceName || 'Dispositivo BLE',
+      createdAt: Date.now(),
+      lastSeen: Date.now()
     }
+    if (!devices.find((d) => d.mac === ble.deviceId)) {
+      addDevice(newDevice)
+    }
+    setConnected(ble.deviceId)
     setScanState('idle')
     setFoundDevices([])
   }
@@ -188,9 +164,7 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-medium text-text-primary">{d.name}</p>
-                  {d.mac !== MOCK_DEVICE_ID && (
-                    <p className="text-xs text-text-muted font-mono">{d.mac}</p>
-                  )}
+                  <p className="text-xs text-text-muted font-mono">{d.mac}</p>
                   {connected?.mac === d.mac && (
                     <p className="text-xs text-secondary mt-1">● Activo</p>
                   )}
@@ -277,21 +251,12 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
                 <button
                   key={ble.deviceId}
                   onClick={() => selectFound(ble)}
-                  className={`w-full text-left border rounded-lg px-4 py-3 transition-all ${
-                    ble.deviceId === MOCK_DEVICE_ID
-                      ? 'bg-accent/10 border-accent/40 hover:border-accent'
-                      : 'bg-bg-tertiary border-border hover:border-secondary/50'
-                  }`}
+                  className="w-full text-left border rounded-lg px-4 py-3 transition-all bg-bg-tertiary border-border hover:border-secondary/50"
                 >
                   <p className="text-sm font-medium text-text-primary">
                     {ble.deviceName || 'Dispositivo sin nombre'}
-                    {ble.deviceId === MOCK_DEVICE_ID && (
-                      <span className="ml-2 text-xs text-accent">simulador</span>
-                    )}
                   </p>
-                  {ble.deviceId !== MOCK_DEVICE_ID && (
-                    <p className="text-xs text-text-muted font-mono mt-0.5">{ble.deviceId}</p>
-                  )}
+                  <p className="text-xs text-text-muted font-mono mt-0.5">{ble.deviceId}</p>
                 </button>
               ))}
             </div>

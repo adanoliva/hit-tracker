@@ -12,8 +12,8 @@ function formatTime(seconds: number) {
   return `${m}:${sc.toString().padStart(2, '0')}`
 }
 
-function ImpactChart({ impacts, powerMax, width, height }: {
-  impacts: Impact[]; powerMax: number; width: number; height: number
+function ImpactChart({ impacts, powerMax, userPowerRef, width, height }: {
+  impacts: Impact[]; powerMax: number; userPowerRef: number; width: number; height: number
 }) {
   if (impacts.length === 0) {
     return (
@@ -23,6 +23,13 @@ function ImpactChart({ impacts, powerMax, width, height }: {
     )
   }
 
+  const chartValues = impacts.map((i) =>
+    userPowerRef > 0 ? Math.round((i.magnitude / userPowerRef) * 100) : i.intensity
+  )
+  const maxValue = Math.max(...chartValues)
+  const yMax = Math.max(105, maxValue + 5)
+  const refLineValue = userPowerRef > 0 ? 80 : (powerMax > 0 ? powerMax * 0.8 : null)
+
   const pad = { t: 10, r: 8, b: 10, l: 30 }
   const W = width - pad.l - pad.r
   const H = height - pad.t - pad.b
@@ -30,43 +37,39 @@ function ImpactChart({ impacts, powerMax, width, height }: {
   const tMin = impacts[0].time
   const tMax = Math.max(impacts[impacts.length - 1].time, tMin + 2000)
   const toX = (t: number) => pad.l + ((t - tMin) / (tMax - tMin)) * W
-  const toY = (v: number) => pad.t + H - (v / 105) * H
+  const toY = (v: number) => pad.t + H - (v / yMax) * H
 
-  const threshold = powerMax > 0 ? toY(powerMax * 0.8) : null
+  const threshold = refLineValue != null ? toY(refLineValue) : null
 
   return (
     <Svg width={width} height={height}>
-      {/* 80% threshold line */}
       {threshold != null && (
         <Line
           x1={pad.l} y1={threshold} x2={pad.l + W} y2={threshold}
           stroke={colors.textMuted} strokeWidth={1} strokeDasharray="4,4" opacity={0.4}
         />
       )}
-      {/* Connecting line */}
       {impacts.map((impact, i) => {
         if (i === 0) return null
         const prev = impacts[i - 1]
         return (
           <Line
             key={`l${i}`}
-            x1={toX(prev.time)} y1={toY(prev.intensity)}
-            x2={toX(impact.time)} y2={toY(impact.intensity)}
+            x1={toX(prev.time)} y1={toY(chartValues[i - 1])}
+            x2={toX(impact.time)} y2={toY(chartValues[i])}
             stroke={colors.border} strokeWidth={1}
           />
         )
       })}
-      {/* Dots */}
       {impacts.map((impact, i) => {
         const cx = toX(impact.time)
-        const cy = toY(impact.intensity)
-        const color = HIT_COLOR
+        const cy = toY(chartValues[i])
         const r = impact.isValid ? 6 : 4
         return (
           <G key={`d${i}`}>
-            <Circle cx={cx} cy={cy} r={r} fill={color} opacity={impact.isValid ? 0.9 : 0.4} />
+            <Circle cx={cx} cy={cy} r={r} fill={HIT_COLOR} opacity={impact.isValid ? 0.9 : 0.4} />
             {impact.isValid && (
-              <Circle cx={cx} cy={cy} r={r + 3} fill="none" stroke={color} strokeWidth={1} opacity={0.3} />
+              <Circle cx={cx} cy={cy} r={r + 3} fill="none" stroke={HIT_COLOR} strokeWidth={1} opacity={0.3} />
             )}
           </G>
         )
@@ -84,6 +87,7 @@ interface TrainingRoundProps {
   impacts: Impact[]
   powerMax: number
   powerMaxMag: number
+  userPowerRef: number
   hpmStats: { current: number; average: number; max: number }
   onAbort: () => void
   onFinish: () => void
@@ -91,7 +95,7 @@ interface TrainingRoundProps {
 
 export function TrainingRound({
   roundNumber, totalRounds, timeRemaining, timeElapsed, isFreeMode,
-  impacts, powerMax, powerMaxMag, hpmStats, onAbort, onFinish
+  impacts, powerMax, powerMaxMag, userPowerRef, hpmStats, onAbort, onFinish
 }: TrainingRoundProps) {
   const { width } = useWindowDimensions()
   const { top } = useSafeAreaInsets()
@@ -127,7 +131,7 @@ export function TrainingRound({
 
       {/* Gráfico */}
       <View style={s.chartContainer}>
-        <ImpactChart impacts={impacts} powerMax={powerMax} width={chartWidth} height={chartHeight} />
+        <ImpactChart impacts={impacts} powerMax={powerMax} userPowerRef={userPowerRef} width={chartWidth} height={chartHeight} />
       </View>
 
       {/* Stats */}
