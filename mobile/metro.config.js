@@ -6,11 +6,14 @@ const sharedRoot = path.resolve(projectRoot, '../shared')
 
 const config = getDefaultConfig(projectRoot)
 
-// Permite a Metro resolver archivos fuera del directorio del proyecto
 config.watchFolders = [sharedRoot]
 
-// Mapea el alias @shared al directorio compartido
 config.resolver.extraNodeModules = {
+  '@shared': sharedRoot
+}
+
+// Fallback: alias directo para builds de release
+config.resolver.alias = {
   '@shared': sharedRoot
 }
 

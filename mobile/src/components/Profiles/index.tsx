@@ -124,7 +124,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
               <SliderField
                 label="Mínimo de detección"
                 hint="Fuerza mínima del golpe para que la app lo registre. Súbelo si detecta golpes que no das. Bájalo si se pierden golpes suaves."
-                value={editing.threshold} min={5} max={50} step={0.5}
+                value={editing.threshold} min={0} max={100} step={5}
                 color={colors.accent}
                 onChange={(v) => setEditing({ ...editing, threshold: v })}
               />

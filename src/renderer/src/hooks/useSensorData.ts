@@ -42,7 +42,7 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
       const isRising  = reading.magnitude > prev.magnitude
       const isPeak    =
         !isRising &&
-        prev.magnitude > profile.threshold &&
+        prev.magnitude > profile.threshold * 10 &&
         now - lastPeakTime.current > PEAK_COOLDOWN_MS
 
       if (!isPeak) return null

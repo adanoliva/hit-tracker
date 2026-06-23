@@ -5,7 +5,7 @@ import type { CalibrationProfile } from '../types'
 const DEFAULT_PROFILE: CalibrationProfile = {
   id: 'default-v1',
   name: 'Default',
-  threshold: 15.0,
+  threshold: 35,
   sensitivity: 25.0,
   validHitThreshold: 80,
   createdAt: Date.now()

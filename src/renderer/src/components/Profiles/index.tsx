@@ -145,9 +145,9 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
                   label="Mínimo de detección"
                   hint="Fuerza mínima del golpe para que la app lo registre. Súbelo si detecta golpes que no das (roces, vibraciones). Bájalo si se pierden golpes suaves."
                   value={editing.threshold}
-                  min={5}
-                  max={50}
-                  step={0.5}
+                  min={0}
+                  max={100}
+                  step={5}
                   color="text-accent"
                   onChange={(v) => setEditing({ ...editing, threshold: v })}
                 />
