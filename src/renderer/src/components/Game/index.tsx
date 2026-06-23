@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { listen } from '@tauri-apps/api/event'
 import { Dumbbell } from 'lucide-react'
 import { useDeviceStore } from '../../stores/deviceStore'
 import { useSensorData } from '../../hooks/useSensorData'
@@ -8,7 +9,7 @@ import type { CalibrationProfile } from '../../types'
 const DEFAULT_PROFILE: CalibrationProfile = {
   id: 'default-v1',
   name: 'Default',
-  threshold: 15.0,
+  threshold: 12.0,
   sensitivity: 25.0,
   validHitThreshold: 80,
   createdAt: 0
@@ -30,6 +31,17 @@ export function GamePage(): JSX.Element {
     if (!isMock || !active) return
     mockSensorConnection.connect(processReading)
     return () => mockSensorConnection.disconnect()
+  }, [active, isMock, processReading])
+
+  useEffect(() => {
+    if (isMock || !active) return
+    let unlisten: (() => void) | null = null
+    listen<{ ax: number; ay: number; az: number }>('ble-sensor-data', (e) => {
+      const { ax, ay, az } = e.payload
+      const magnitude = Math.sqrt(ax * ax + ay * ay + az * az)
+      processReading({ ax, ay, az, gx: 0, gy: 0, gz: 0, magnitude, timestamp: Date.now() })
+    }).then((fn) => { unlisten = fn })
+    return () => { unlisten?.() }
   }, [active, isMock, processReading])
 
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { listen } from '@tauri-apps/api/event'
 import { audioService } from '../../services/audio'
 import { useDeviceStore } from '../../stores/deviceStore'
 import { useProfileStore } from '../../stores/profileStore'
@@ -99,6 +100,18 @@ export function TrainingPage({ onBack }: TrainingPageProps): JSX.Element {
     }
     return () => mockSensorConnection.disconnect()
   }, [phase, isMock, processReading])
+
+  // BLE sensor real: escuchar datos solo durante la ronda
+  useEffect(() => {
+    if (isMock || !connected || phase !== 'round') return
+    let unlisten: (() => void) | null = null
+    listen<{ ax: number; ay: number; az: number }>('ble-sensor-data', (e) => {
+      const { ax, ay, az } = e.payload
+      const magnitude = Math.sqrt(ax * ax + ay * ay + az * az)
+      processReading({ ax, ay, az, gx: 0, gy: 0, gz: 0, magnitude, timestamp: Date.now() })
+    }).then((fn) => { unlisten = fn })
+    return () => { unlisten?.() }
+  }, [phase, isMock, connected, processReading])
 
   // Registrar impactos en el servicio de entrenamiento
   useEffect(() => {

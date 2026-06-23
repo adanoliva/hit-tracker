@@ -9,6 +9,7 @@ import type { Device, PhoneSensorPlacement } from '../../core/types'
 import { PHONE_SENSOR_ID } from '../../core/types'
 import { PhoneSensorPicker } from './PhoneSensorPicker'
 import { getBleManager, isBleAvailable } from '../../services/ble'
+import { connectBleDevice, disconnectBleDevice } from '../../services/bleConnection'
 import { colors } from '../../theme'
 
 async function requestBlePermissions(): Promise<boolean> {
@@ -35,6 +36,7 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
   const [editName, setEditName] = useState('')
   const [showPhonePicker, setShowPhonePicker] = useState(false)
   const [showPlacement, setShowPlacement] = useState(false)
+  const [connectingMac, setConnectingMac] = useState<string | null>(null)
   const { width } = useWindowDimensions()
 
   const phoneDevice = devices.find((d) => d.mac === PHONE_SENSOR_ID)
@@ -75,7 +77,7 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
     setFound([])
 
     const ble = getBleManager()!
-    ble.startDeviceScan(null, null, (error, device) => {
+    ble.startDeviceScan(['4fafc201-1fb5-459e-8fcc-c5c9c331914b'], null, (error, device) => {
       if (error) {
         ble.stopDeviceScan()
         setScanState('error')
@@ -102,7 +104,7 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
     setFound([])
   }
 
-  const selectDevice = (fd: FoundDevice) => {
+  const selectDevice = async (fd: FoundDevice) => {
     getBleManager()?.stopDeviceScan()
     setScanState('idle')
     setFound([])
@@ -111,7 +113,16 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
       createdAt: Date.now(), lastSeen: Date.now()
     }
     if (!devices.find((d) => d.mac === fd.id)) addDevice(newDevice)
-    setConnected(fd.id)
+    setConnectingMac(fd.id)
+    try {
+      await connectBleDevice(fd.id, () => {})
+      setConnected(fd.id)
+    } catch (e: any) {
+      setScanError(e?.message ?? 'Error al conectar')
+      setScanState('error')
+    } finally {
+      setConnectingMac(null)
+    }
   }
 
   const handleRename = (mac: string) => {
@@ -202,12 +213,33 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
               </View>
               <View style={s.actions}>
                 {connected?.mac === d.mac ? (
-                  <TouchableOpacity style={s.btnDanger} onPress={() => setConnected(null)}>
+                  <TouchableOpacity style={s.btnDanger} onPress={() => { disconnectBleDevice(); setConnected(null) }}>
                     <Text style={s.btnDangerText}>Desconectar</Text>
                   </TouchableOpacity>
-                ) : (
+                ) : d.mac === PHONE_SENSOR_ID ? (
                   <TouchableOpacity style={s.btn} onPress={() => setConnected(d.mac)}>
                     <Text style={s.btnText}>Usar</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={s.btn}
+                    disabled={connectingMac === d.mac}
+                    onPress={async () => {
+                      setConnectingMac(d.mac)
+                      try {
+                        await connectBleDevice(d.mac, () => {})
+                        setConnected(d.mac)
+                      } catch (e: any) {
+                        Alert.alert('Error', e?.message ?? 'No se pudo conectar')
+                      } finally {
+                        setConnectingMac(null)
+                      }
+                    }}
+                  >
+                    {connectingMac === d.mac
+                      ? <ActivityIndicator size="small" color={colors.secondary} />
+                      : <Text style={s.btnText}>Usar</Text>
+                    }
                   </TouchableOpacity>
                 )}
                 {d.mac === PHONE_SENSOR_ID ? (

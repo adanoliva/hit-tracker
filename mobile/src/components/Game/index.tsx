@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useSensorData } from '../../core/hooks/useSensorData'
 import { usePhoneSensor } from '../../core/hooks/usePhoneSensor'
+import { useBleReading } from '../../core/hooks/useBleReading'
 import { PHONE_SENSOR_ID } from '../../core/types'
 import type { CalibrationProfile, PhoneSensorPlacement } from '../../core/types'
 import { colors } from '../../theme'
@@ -12,7 +13,7 @@ import { colors } from '../../theme'
 const DEFAULT_PROFILE: CalibrationProfile = {
   id: 'default-v1',
   name: 'Default',
-  threshold: 15.0,
+  threshold: 12.0,
   sensitivity: 25.0,
   validHitThreshold: 80,
   createdAt: 0
@@ -36,6 +37,12 @@ export function GamePage() {
   usePhoneSensor({
     placement: phonePlacement ?? 'front-vertical',
     active: isPhoneSensor && active,
+    onReading: processReading
+  })
+
+  useBleReading({
+    deviceId: !isPhoneSensor ? (connected?.mac ?? null) : null,
+    active,
     onReading: processReading
   })
 

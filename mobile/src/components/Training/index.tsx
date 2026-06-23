@@ -9,6 +9,7 @@ import { useTrainingStore } from '../../core/stores/trainingStore'
 import { useTraining } from '../../core/hooks/useTraining'
 import { useSensorData } from '../../core/hooks/useSensorData'
 import { usePhoneSensor } from '../../core/hooks/usePhoneSensor'
+import { useBleReading } from '../../core/hooks/useBleReading'
 import { trainingService } from '../../core/services/trainingService'
 import { PHONE_SENSOR_ID } from '../../core/types'
 import type { PhoneSensorPlacement } from '../../core/types'
@@ -94,6 +95,13 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
   usePhoneSensor({
     placement: phonePlacement ?? 'front-vertical',
     active: isPhoneSensor && phase === 'round',
+    onReading: processReading
+  })
+
+  // Sensor BLE externo
+  useBleReading({
+    deviceId: !isPhoneSensor ? (connected?.mac ?? null) : null,
+    active: phase === 'round',
     onReading: processReading
   })
 

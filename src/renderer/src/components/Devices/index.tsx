@@ -22,6 +22,7 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
   const [editingMac, setEditingMac] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [showPlacement, setShowPlacement] = useState(false)
+  const [connectingMac, setConnectingMac] = useState<string | null>(null)
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -75,7 +76,7 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
       }
       setConnected(MOCK_DEVICE_ID)
     } else {
-      invoke('select_ble_device')
+      invoke('connect_ble_device', { deviceId: ble.deviceId })
       const newDevice: Device = {
         mac: ble.deviceId,
         name: ble.deviceName || 'Dispositivo BLE',
@@ -85,6 +86,7 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
       if (!devices.find((d) => d.mac === ble.deviceId)) {
         addDevice(newDevice)
       }
+      setConnected(ble.deviceId)
     }
     setScanState('idle')
     setFoundDevices([])
@@ -196,17 +198,28 @@ export function DevicesPage({ onBack }: DevicesPageProps): JSX.Element {
                 <div className="flex gap-2">
                   {connected?.mac === d.mac ? (
                     <button
-                      onClick={() => setConnected(null)}
+                      onClick={() => { invoke('disconnect_ble_device'); setConnected(null) }}
                       className="text-xs text-accent border border-accent/40 px-2 py-1 rounded hover:bg-accent/10 transition-colors"
                     >
                       Desconectar
                     </button>
                   ) : (
                     <button
-                      onClick={() => setConnected(d.mac)}
-                      className="text-xs text-secondary border border-secondary/40 px-2 py-1 rounded hover:bg-secondary/10 transition-colors"
+                      onClick={async () => {
+                        setConnectingMac(d.mac)
+                        try {
+                          await invoke('connect_ble_device', { deviceId: d.mac })
+                          setConnected(d.mac)
+                        } catch (e) {
+                          setScanError(e instanceof Error ? e.message : String(e))
+                        } finally {
+                          setConnectingMac(null)
+                        }
+                      }}
+                      disabled={connectingMac === d.mac}
+                      className="text-xs text-secondary border border-secondary/40 px-2 py-1 rounded hover:bg-secondary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Usar
+                      {connectingMac === d.mac ? 'Conectando...' : 'Usar'}
                     </button>
                   )}
                   <button

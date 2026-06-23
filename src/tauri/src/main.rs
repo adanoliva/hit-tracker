@@ -1,20 +1,31 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use btleplug::api::{Central, Manager as _, Peripheral as _, ScanFilter};
-use btleplug::platform::Manager;
+use btleplug::platform::{Manager, Peripheral};
 use tauri::Emitter;
 use serde_json::Value;
 use tauri::{AppHandle, Manager as TauriManager, State};
 use tokio::time;
+use tokio_stream::StreamExt;
+use uuid::Uuid;
+
+// Service / characteristic UUIDs matching the firmware
+const SERVICE_UUID: &str = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+const CHARACTERISTIC_UUID: &str = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
 
 struct BleState {
     scanning: Arc<AtomicBool>,
+    // peripherals found during last scan, keyed by device id string
+    found: Arc<Mutex<HashMap<String, Peripheral>>>,
+    connected: Arc<Mutex<Option<Peripheral>>>,
+    reading: Arc<AtomicBool>,
 }
 
 // ── Paths ────────────────────────────────────────────────────────────────────
@@ -164,11 +175,14 @@ async fn start_ble_scan(app: AppHandle, state: State<'_, BleState>) -> Result<()
         return Ok(()); // already scanning
     }
 
+    state.found.lock().unwrap().clear();
+
     let scanning = state.scanning.clone();
+    let found = state.found.clone();
     let app_handle = app.clone();
 
     tokio::spawn(async move {
-        let result = run_ble_scan(app_handle.clone(), scanning.clone()).await;
+        let result = run_ble_scan(app_handle.clone(), scanning.clone(), found).await;
         scanning.store(false, Ordering::SeqCst);
         if let Err(e) = result {
             let _ = app_handle.emit("ble-scan-error", e);
@@ -178,7 +192,11 @@ async fn start_ble_scan(app: AppHandle, state: State<'_, BleState>) -> Result<()
     Ok(())
 }
 
-async fn run_ble_scan(app: AppHandle, scanning: Arc<AtomicBool>) -> Result<(), String> {
+async fn run_ble_scan(
+    app: AppHandle,
+    scanning: Arc<AtomicBool>,
+    found: Arc<Mutex<HashMap<String, Peripheral>>>,
+) -> Result<(), String> {
     let manager = Manager::new().await.map_err(|e| e.to_string())?;
     let adapters = manager.adapters().await.map_err(|e| e.to_string())?;
     let adapter = adapters
@@ -186,8 +204,9 @@ async fn run_ble_scan(app: AppHandle, scanning: Arc<AtomicBool>) -> Result<(), S
         .next()
         .ok_or("No Bluetooth adapter found")?;
 
+    let svc_uuid = Uuid::parse_str(SERVICE_UUID).map_err(|e| e.to_string())?;
     adapter
-        .start_scan(ScanFilter::default())
+        .start_scan(ScanFilter { services: vec![svc_uuid] })
         .await
         .map_err(|e| e.to_string())?;
 
@@ -195,14 +214,21 @@ async fn run_ble_scan(app: AppHandle, scanning: Arc<AtomicBool>) -> Result<(), S
         time::sleep(Duration::from_millis(500)).await;
 
         if let Ok(peripherals) = adapter.peripherals().await {
-            let mut devices = vec![];
+            // resolve names async first (no lock held across await)
+            let mut entries: Vec<(String, String, Peripheral)> = vec![];
             for p in peripherals {
-                if let Ok(Some(props)) = p.properties().await {
-                    devices.push(serde_json::json!({
-                        "deviceId": p.id().to_string(),
-                        "deviceName": props.local_name.unwrap_or_else(|| "Unknown".to_string())
-                    }));
-                }
+                let id = p.id().to_string();
+                let name = match p.properties().await {
+                    Ok(Some(props)) => props.local_name.unwrap_or_else(|| id.clone()),
+                    _ => id.clone(),
+                };
+                entries.push((id, name, p));
+            }
+            let mut devices = vec![];
+            let mut map = found.lock().unwrap();
+            for (id, name, p) in entries {
+                map.insert(id.clone(), p);
+                devices.push(serde_json::json!({ "deviceId": id, "deviceName": name }));
             }
             let _ = app.emit("ble-devices-updated", devices);
         }
@@ -213,14 +239,98 @@ async fn run_ble_scan(app: AppHandle, scanning: Arc<AtomicBool>) -> Result<(), S
 }
 
 #[tauri::command]
-async fn select_ble_device(state: State<'_, BleState>) -> Result<(), String> {
+async fn cancel_ble_scan(state: State<'_, BleState>) -> Result<(), String> {
     state.scanning.store(false, Ordering::SeqCst);
     Ok(())
 }
 
 #[tauri::command]
-async fn cancel_ble_scan(state: State<'_, BleState>) -> Result<(), String> {
+async fn connect_ble_device(
+    app: AppHandle,
+    state: State<'_, BleState>,
+    device_id: String,
+) -> Result<(), String> {
     state.scanning.store(false, Ordering::SeqCst);
+
+    // Use cached peripheral from last scan, or do a quick scan to find it
+    let cached = state.found.lock().unwrap().get(&device_id).cloned();
+    let peripheral = if let Some(p) = cached {
+        p
+    } else {
+        let manager = Manager::new().await.map_err(|e| e.to_string())?;
+        let adapters = manager.adapters().await.map_err(|e| e.to_string())?;
+        let adapter = adapters.into_iter().next().ok_or("No Bluetooth adapter")?;
+        let svc_uuid = Uuid::parse_str(SERVICE_UUID).map_err(|e| e.to_string())?;
+        adapter.start_scan(ScanFilter { services: vec![svc_uuid] }).await.map_err(|e| e.to_string())?;
+        time::sleep(Duration::from_secs(3)).await;
+        let _ = adapter.stop_scan().await;
+        adapter.peripherals().await.map_err(|e| e.to_string())?
+            .into_iter()
+            .find(|p| p.id().to_string() == device_id)
+            .ok_or("Device not found — make sure the sensor is on")?
+    };
+
+    peripheral.connect().await.map_err(|e| e.to_string())?;
+    peripheral.discover_services().await.map_err(|e| e.to_string())?;
+
+    let svc_uuid = Uuid::parse_str(SERVICE_UUID).map_err(|e| e.to_string())?;
+    let chr_uuid = Uuid::parse_str(CHARACTERISTIC_UUID).map_err(|e| e.to_string())?;
+
+    let characteristic = peripheral
+        .services()
+        .iter()
+        .find(|s| s.uuid == svc_uuid)
+        .ok_or("HIT TRACKER service not found")?
+        .characteristics
+        .iter()
+        .find(|c| c.uuid == chr_uuid)
+        .ok_or("Sensor characteristic not found")?
+        .clone();
+
+    peripheral.subscribe(&characteristic).await.map_err(|e| e.to_string())?;
+
+    // notifications() must be called AFTER subscribe on some backends
+    let stream_result = peripheral.notifications().await;
+
+    *state.connected.lock().unwrap() = Some(peripheral.clone());
+    state.reading.store(true, Ordering::SeqCst);
+
+    let reading_flag = state.reading.clone();
+    tokio::spawn(async move {
+        let mut stream = match stream_result {
+            Ok(s) => s,
+            Err(e) => {
+                let _ = app.emit("ble-sensor-error", e.to_string());
+                return;
+            }
+        };
+        while reading_flag.load(Ordering::SeqCst) {
+            match tokio::time::timeout(Duration::from_secs(5), stream.next()).await {
+                Ok(Some(data)) => {
+                    if data.value.len() == 28 {
+                        let ax = f32::from_le_bytes(data.value[4..8].try_into().unwrap());
+                        let ay = f32::from_le_bytes(data.value[8..12].try_into().unwrap());
+                        let az = f32::from_le_bytes(data.value[12..16].try_into().unwrap());
+                        let _ = app.emit("ble-sensor-data", serde_json::json!({ "ax": ax, "ay": ay, "az": az }));
+                    }
+                }
+                Ok(None) => break,
+                Err(_) => {} // timeout — keep waiting
+            }
+        }
+        let _ = peripheral.disconnect().await;
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn disconnect_ble_device(state: State<'_, BleState>) -> Result<(), String> {
+    state.reading.store(false, Ordering::SeqCst);
+    let peripheral = state.connected.lock().unwrap().take();
+    if let Some(p) = peripheral {
+        let _ = p.disconnect().await;
+    }
     Ok(())
 }
 
@@ -231,6 +341,9 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .manage(BleState {
             scanning: Arc::new(AtomicBool::new(false)),
+            found: Arc::new(Mutex::new(HashMap::new())),
+            connected: Arc::new(Mutex::new(None)),
+            reading: Arc::new(AtomicBool::new(false)),
         })
         .invoke_handler(tauri::generate_handler![
             save_training,
@@ -243,8 +356,9 @@ fn main() {
             save_config,
             load_config,
             start_ble_scan,
-            select_ble_device,
             cancel_ble_scan,
+            connect_ble_device,
+            disconnect_ble_device,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
