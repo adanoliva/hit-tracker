@@ -26,6 +26,7 @@ export function useShareSession({ training, chartRef }: UseShareSessionOptions):
       const text = generateShareText(training)
       try {
         const tmpUri = (FileSystem.cacheDirectory ?? '') + 'hit-tracker-share.png'
+        await new Promise(r => setTimeout(r, 300))
         const uri = await captureRef(chartRef, { format: 'png', quality: 0.9 })
         await FileSystem.copyAsync({ from: uri, to: tmpUri })
         await Sharing.shareAsync(tmpUri, {

@@ -4,6 +4,7 @@ import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SplashScreen from 'expo-splash-screen'
 import { NavigationContainer, DarkTheme } from '@react-navigation/native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StyleSheet, useWindowDimensions, View, Image, ActivityIndicator } from 'react-native'
 import { MobileLayout } from './src/navigation/MobileLayout'
 import { useTrainingStore } from './src/core/stores/trainingStore'
@@ -81,10 +82,12 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <NavigationContainer theme={NAV_THEME}>
-        <StatusBar style="light" />
-        <RootNavigator />
-      </NavigationContainer>
+      <SafeAreaProvider>
+        <NavigationContainer theme={NAV_THEME}>
+          <StatusBar style="light" />
+          <RootNavigator />
+        </NavigationContainer>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   )
 }

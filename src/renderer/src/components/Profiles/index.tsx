@@ -78,7 +78,6 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
       name: editing.name,
       threshold: editing.threshold,
       sensitivity: editing.sensitivity,
-      validHitThreshold: editing.validHitThreshold
     })
     setEditing(null)
   }
@@ -157,24 +156,11 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
                   label="Escala de potencia"
                   hint="Cómo se convierte la fuerza del golpe en el marcador 0-100. Súbelo si tus golpes más fuertes no llegan al 100. Bájalo si casi todos los golpes salen al máximo."
                   value={editing.sensitivity}
-                  min={5}
-                  max={60}
-                  step={0.5}
+                  min={1}
+                  max={100}
+                  step={1}
                   color="text-secondary"
                   onChange={(v) => setEditing({ ...editing, sensitivity: v })}
-                />
-
-                {/* Umbral golpe válido */}
-                <SliderField
-                  label="Umbral golpe válido"
-                  hint="Un golpe cuenta como válido si supera este porcentaje de tu golpe más fuerte de la sesión. Con 80%, solo cuentan los golpes de al menos el 80% de tu máximo. Con 0%, todos los golpes son válidos."
-                  value={editing.validHitThreshold ?? 80}
-                  min={0}
-                  max={100}
-                  step={5}
-                  unit="%"
-                  color="text-text-primary"
-                  onChange={(v) => setEditing({ ...editing, validHitThreshold: v })}
                 />
 
                 <div className="flex gap-2 pt-1">
@@ -200,8 +186,6 @@ export function ProfilesPage({ onBack }: ProfilesPageProps): JSX.Element {
                     Detección <span className="text-accent">{p.threshold}</span>
                     {' · '}
                     Potencia <span className="text-secondary">{p.sensitivity}</span>
-                    {' · '}
-                    Válido ≥<span className="text-text-primary">{p.validHitThreshold ?? 80}%</span>
                   </p>
                   {selectedProfileId === p.id && (
                     <p className="text-xs text-secondary mt-1">● Activo</p>

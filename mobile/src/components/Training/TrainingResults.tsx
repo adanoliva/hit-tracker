@@ -37,35 +37,36 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
         <Text style={s.muted}>{training.rounds.length} rondas · {training.device.name}</Text>
       </View>
 
-      <View style={s.statsGrid} ref={statsRef}>
-        <Stat label="Total golpes" value={training.totalImpacts} />
-        <Stat label="Golpes válidos" value={training.validHits} color={colors.accent} />
-        <Stat label="Power máximo" value={Math.max(0, ...training.rounds.flatMap(r => r.impacts).map(i => Math.round(i.magnitude)))} color={colors.accent} />
-        <Stat label="HPM promedio" value={training.hpmAverage} color={colors.secondary} />
-      </View>
+      <View ref={statsRef} collapsable={false} style={s.shareCapture}>
+        <View style={s.statsGrid}>
+          <Stat label="Total golpes" value={training.totalImpacts} />
+          <Stat label="Power máximo" value={Math.max(0, ...training.rounds.flatMap(r => r.impacts).map(i => Math.round(i.magnitude)))} color={colors.accent} />
+          <Stat label="HPM promedio" value={training.hpmAverage} color={colors.secondary} />
+        </View>
 
-      <Text style={s.sectionTitle}>Por ronda</Text>
-      <View style={s.roundsList}>
-        {training.rounds.map((r) => (
-          <View
-            key={r.number}
-            style={[s.roundCard, r.number === bestRound?.number && s.roundCardBest]}
-          >
-            <View>
-              <View style={s.roundHeader}>
-                <Text style={s.roundName}>Ronda {r.number}</Text>
-                {r.number === bestRound?.number && (
-                  <Text style={s.bestBadge}>★ Mejor</Text>
-                )}
+        <Text style={s.sectionTitle}>Por ronda</Text>
+        <View style={s.roundsList}>
+          {training.rounds.map((r) => (
+            <View
+              key={r.number}
+              style={[s.roundCard, r.number === bestRound?.number && s.roundCardBest]}
+            >
+              <View>
+                <View style={s.roundHeader}>
+                  <Text style={s.roundName}>Ronda {r.number}</Text>
+                  {r.number === bestRound?.number && (
+                    <Text style={s.bestBadge}>★ Mejor</Text>
+                  )}
+                </View>
+                <Text style={s.muted}>{r.stats.totalImpacts} golpes</Text>
               </View>
-              <Text style={s.muted}>{r.stats.totalImpacts} golpes</Text>
+              <View style={s.roundRight}>
+                <Text style={[s.roundValue, { color: colors.accent }]}>{Math.max(0, ...r.impacts.map(i => Math.round(i.magnitude)))}</Text>
+                <Text style={[s.muted, { color: colors.secondary }]}>{r.stats.hpmAverage} HPM</Text>
+              </View>
             </View>
-            <View style={s.roundRight}>
-              <Text style={[s.roundValue, { color: colors.accent }]}>{Math.max(0, ...r.impacts.map(i => Math.round(i.magnitude)))}</Text>
-              <Text style={[s.muted, { color: colors.secondary }]}>{r.stats.hpmAverage} HPM</Text>
-            </View>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
 
       <TouchableOpacity style={s.shareBtn} onPress={share} disabled={isSharing} activeOpacity={0.7}>
@@ -90,6 +91,7 @@ const s = StyleSheet.create({
   heroEmoji: { fontSize: 48 },
   heroTitle: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
   muted: { fontSize: 12, color: colors.textMuted },
+  shareCapture: { backgroundColor: colors.bgPrimary, gap: 16 },
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   stat: {
     flex: 1, minWidth: '45%', backgroundColor: colors.bgSecondary,

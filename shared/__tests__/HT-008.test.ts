@@ -9,13 +9,13 @@ function getUserPowerMax(trainings: Training[], profileId: string): number {
 
 function makeTraining(profileId: string, powerMax: number): Training {
   const profile: CalibrationProfile = {
-    id: profileId, name: 'Test', threshold: 15, sensitivity: 25, validHitThreshold: 80, createdAt: 0
+    id: profileId, name: 'Test', threshold: 15, sensitivity: 25, createdAt: 0
   }
   return {
     id: `t-${Math.random()}`, createdAt: 0,
     device: { mac: 'AA:BB', name: 'Sensor' },
     profile, rounds: [], roundDuration: 0, numRounds: 0,
-    restDuration: 0, totalImpacts: 0, validHits: 0,
+    restDuration: 0, totalImpacts: 0,
     powerMax, hpmAverage: 0
   }
 }

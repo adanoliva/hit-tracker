@@ -11,11 +11,10 @@ export interface TrainingConfig {
 
 function calcRoundStats(impacts: Impact[], duration: number): RoundStats {
   const totalImpacts = impacts.length
-  const validHits = impacts.filter((i) => i.isValid).length
-  const powerMax = impacts.reduce((max, i) => Math.max(max, i.intensity), 0)
+  const powerMax = impacts.reduce((max, i) => Math.max(max, Math.round(i.magnitude ?? 0)), 0)
   const durationMin = duration / 60000
   const hpmAverage = durationMin > 0 ? Math.round(totalImpacts / durationMin) : 0
-  const powerTrend = impacts.map((i) => i.intensity)
+  const powerTrend = impacts.map((i) => Math.round(i.magnitude ?? 0))
 
   const firstHalf = powerTrend.slice(0, Math.floor(powerTrend.length / 2))
   const secondHalf = powerTrend.slice(Math.floor(powerTrend.length / 2))
@@ -26,8 +25,6 @@ function calcRoundStats(impacts: Impact[], duration: number): RoundStats {
   return {
     duration,
     totalImpacts,
-    validHits,
-    validHitRate: totalImpacts > 0 ? Math.round((validHits / totalImpacts) * 100) : 0,
     powerMax,
     hpmAverage,
     hpmMax: 0,
@@ -51,7 +48,6 @@ class TrainingService {
       numRounds: config.numRounds,
       restDuration: config.restDuration,
       totalImpacts: 0,
-      validHits: 0,
       powerMax: 0,
       hpmAverage: 0
     }
@@ -101,7 +97,6 @@ class TrainingService {
     const durationMin = totalDurationMs / 60000
 
     this.current.totalImpacts = allImpacts.length
-    this.current.validHits = allImpacts.filter((i) => i.isValid).length
     this.current.powerMax = allImpacts.reduce((max, i) => Math.max(max, i.intensity), 0)
     this.current.hpmAverage =
       durationMin > 0 ? Math.round(allImpacts.length / durationMin) : 0

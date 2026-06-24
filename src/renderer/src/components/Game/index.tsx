@@ -11,7 +11,6 @@ const DEFAULT_PROFILE: CalibrationProfile = {
   name: 'Default',
   threshold: 12.0,
   sensitivity: 25.0,
-  validHitThreshold: 80,
   createdAt: 0
 }
 

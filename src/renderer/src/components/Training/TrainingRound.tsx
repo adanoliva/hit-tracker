@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, ReferenceLine } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import type { Impact } from '../../types'
 
 interface TrainingRoundProps {
@@ -25,35 +25,22 @@ function formatTime(seconds: number): string {
 const HIT_COLOR = '#c0c0c0'
 
 function ImpactDot(props: any): JSX.Element {
-  const { cx, cy, payload } = props
-  if (cx == null || cy == null || !payload) return <g />
-  const radius = payload.isValid ? 5 : 3
-
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={radius} fill={HIT_COLOR} opacity={payload.isValid ? 0.9 : 0.4} />
-      {payload.isValid && (
-        <circle cx={cx} cy={cy} r={radius + 2} fill="none" stroke={HIT_COLOR} strokeWidth={1} opacity={0.4} />
-      )}
-    </g>
-  )
+  const { cx, cy } = props
+  if (cx == null || cy == null) return <g />
+  return <circle cx={cx} cy={cy} r={4} fill={HIT_COLOR} opacity={0.85} />
 }
 
 export function TrainingRound({
   roundNumber, totalRounds, timeRemaining, timeElapsed, isFreeMode,
   impacts, powerMax, powerMaxMag, userPowerRef, hpmStats, onAbort, onFinish
 }: TrainingRoundProps): JSX.Element {
-  const validHits = impacts.filter((i) => i.isValid).length
-
   const chartData = impacts.map((i) => ({
-    time:    i.time,
-    value:   userPowerRef > 0 ? Math.round((i.magnitude / userPowerRef) * 100) : i.intensity,
-    isValid: i.isValid
+    time:  i.time,
+    value: userPowerRef > 0 ? Math.round((i.magnitude / userPowerRef) * 100) : i.intensity,
   }))
 
   const maxChartValue = chartData.length > 0 ? Math.max(...chartData.map(d => d.value)) : 100
   const yDomain: [number, number] = [0, Math.max(105, maxChartValue + 5)]
-  const refLineY = userPowerRef > 0 ? 80 : (powerMax > 0 ? powerMax * 0.8 : null)
 
   const xDomain: [number, number] = impacts.length > 0
     ? [impacts[0].time, Math.max(impacts[impacts.length - 1].time, impacts[0].time + 2000)]
@@ -102,15 +89,6 @@ export function TrainingRound({
               tick={{ fontSize: 10, fill: '#808080' }}
               width={28}
             />
-            {refLineY != null && (
-              <ReferenceLine
-                y={refLineY}
-                stroke="#808080"
-                strokeDasharray="4 4"
-                opacity={0.4}
-                label={{ value: '80%', position: 'insideTopRight', fontSize: 9, fill: '#808080' }}
-              />
-            )}
             <Line
               dataKey="value"
               type="monotone"
@@ -125,9 +103,8 @@ export function TrainingRound({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <Stat label="Golpes" value={impacts.length} />
-        <Stat label="Válidos" value={validHits} color="text-accent" />
         <Stat label="Power máx" value={powerMaxMag} color="text-accent" />
         <Stat label="HPM" value={hpmStats.current} color="text-secondary" />
       </div>

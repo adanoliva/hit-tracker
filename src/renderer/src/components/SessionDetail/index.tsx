@@ -38,14 +38,21 @@ function RoundChart({ round }: { round: Round }): JSX.Element {
   const pad = { t: 16, r: 16, b: 32, l: 36 }
   const innerW = W - pad.l - pad.r
   const innerH = H - pad.t - pad.b
-  const durationSec = (round.endTime - round.startTime) / 1000
-  const xMax = Math.max(durationSec, 1)
+  const mags = round.impacts.map(i => Math.round(i.magnitude ?? 0))
+  const magMin = Math.min(...mags)
+  const magMax = Math.max(...mags)
+  const magRange = magMax - magMin || 1
 
-  const toX = (t: number) => pad.l + ((t - round.startTime) / 1000 / xMax) * innerW
-  const toY = (v: number) => pad.t + innerH - (v / 100) * innerH
+  const tMin = round.impacts[0].time
+  const tMax = Math.max(round.impacts[round.impacts.length - 1].time, tMin + 1000)
+  const durationSec = Math.round((tMax - tMin) / 1000)
 
-  const xTicks = [0, Math.round(xMax / 2), Math.round(xMax)]
-  const yTicks = [0, 25, 50, 75, 100]
+  const toX = (t: number) => pad.l + ((t - tMin) / (tMax - tMin)) * innerW
+  const toY = (mag: number) => pad.t + innerH - ((mag - magMin) / magRange) * innerH
+
+  const xTicks = [0, Math.round(durationSec / 2), durationSec]
+  const yMid = Math.round((magMin + magMax) / 2)
+  const yTicks = [magMin, yMid, magMax]
 
   return (
     <div ref={containerRef}>
@@ -64,17 +71,17 @@ function RoundChart({ round }: { round: Round }): JSX.Element {
             </g>
           ))}
           {xTicks.map((v) => (
-            <text key={v} x={toX(round.startTime + v * 1000)} y={H - 6}
+            <text key={v} x={toX(tMin + v * 1000)} y={H - 6}
               textAnchor="middle" fontSize={11} fill="#808080">{v}s</text>
           ))}
           {round.impacts.map((impact, i) => (
             <circle
               key={i}
               cx={toX(impact.time)}
-              cy={toY(impact.intensity)}
-              r={6}
-              fill={impact.isValid ? 'var(--accent)' : '#404040'}
-              opacity={impact.isValid ? 0.9 : 0.6}
+              cy={toY(Math.round(impact.magnitude ?? 0))}
+              r={5}
+              fill="var(--accent)"
+              opacity={0.75}
             />
           ))}
         </svg>
@@ -85,12 +92,12 @@ function RoundChart({ round }: { round: Round }): JSX.Element {
 
 function RoundStats({ round }: { round: Round }): JSX.Element {
   const { stats } = round
+  const powerMax = Math.max(0, ...round.impacts.map(i => Math.round(i.magnitude ?? 0)))
   return (
-    <div className="grid grid-cols-5 gap-2 mb-3">
+    <div className="grid grid-cols-4 gap-2 mb-3">
       {[
         { label: 'Golpes', value: stats.totalImpacts },
-        { label: 'Válidos', value: stats.validHits },
-        { label: 'Power máx', value: stats.powerMax },
+        { label: 'Power máx', value: powerMax },
         { label: 'HPM prom.', value: stats.hpmAverage },
         { label: 'Duración', value: formatDuration(stats.duration) },
       ].map(({ label, value }) => (

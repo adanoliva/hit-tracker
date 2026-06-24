@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Svg, { Circle, Line, G } from 'react-native-svg'
+import Svg, { Circle, Line } from 'react-native-svg'
 import type { Impact } from '../../core/types'
 import { colors } from '../../theme'
 
@@ -28,7 +28,7 @@ function ImpactChart({ impacts, powerMax, userPowerRef, width, height }: {
   )
   const maxValue = Math.max(...chartValues)
   const yMax = Math.max(105, maxValue + 5)
-  const refLineValue = userPowerRef > 0 ? 80 : (powerMax > 0 ? powerMax * 0.8 : null)
+  const refLineValue = null
 
   const pad = { t: 10, r: 8, b: 10, l: 30 }
   const W = width - pad.l - pad.r
@@ -61,19 +61,9 @@ function ImpactChart({ impacts, powerMax, userPowerRef, width, height }: {
           />
         )
       })}
-      {impacts.map((impact, i) => {
-        const cx = toX(impact.time)
-        const cy = toY(chartValues[i])
-        const r = impact.isValid ? 6 : 4
-        return (
-          <G key={`d${i}`}>
-            <Circle cx={cx} cy={cy} r={r} fill={HIT_COLOR} opacity={impact.isValid ? 0.9 : 0.4} />
-            {impact.isValid && (
-              <Circle cx={cx} cy={cy} r={r + 3} fill="none" stroke={HIT_COLOR} strokeWidth={1} opacity={0.3} />
-            )}
-          </G>
-        )
-      })}
+      {impacts.map((impact, i) => (
+        <Circle key={`d${i}`} cx={toX(impact.time)} cy={toY(chartValues[i])} r={4} fill={HIT_COLOR} opacity={0.85} />
+      ))}
     </Svg>
   )
 }
@@ -101,8 +91,6 @@ export function TrainingRound({
   const { top } = useSafeAreaInsets()
   const chartWidth = width - 32  // padding 16*2
   const chartHeight = 200
-
-  const validHits = impacts.filter((i) => i.isValid).length
 
   return (
     <View style={[s.container, { paddingTop: top + 16 }]}>
@@ -137,7 +125,6 @@ export function TrainingRound({
       {/* Stats */}
       <View style={s.statsRow}>
         <StatBox label="Golpes" value={impacts.length} />
-        <StatBox label="Válidos" value={validHits} color={colors.accent} />
         <StatBox label="Power máx" value={powerMaxMag} color={colors.accent} />
         <StatBox label="HPM" value={hpmStats.current} color={colors.secondary} />
       </View>

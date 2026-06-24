@@ -4,11 +4,11 @@ import {
   useWindowDimensions, Alert, ActivityIndicator
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg'
 import { Share2 } from 'lucide-react-native'
 import { useTrainingStore } from '../../core/stores/trainingStore'
 import type { Training, Round } from '../../core/types'
 import { colors } from '../../theme'
+import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg'
 import { useShareSession } from '../../hooks/useShareSession'
 
 interface SessionDetailProps {
@@ -44,38 +44,33 @@ function RoundChart({ round, width }: { round: Round; width: number }) {
   const pad = { t: 10, r: 12, b: 24, l: 28 }
   const W = width - pad.l - pad.r
   const innerH = H - pad.t - pad.b
-  const durationSec = (round.endTime - round.startTime) / 1000
-  const xMax = Math.max(durationSec, 1)
+  const mags = round.impacts.map(i => i.magnitude ?? 0)
+  const magMin = Math.min(...mags)
+  const magMax = Math.max(...mags)
+  const magRange = magMax - magMin || 1
 
-  const toX = (t: number) => pad.l + ((t - round.startTime) / 1000 / xMax) * W
-  const toY = (v: number) => pad.t + innerH - (v / 100) * innerH
+  const tMin = round.impacts[0].time
+  const tMax = Math.max(round.impacts[round.impacts.length - 1].time, tMin + 1000)
+  const durationSec = Math.round((tMax - tMin) / 1000)
 
-  const xTicks = [0, Math.round(xMax / 2), Math.round(xMax)]
-  const yTicks = [0, 50, 100]
+  const toX = (t: number) => pad.l + ((t - tMin) / (tMax - tMin)) * W
+  const toY = (mag: number) => pad.t + innerH - ((mag - magMin) / magRange) * innerH
+
+  const xTicks = [0, Math.round(durationSec / 2), durationSec]
 
   return (
     <Svg width={width} height={H}>
-      {yTicks.map((v) => (
-        <Line key={`yg${v}`} x1={pad.l} x2={pad.l + W} y1={toY(v)} y2={toY(v)}
-          stroke={colors.border} strokeWidth={1} />
-      ))}
-      {yTicks.map((v) => (
-        <SvgText key={`yl${v}`} x={pad.l - 4} y={toY(v) + 4}
-          textAnchor="end" fontSize={9} fill={colors.textMuted}>{v}</SvgText>
-      ))}
+      <Line x1={pad.l} x2={pad.l + W} y1={pad.t} y2={pad.t} stroke={colors.border} strokeWidth={1} />
+      <Line x1={pad.l} x2={pad.l + W} y1={pad.t + innerH} y2={pad.t + innerH} stroke={colors.border} strokeWidth={1} />
+      <SvgText x={pad.l - 4} y={pad.t + 4} textAnchor="end" fontSize={9} fill={colors.textMuted}>{Math.round(magMax)}</SvgText>
+      <SvgText x={pad.l - 4} y={pad.t + innerH + 4} textAnchor="end" fontSize={9} fill={colors.textMuted}>{Math.round(magMin)}</SvgText>
       {xTicks.map((v) => (
-        <SvgText key={`xl${v}`} x={toX(round.startTime + v * 1000)} y={H - 4}
+        <SvgText key={`xl${v}`} x={toX(tMin + v * 1000)} y={H - 4}
           textAnchor="middle" fontSize={9} fill={colors.textMuted}>{v}s</SvgText>
       ))}
       {round.impacts.map((impact, i) => (
-        <Circle
-          key={i}
-          cx={toX(impact.time)}
-          cy={toY(impact.intensity)}
-          r={5}
-          fill={impact.isValid ? colors.accent : colors.textSecondary}
-          opacity={impact.isValid ? 0.9 : 0.5}
-        />
+        <Circle key={i} cx={toX(impact.time)} cy={toY(impact.magnitude ?? 0)}
+          r={5} fill={colors.accent} opacity={0.85} />
       ))}
     </Svg>
   )
@@ -168,25 +163,26 @@ export function SessionDetail({ training, onBack, onDelete }: SessionDetailProps
       <ScrollView style={s.content} contentContainerStyle={s.contentInner}>
         {round && (
           <>
-            {/* Round stats */}
-            <View style={s.roundStats}>
-              {[
-                { label: 'Golpes', value: round.stats.totalImpacts },
-                { label: 'Válidos', value: round.stats.validHits },
-                { label: 'Power máx', value: round.stats.powerMax },
-                { label: 'HPM', value: round.stats.hpmAverage },
-                { label: 'Duración', value: formatDuration(round.stats.duration) },
-              ].map(({ label, value }) => (
-                <View key={label} style={s.roundStat}>
-                  <Text style={s.statLabel}>{label}</Text>
-                  <Text style={s.roundStatValue}>{value}</Text>
-                </View>
-              ))}
-            </View>
+            <View ref={chartRef} collapsable={false} style={s.shareCapture}>
+              {/* Round stats */}
+              <View style={s.roundStats}>
+                {[
+                  { label: 'Golpes', value: round.stats.totalImpacts },
+                  { label: 'Power máx', value: Math.max(0, ...round.impacts.map(i => Math.round(i.magnitude ?? 0))) },
+                  { label: 'HPM', value: round.stats.hpmAverage },
+                  { label: 'Duración', value: formatDuration(round.stats.duration) },
+                ].map(({ label, value }) => (
+                  <View key={label} style={s.roundStat}>
+                    <Text style={s.statLabel}>{label}</Text>
+                    <Text style={s.roundStatValue}>{value}</Text>
+                  </View>
+                ))}
+              </View>
 
-            {/* Chart */}
-            <View style={s.chartCard} ref={chartRef}>
-              <RoundChart round={round} width={chartWidth} />
+              {/* Chart */}
+              <View style={s.chartCard}>
+                <RoundChart round={round} width={chartWidth} />
+              </View>
             </View>
           </>
         )}
@@ -226,6 +222,7 @@ const s = StyleSheet.create({
   tabTextActive: { color: '#fff' },
   content: { flex: 1 },
   contentInner: { padding: 16, gap: 12 },
+  shareCapture: { backgroundColor: colors.bgPrimary, gap: 12 },
   roundStats: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   roundStat: {
     backgroundColor: colors.bgSecondary, borderRadius: 10, padding: 10,
@@ -234,7 +231,7 @@ const s = StyleSheet.create({
   roundStatValue: { fontSize: 16, fontWeight: '800', color: colors.textPrimary },
   chartCard: {
     backgroundColor: colors.bgSecondary, borderRadius: 12,
-    borderWidth: 1, borderColor: colors.border, padding: 12, overflow: 'hidden'
+    borderWidth: 1, borderColor: colors.border, padding: 12,
   },
 })
 

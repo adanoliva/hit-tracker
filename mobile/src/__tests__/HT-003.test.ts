@@ -11,8 +11,6 @@ function makeTraining(overrides: Partial<Training> & { roundDurations?: number[]
     stats: {
       duration,
       totalImpacts: 0,
-      validHits: 0,
-      validHitRate: 0,
       powerMax: 0,
       hpmAverage: 0,
       hpmMax: 0,
@@ -24,13 +22,12 @@ function makeTraining(overrides: Partial<Training> & { roundDurations?: number[]
     id: 'test',
     createdAt: 0,
     device: { mac: '00:00', name: 'Test' },
-    profile: { id: 'p1', name: 'Default', threshold: 15, sensitivity: 25, validHitThreshold: 80, createdAt: 0 },
+    profile: { id: 'p1', name: 'Default', threshold: 15, sensitivity: 25, createdAt: 0 },
     rounds,
     roundDuration: 120,
     numRounds: rounds.length,
     restDuration: 60,
     totalImpacts: 0,
-    validHits: 0,
     powerMax: 0,
     hpmAverage: 0,
     ...rest

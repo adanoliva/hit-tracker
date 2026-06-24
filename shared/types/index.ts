@@ -14,7 +14,6 @@ export interface Impact {
   intensity: number
   magnitude: number
   duration: number
-  isValid: boolean
 }
 
 export interface Device {
@@ -39,7 +38,6 @@ export interface CalibrationProfile {
   name: string
   threshold: number
   sensitivity: number
-  validHitThreshold: number
   calibrationData?: CalibrationData
   createdAt: number
 }
@@ -47,8 +45,6 @@ export interface CalibrationProfile {
 export interface RoundStats {
   duration: number
   totalImpacts: number
-  validHits: number
-  validHitRate: number
   powerMax: number
   hpmAverage: number
   hpmMax: number
@@ -78,7 +74,6 @@ export interface Training {
   numRounds: number
   restDuration: number
   totalImpacts: number
-  validHits: number
   powerMax: number
   hpmAverage: number
 }

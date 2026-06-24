@@ -11,7 +11,6 @@ export const calibrationService = {
       name,
       threshold: 15.0,
       sensitivity: 25.0,
-      validHitThreshold: 80,
       createdAt: Date.now()
     }
   },
@@ -34,11 +33,9 @@ export const calibrationService = {
   },
 
   calculateIntensity(magnitude: number, profile: CalibrationProfile): number {
-    const raw = (magnitude - profile.threshold) * profile.sensitivity
-    return Math.min(100, Math.max(0, Math.round(raw)))
-  },
-
-  isValidHit(impact: Impact, powerMax: number, validRatio: number = 0.8): boolean {
-    return impact.intensity >= powerMax * validRatio
+    const base = profile.threshold * 10
+    const range = profile.sensitivity * 10
+    if (range <= 0) return 0
+    return Math.min(100, Math.max(0, Math.round((magnitude - base) / range * 100)))
   }
 }

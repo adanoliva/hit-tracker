@@ -23,7 +23,6 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps): JSX
       {/* Global stats */}
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Total golpes" value={training.totalImpacts} />
-        <Stat label="Golpes válidos" value={training.validHits} color="text-accent" />
         <Stat label="Power máximo" value={training.powerMax} color="text-accent" />
         <Stat label="HPM promedio" value={training.hpmAverage} color="text-secondary" />
       </div>
