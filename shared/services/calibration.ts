@@ -19,17 +19,15 @@ export const calibrationService = {
     light: number[],
     normal: number[],
     heavy: number[]
-  ): { suggestedThreshold: number; suggestedSensitivity: number } {
+  ): { suggestedThreshold: number; suggestedSensitivity: number } | null {
     const lightAvg = avg(light)
     const heavyAvg = avg(heavy)
-
-    const suggestedThreshold = lightAvg * 0.8
-    const suggestedSensitivity = 100 / (heavyAvg - lightAvg)
-
-    return {
-      suggestedThreshold: Math.round(suggestedThreshold * 10) / 10,
-      suggestedSensitivity: Math.round(suggestedSensitivity * 10) / 10
-    }
+    const base = lightAvg * 0.8
+    const range = heavyAvg - base
+    if (range < base * 0.2) return null
+    const suggestedThreshold = Math.min(100, Math.max(0, Math.round((base / 10) * 10) / 10))
+    const suggestedSensitivity = Math.min(100, Math.max(1, Math.round((range / 10) * 10) / 10))
+    return { suggestedThreshold, suggestedSensitivity }
   },
 
   calculateIntensity(magnitude: number, profile: CalibrationProfile): number {

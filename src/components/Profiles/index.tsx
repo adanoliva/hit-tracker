@@ -1,12 +1,33 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Linking } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import appJson from '../../../app.json'
 import Slider from '@react-native-community/slider'
 import { useProfileStore } from '../../core/stores/profileStore'
+import { useDeviceStore } from '../../core/stores/deviceStore'
+import { useBleReading } from '../../core/hooks/useBleReading'
 import { calibrationService } from '../../core/services/calibration'
 import type { CalibrationProfile } from '../../core/types'
+import type { SensorReading } from '../../core/types'
 import { colors } from '../../theme'
+
+type CalibStep = 'light' | 'normal' | 'heavy' | 'done' | 'error'
+interface CalibWizardState {
+  step: CalibStep
+  light: number[]
+  normal: number[]
+  heavy: number[]
+  errorMsg?: string
+  result?: { threshold: number; sensitivity: number }
+}
+
+const MIN_CALIB_HIT = 200
+const HITS_PER_SERIES = 5
+const STEP_LABELS: Record<Exclude<CalibStep, 'done' | 'error'>, string> = {
+  light: 'Golpes suaves',
+  normal: 'Golpes normales',
+  heavy: 'Golpes fuertes',
+}
 
 function SliderField({
   label, hint, value, min, max, step, unit = '', color = colors.textPrimary, onChange
@@ -57,10 +78,82 @@ const REPO_URL = 'https://github.com/adanoliva/hit-tracker'
 export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   const { top } = useSafeAreaInsets()
   const { profiles, selectedProfileId, addProfile, updateProfile, deleteProfile, selectProfile } = useProfileStore()
+  const connected = useDeviceStore((s) => s.connected)
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [editing, setEditing] = useState<CalibrationProfile | null>(null)
   const [showAbout, setShowAbout] = useState(false)
+  const [calib, setCalib] = useState<CalibWizardState | null>(null)
+
+  const prevReadingRef = useRef<SensorReading | null>(null)
+  const lastHitTimeRef = useRef<number>(0)
+
+  const activeStep = calib?.step
+  const wizardActive = calib !== null && activeStep !== 'done' && activeStep !== 'error'
+
+  useBleReading({
+    deviceId: connected?.mac ?? null,
+    active: wizardActive,
+    onReading: (reading) => {
+      const prev = prevReadingRef.current
+      prevReadingRef.current = reading
+      if (!prev || !calib) return
+      const isRising = reading.magnitude >= prev.magnitude
+      const now = Date.now()
+      if (!isRising && prev.magnitude > MIN_CALIB_HIT && now - lastHitTimeRef.current > 200) {
+        lastHitTimeRef.current = now
+        setCalib((c) => {
+          if (!c) return c
+          const { step, light, normal, heavy } = c
+          if (step === 'light' && light.length < HITS_PER_SERIES) {
+            const next = [...light, prev.magnitude]
+            if (next.length === HITS_PER_SERIES) return { ...c, light: next, step: 'normal', normal: [] }
+            return { ...c, light: next }
+          }
+          if (step === 'normal' && normal.length < HITS_PER_SERIES) {
+            const next = [...normal, prev.magnitude]
+            if (next.length === HITS_PER_SERIES) return { ...c, normal: next, step: 'heavy', heavy: [] }
+            return { ...c, normal: next }
+          }
+          if (step === 'heavy' && heavy.length < HITS_PER_SERIES) {
+            const next = [...heavy, prev.magnitude]
+            if (next.length === HITS_PER_SERIES) {
+              const result = calibrationService.analyzeCalibrationSamples(light, normal, next)
+              if (!result) return { ...c, heavy: next, step: 'error', errorMsg: 'Los golpes fuertes no fueron suficientemente distintos a los suaves. Inténtalo de nuevo.' }
+              const profile = profiles.find((p) => p.id === selectedProfileId)
+              if (profile) updateProfile(profile.id, { threshold: result.suggestedThreshold, sensitivity: result.suggestedSensitivity })
+              return { ...c, heavy: next, step: 'done', result: { threshold: result.suggestedThreshold, sensitivity: result.suggestedSensitivity } }
+            }
+            return { ...c, heavy: next }
+          }
+          return c
+        })
+      }
+    },
+  })
+
+  // Cancel wizard if sensor disconnects
+  useEffect(() => {
+    if (!connected && wizardActive) {
+      setCalib({ step: 'error', light: [], normal: [], heavy: [], errorMsg: 'Sensor desconectado. La calibración se ha cancelado.' })
+    }
+  }, [connected])
+
+  const openWizard = () => {
+    prevReadingRef.current = null
+    lastHitTimeRef.current = 0
+    setCalib({ step: 'light', light: [], normal: [], heavy: [] })
+  }
+
+  const repeatSeries = () => {
+    setCalib((c) => {
+      if (!c) return c
+      if (c.step === 'light') return { ...c, light: [] }
+      if (c.step === 'normal') return { ...c, normal: [] }
+      if (c.step === 'heavy') return { ...c, heavy: [] }
+      return c
+    })
+  }
 
   const handleCreate = () => {
     if (!newName.trim()) return
@@ -80,6 +173,65 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
 
   return (
     <View style={s.wrapper}>
+    <Modal visible={calib !== null} transparent animationType="fade" onRequestClose={() => setCalib(null)}>
+      <View style={s.overlay}>
+        <View style={s.modal}>
+          {calib?.step === 'done' ? (
+            <>
+              <Text style={s.modalTitle}>Calibración completada</Text>
+              <Text style={s.calibResult}>
+                Detección: <Text style={{ color: colors.accent }}>{calib.result?.threshold}</Text>
+                {'  '}Potencia: <Text style={{ color: colors.secondary }}>{calib.result?.sensitivity}</Text>
+              </Text>
+              <Text style={s.calibDesc}>Los valores han sido aplicados al perfil activo.</Text>
+              <TouchableOpacity style={s.saveBtn} onPress={() => setCalib(null)}>
+                <Text style={s.saveBtnText}>Listo</Text>
+              </TouchableOpacity>
+            </>
+          ) : calib?.step === 'error' ? (
+            <>
+              <Text style={s.modalTitle}>Error</Text>
+              <Text style={s.calibDesc}>{calib.errorMsg}</Text>
+              <View style={s.editActions}>
+                <TouchableOpacity style={s.saveBtn} onPress={openWizard}>
+                  <Text style={s.saveBtnText}>Reintentar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={s.cancelBtn} onPress={() => setCalib(null)}>
+                  <Text style={s.cancelBtnText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : calib !== null ? (
+            <>
+              <View style={s.calibHeader}>
+                <Text style={s.modalTitle}>Calibración</Text>
+                <TouchableOpacity onPress={() => setCalib(null)}>
+                  <Text style={s.calibClose}>✕</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={s.calibStep}>{STEP_LABELS[calib.step as Exclude<CalibStep, 'done' | 'error'>]}</Text>
+              {(() => {
+                const arr = calib[calib.step as 'light' | 'normal' | 'heavy']
+                return (
+                  <>
+                    <Text style={s.calibCounter}>{arr.length} / {HITS_PER_SERIES}</Text>
+                    <Text style={s.calibDesc}>
+                      {calib.step === 'light' && 'Golpea el saco con suavidad 5 veces.'}
+                      {calib.step === 'normal' && 'Golpea el saco con fuerza media 5 veces.'}
+                      {calib.step === 'heavy' && 'Golpea el saco con toda tu fuerza 5 veces.'}
+                    </Text>
+                    <TouchableOpacity style={s.cancelBtn} onPress={repeatSeries}>
+                      <Text style={s.cancelBtnText}>Repetir serie</Text>
+                    </TouchableOpacity>
+                  </>
+                )
+              })()}
+            </>
+          ) : null}
+        </View>
+      </View>
+    </Modal>
+
     <Modal visible={showAbout} transparent animationType="fade" onRequestClose={() => setShowAbout(false)}>
       <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={() => setShowAbout(false)}>
         <View style={s.modal}>
@@ -159,6 +311,11 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                 {selectedProfileId !== p.id && (
                   <TouchableOpacity style={s.useBtn} onPress={() => selectProfile(p.id)}>
                     <Text style={s.useBtnText}>Usar</Text>
+                  </TouchableOpacity>
+                )}
+                {selectedProfileId === p.id && connected && (
+                  <TouchableOpacity style={s.calibBtn} onPress={openWizard}>
+                    <Text style={s.calibBtnText}>Calibrar</Text>
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity style={s.editBtn} onPress={() => setEditing(p)}>
@@ -272,5 +429,13 @@ const s = StyleSheet.create({
     borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border,
     borderRadius: 14, paddingVertical: 16, alignItems: 'center'
   },
-  addBtnText: { color: colors.textMuted, fontSize: 14 }
+  addBtnText: { color: colors.textMuted, fontSize: 14 },
+  calibBtn: { borderWidth: 1, borderColor: colors.accent, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
+  calibBtnText: { color: colors.accent, fontSize: 12 },
+  calibHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  calibClose: { fontSize: 18, color: colors.textMuted, padding: 4 },
+  calibStep: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginTop: 4 },
+  calibCounter: { fontSize: 48, fontWeight: '800', color: colors.accent, textAlign: 'center', marginVertical: 12 },
+  calibDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+  calibResult: { fontSize: 16, color: colors.textPrimary, marginVertical: 8 },
 })

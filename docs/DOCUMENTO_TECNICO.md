@@ -181,9 +181,11 @@ calibrationService.createProfile(name: string): CalibrationProfile
 
 calibrationService.analyzeCalibrationSamples(
   light: number[], normal: number[], heavy: number[]
-): { suggestedThreshold: number; suggestedSensitivity: number }
-// threshold = avg(light) * 0.8
-// sensitivity = 100 / (avg(heavy) - avg(light))
+): { suggestedThreshold: number; suggestedSensitivity: number } | null
+// base = avg(light) * 0.8
+// range = avg(heavy) - base
+// → null si range < base * 0.2 (rango insuficiente: heavy no supera significativamente a light)
+// threshold = base / 10, sensitivity = range / 10, ambos clampeados (threshold: 0-100, sensitivity: 1-100)
 
 calibrationService.calculateIntensity(magnitude: number, profile: CalibrationProfile): number
 // raw = (magnitude - threshold) * sensitivity

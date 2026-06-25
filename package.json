@@ -1,6 +1,6 @@
 {
   "name": "mobile",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "main": "index.ts",
   "dependencies": {
     "@react-native-community/slider": "^5.2.0",
@@ -41,6 +41,7 @@
     "android": "expo run:android",
     "android:release": "expo run:android --variant release",
     "android:apk": "cd android && ./gradlew assembleRelease",
+    "android:bundle": "cd android && ./gradlew bundleRelease",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest",

@@ -21,7 +21,7 @@
 | HT-011 | Sistema de logros (Achievements) | v2 | both | medium | pending | — |
 | HT-012 | Grabación de vídeo sincronizada con sensor (overlay en reproducción) | v2 | mobile | medium | pending | — |
 | HT-013 | Exportar vídeo con overlay de golpes baked in | v2 | mobile | medium | pending | HT-012 |
-| HT-014 | Asistente de auto-calibración guiado desde el perfil | v2 | both | high | pending | — |
+| HT-014 | Asistente de auto-calibración guiado desde el perfil | v2 | both | high | done | — |
 | HT-006-a | Calibración: nuevo modelo de datos Perfil-Sensor (DeviceCalibration) | v3 | shared | high | pending | — |
 | HT-006-b | Calibración: pantalla "Sesión activa" combinada sensor + perfil | v3 | both | high | pending | HT-006-a |
 | HT-006-c | Calibración: asistente guiado 3 series de golpes | v3 | both | high | pending | HT-006-a, HT-006-b |
