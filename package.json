@@ -32,6 +32,7 @@
     "@types/react": "~19.2.2",
     "babel-plugin-module-resolver": "^5.0.3",
     "jest": "^30.4.2",
+    "patch-package": "^8.0.1",
     "ts-jest": "^29.4.11",
     "typescript": "~6.0.3"
   },
@@ -42,7 +43,8 @@
     "android:apk": "cd android && ./gradlew assembleRelease",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "patch-package"
   },
   "jest": {
     "preset": "ts-jest",
