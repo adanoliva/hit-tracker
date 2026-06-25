@@ -1,20 +1,59 @@
 diff --git a/node_modules/react-native-sensors/android/build.gradle b/node_modules/react-native-sensors/android/build.gradle
-index f1526ec..2cd7e2f 100644
+index f1526ec..4b0230d 100644
 --- a/node_modules/react-native-sensors/android/build.gradle
 +++ b/node_modules/react-native-sensors/android/build.gradle
-@@ -6,13 +6,13 @@ def safeExtGet(prop, fallback) {
- repositories {
-   mavenCentral()
-   google()
--  jcenter()
-+  // jcenter() removed — Gradle 9+
+@@ -1,48 +1,26 @@
+-
+ def safeExtGet(prop, fallback) {
+     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
  }
  
- buildscript {
-     repositories {
-         google()
+-repositories {
+-  mavenCentral()
+-  google()
+-  jcenter()
+-}
+-
+-buildscript {
+-    repositories {
+-        google()
 -        jcenter()
-+        // jcenter() removed — Gradle 9+
-     }
+-    }
+-
+-    dependencies {
+-        classpath("com.android.tools.build:gradle:3.5.1")
+-    }
+-}
+-
+ apply plugin: 'com.android.library'
  
-     dependencies {
+ android {
+-    compileSdkVersion safeExtGet('compileSdkVersion', 23)
++    compileSdkVersion safeExtGet('compileSdkVersion', 34)
++    namespace "com.sensors"
+ 
+     defaultConfig {
+-        minSdkVersion 17
+-        targetSdkVersion 29
++        minSdkVersion safeExtGet('minSdkVersion', 24)
++        targetSdkVersion safeExtGet('targetSdkVersion', 34)
+         versionCode 1
+         versionName "1.0"
+-        ndk {
+-            abiFilters "armeabi-v7a", "x86"
+-        }
+     }
+     lintOptions {
+        warning 'InvalidPackage'
+     }
+ }
+ 
+-
+-
+ dependencies {
+     implementation 'com.facebook.react:react-native:+'
+-    implementation 'androidx.appcompat:appcompat:1.0.2'
+-    implementation 'androidx.annotation:annotation:1.0.2'
++    implementation 'androidx.appcompat:appcompat:1.1.0'
++    implementation 'androidx.annotation:annotation:1.1.0'
+ }
