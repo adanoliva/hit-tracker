@@ -30,6 +30,9 @@
 | HT-009-a | Potencia real: firmware V2 con raw int16 escalado (/16) | v1 | both | high | done | HT-008 |
 | HT-009-b | Potencia real: display raw durante sesión y gráfica en % con referencia de 5 sesiones | v1 | both | high | done | HT-008, HT-009-a |
 | HT-010 | Sistema de migraciones de datos — appVersion en Training y migrationService | v1 | both | high | done | HT-009-a |
+| HT-015-a | Catálogo de ejercicios físicos local (tipos + exerciseService + JSON curado) | v2 | shared | high | pending | — |
+| HT-015-b | WorkoutPlayer — componente guiado de ejercicios físicos con timer | v2 | both | high | pending | HT-015-a |
+| HT-015-c | Sesión Completa — configurador de fases y flujo encadenado (físico → boxeo) | v2 | both | high | pending | HT-015-a, HT-015-b |
 
 ## Leyenda
 
