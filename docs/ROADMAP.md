@@ -10,13 +10,17 @@
 | ✅ | Sesiones con rondas, descansos y modo libre |
 | ✅ | Dashboard con historial y progreso |
 | ✅ | Perfiles de usuario y calibración manual |
-| ✅ | App desktop (Windows) + app mobile (Android) |
-| ✅ | Sensor ESP32 conectado via BLE en desktop y mobile |
-| ⬜ | `HT-001` Eliminación de modos de prueba (mock desktop y teléfono como sensor mobile) |
-| ⬜ | `HT-002` Pantalla de detalle de sesión con gráfico de golpes por round |
+| ✅ | App mobile Android (Expo + React Native) |
+| ✅ | Sensor ESP32 conectado via BLE en mobile |
+| ✅ | `HT-001` Eliminación de modos de prueba (teléfono como sensor) |
+| ✅ | `HT-002` Pantalla de detalle de sesión con gráfico de golpes por round |
 | ✅ | `HT-003` Compartir sesión en redes sociales (mobile) |
 | ✅ | `HT-005` Modo Game mejorado: TOP 3 y entrada de iniciales estilo arcade |
-| ⬜ | `HT-007` Umbral de golpe válido configurable por perfil |
+| ✅ | `HT-007` Umbral de golpe válido configurable por perfil |
+| ✅ | `HT-008` Power máximo basado en media de las últimas 5 sesiones |
+| ✅ | `HT-009-a` Firmware V2 con raw int16 escalado (/16) |
+| ✅ | `HT-009-b` Display potencia real durante sesión y gráfica en % |
+| ✅ | `HT-010` Sistema de migraciones de datos (appVersion + migrationService) |
 
 > Con V1 completo y el sensor físico (Fase 1 hardware) ya hay un producto real y demostrable, aunque el sensor sea un ESP32 con cables pegado al saco.
 

@@ -2,29 +2,11 @@
 
 ## Descripción General
 
-HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real con dos plataformas: una app de escritorio (Tauri 2 + React) y una app móvil (React Native + Expo). Ambas comparten tipos y lógica de negocio mediante una carpeta `shared/` con alias TypeScript `@shared`.
+HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real. La plataforma activa es la app móvil Android (React Native + Expo). La lógica de negocio y tipos viven en `shared/` con alias TypeScript `@shared`.
 
 ---
 
 ## Stack Tecnológico
-
-### Desktop
-
-| Capa | Tecnología | Versión |
-|---|---|---|
-| Framework | Tauri | 2 |
-| Backend | Rust | — |
-| UI | React | 18 |
-| Lenguaje | TypeScript | 5.6 |
-| Estilos | Tailwind CSS | 3 |
-| Iconos | lucide-react | latest |
-| Estado | Zustand | 4 |
-| BLE | Rust (Tauri commands + events) | — |
-| Gráficos | Recharts | 2 |
-| Tests | Jest + ts-jest | — |
-| Build | tauri build | — |
-
-### Mobile
 
 | Capa | Tecnología | Versión |
 |---|---|---|
@@ -34,7 +16,6 @@ HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real 
 | Iconos | lucide-react-native | latest |
 | Estado | Zustand | 5 |
 | BLE | react-native-ble-plx | 3 |
-| Sensor nativo | react-native-sensors (temporal) | 7 |
 | Audio | expo-audio | 56 |
 | Persistencia | expo-file-system | 56 |
 | Captura de vista | react-native-view-shot | 5 |
@@ -46,83 +27,55 @@ HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real 
 ## Estructura de Carpetas
 
 ```
-hit-tracker/
+hit-tracker/                       ← raíz = app mobile
 │
-├─ shared/                         ← Código común a desktop y mobile
+├─ shared/                         ← Código común
 │  ├─ types/
 │  │  └─ index.ts                  Todos los tipos del dominio
 │  └─ services/
 │     ├─ calibration.ts            calibrationService
 │     └─ training.ts               trainingService (TrainingService class)
 │
-├─ src/tauri/                       ← Backend Rust (Tauri 2)
-│  └─ src/main.rs                   Comandos invoke, BLE, file system
-│
-├─ src/                            ← Desktop (Renderer React)
-│  └─ renderer/src/
-│     ├─ types/index.ts            → re-export @shared/types
-│     ├─ services/
-│     │  ├─ audio.ts               HTMLAudioElement cache
-│     │  ├─ calibration.ts         → re-export @shared/services/calibration
-│     │  └─ training.ts            → re-export @shared/services/training
-│     ├─ hooks/
-│     │  ├─ useSensorData.ts       Detección de golpes, cálculo HPM
-│     │  └─ useTraining.ts         Orquesta fases y timers
-│     ├─ stores/
-│     │  ├─ deviceStore.ts
-│     │  ├─ profileStore.ts
-│     │  └─ trainingStore.ts
-│     └─ components/
-│        ├─ Dashboard/
-│        ├─ Devices/
-│        ├─ Profiles/
-│        ├─ Training/
-│        ├─ Game/
-│        ├─ Progress/
-│        └─ SessionDetail/
-│
-├─ mobile/                         ← Mobile (Expo / React Native)
-│  ├─ src/
-│  │  ├─ core/
-│  │  │  ├─ types/index.ts         → re-export @shared/types
-│  │  │  ├─ services/
-│  │  │  │  ├─ calibration.ts      → re-export @shared/services/calibration
-│  │  │  │  └─ trainingService.ts  → re-export @shared/services/training
-│  │  │  ├─ hooks/
-│  │  │  │  ├─ useSensorData.ts    Idéntico a desktop en lógica
-│  │  │  │  ├─ useTraining.ts      Idéntico a desktop en lógica
-│  │  │  │  └─ useBleReading.ts    Suscribe lecturas BLE al callback activo
-│  │  │  └─ stores/
-│  │  │     ├─ deviceStore.ts
-│  │  │     ├─ profileStore.ts
-│  │  │     └─ trainingStore.ts
-│  │  │
-│  │  ├─ hooks/
-│  │  │  └─ useShareSession.ts     Captura View como PNG + share sheet nativo
-│  │  │
-│  │  ├─ utils/
-│  │  │  └─ shareText.ts           generateShareText(training) → plantilla share
-│  │  │
+├─ src/
+│  ├─ core/
+│  │  ├─ types/index.ts            → re-export @shared/types
 │  │  ├─ services/
-│  │  │  ├─ audio.ts               expo-audio
-│  │  │  ├─ ble.ts                 react-native-ble-plx (BleManager singleton)
-│  │  │  ├─ bleConnection.ts       connect/disconnect/parse sensor BLE
-│  │  │  └─ storage.ts             expo-file-system
-│  │  │
-│  │  └─ components/
-│  │     ├─ Dashboard/
-│  │     ├─ Devices/
-│  │     ├─ Profiles/
-│  │     ├─ Training/
-│  │     ├─ Game/
-│  │     └─ SessionDetail/
+│  │  │  ├─ calibration.ts         → re-export @shared/services/calibration
+│  │  │  └─ trainingService.ts     → re-export @shared/services/training
+│  │  ├─ hooks/
+│  │  │  ├─ useSensorData.ts       Detección de golpes, cálculo HPM
+│  │  │  ├─ useTraining.ts         Orquesta fases y timers
+│  │  │  └─ useBleReading.ts       Suscribe lecturas BLE al callback activo
+│  │  └─ stores/
+│  │     ├─ deviceStore.ts
+│  │     ├─ profileStore.ts
+│  │     ├─ trainingStore.ts
+│  │     └─ gameStore.ts
 │  │
-│  ├─ App.tsx
-│  ├─ metro.config.js              watchFolders + extraNodeModules para @shared
-│  └─ tsconfig.json                paths: @shared/* → ../shared/*
+│  ├─ hooks/
+│  │  └─ useShareSession.ts        Captura View como PNG + share sheet nativo
+│  │
+│  ├─ utils/
+│  │  └─ shareText.ts              generateShareText(training) → plantilla share
+│  │
+│  ├─ services/
+│  │  ├─ audio.ts                  expo-audio
+│  │  ├─ ble.ts                    react-native-ble-plx (BleManager singleton)
+│  │  ├─ bleConnection.ts          connect/disconnect/parse sensor BLE
+│  │  └─ storage.ts                expo-file-system
+│  │
+│  └─ components/
+│     ├─ Dashboard/
+│     ├─ Devices/
+│     ├─ Profiles/
+│     ├─ Training/
+│     ├─ Game/
+│     └─ SessionDetail/
 │
-├─ vite.config.ts                  alias @shared → shared/
-├─ tsconfig.web.json               paths: @shared/* → ./shared/*
+├─ App.tsx
+├─ metro.config.js                 watchFolders + extraNodeModules para @shared
+├─ tsconfig.json                   paths: @shared/* → ./shared/*
+├─ desktop/                        ← archivado (tag desktop-freeze)
 └─ docs/
 ```
 
@@ -265,7 +218,7 @@ trainingService.getPreviousRoundStats(roundNumber: number): RoundStats | null
 
 ### useSensorData
 
-Presente en desktop (`src/renderer/src/hooks/`) y mobile (`mobile/src/core/hooks/`). Lógica idéntica.
+`src/core/hooks/useSensorData.ts`
 
 ```typescript
 function useSensorData(profile: CalibrationProfile): {
@@ -286,7 +239,7 @@ Algoritmo de detección:
 
 ### useTraining
 
-Presente en desktop y mobile. Lógica idéntica.
+`src/core/hooks/useTraining.ts`
 
 ```typescript
 type TrainingPhase = 'idle' | 'preparing' | 'round' | 'resting' | 'finished'
@@ -390,7 +343,7 @@ Conecta al sensor BLE por `deviceId` (vía `bleConnection.connectBleDevice`) cua
 
 ### gameStore
 
-Presente en desktop (`src/renderer/src/stores/gameStore.ts`) y mobile (`mobile/src/core/stores/gameStore.ts`). Lógica idéntica.
+`src/core/stores/gameStore.ts`
 
 ```typescript
 type GamePhase = 'idle' | 'waiting' | 'new-record' | 'loser'
@@ -435,40 +388,7 @@ Lógica de negocio pura (funciones internas):
 
 ---
 
-## Tauri API (Desktop)
-
-El renderer llama al backend Rust mediante `invoke()` de `@tauri-apps/api/core` y escucha eventos con `listen()` de `@tauri-apps/api/event`:
-
-```typescript
-// Entrenamientos
-invoke('save_training', { training: Training }): Promise<void>
-invoke('load_trainings'): Promise<Training[]>
-invoke('delete_training', { id: string }): Promise<void>
-
-// Dispositivos
-invoke('load_devices'): Promise<Device[]>
-invoke('save_devices', { devices: Device[] }): Promise<void>
-
-// Perfiles
-invoke('load_profiles'): Promise<CalibrationProfile[]>
-invoke('save_profiles', { profiles: CalibrationProfile[] }): Promise<void>
-
-// Game scores
-invoke('load_game_scores'): Promise<GameTopThree>
-invoke('save_game_scores', { scores: GameTopThree }): Promise<void>
-
-// BLE
-invoke('start_ble_scan'): Promise<void>
-invoke('cancel_ble_scan'): Promise<void>
-invoke('select_ble_device'): Promise<void>
-
-// Eventos recibidos del backend
-listen('ble-devices-updated', (event: { payload: BleDevice[] }) => void): Promise<UnlistenFn>
-```
-
----
-
-## Storage Mobile (`mobile/src/services/storage.ts`)
+## Storage (`src/services/storage.ts`)
 
 Usa `expo-file-system` (legacy API). Ruta base: `<documentDirectory>/HitTracker/`.
 
@@ -486,40 +406,14 @@ storage.saveGameScores(scores)          // → game-scores.json
 
 ---
 
-## Audio
+## Audio (`src/services/audio.ts`)
 
-### Desktop (`src/renderer/src/services/audio.ts`)
-Cache de `HTMLAudioElement`. Ficheros en `public/sounds/`.
-- `audioService.bell()` — apertura de asalto
-- `audioService.beep()` — cuenta atrás
-- `audioService.longBeep()` — playbackRate 0.5
-- `audioService.countdown()` — sonido de cuenta atrás
-
-### Mobile (`mobile/src/services/audio.ts`)
-`expo-audio`. Equivalentes: bell, beep, countdown.
+`expo-audio`. Métodos: `bell()`, `beep()`, `longBeep()`, `countdown()`.
 
 ---
 
 ## Configuración de Alias TypeScript
 
-### Desktop
-**`tsconfig.web.json`**:
-```json
-"paths": {
-  "@renderer/*": ["./src/renderer/src/*"],
-  "@shared/*": ["./shared/*"]
-}
-```
-
-**`vite.config.ts`**:
-```typescript
-alias: {
-  '@renderer': resolve('src/renderer/src'),
-  '@shared': resolve('shared')
-}
-```
-
-### Mobile
 **`tsconfig.json`**:
 ```json
 "baseUrl": ".",
@@ -536,15 +430,6 @@ config.resolver.extraNodeModules = { '@shared': sharedRoot }
 
 ## Build y Distribución
 
-### Desktop
-```bash
-npm run dev      # tauri dev
-npm run build    # tauri build
-npm run test     # Jest — tests unitarios
-```
-Requisitos: Node.js 18+, Rust toolchain. Targets: Windows (.exe / .msi), macOS (.dmg), Linux (.AppImage / .deb).
-
-### Mobile
 ```bash
 npm run start    # expo start
 npm run android  # expo run:android

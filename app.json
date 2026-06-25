@@ -8,12 +8,12 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0f0f0f"
+      "backgroundColor": "#000000"
     },
     "userInterfaceStyle": "dark",
     "androidStatusBar": {
       "barStyle": "light-content",
-      "backgroundColor": "#0f0f0f",
+      "backgroundColor": "#000000",
       "translucent": false
     },
     "ios": {
@@ -32,7 +32,12 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-splash-screen",
+      ["expo-splash-screen", {
+        "image": "./assets/splash-icon.png",
+        "imageWidth": 288,
+        "resizeMode": "contain",
+        "backgroundColor": "#000000"
+      }],
       "expo-audio",
       "./plugins/withArmOnly"
     ]
