@@ -21,9 +21,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "../resources/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
-        "backgroundImage": "../resources/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
-        "monochromeImage": "../resources/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png"
+        "foregroundImage": "./resources/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+        "backgroundImage": "./resources/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
+        "monochromeImage": "./resources/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.hittracker.app"
