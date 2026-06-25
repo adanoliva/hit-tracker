@@ -1,25 +1,57 @@
 {
-  "name": "hit-tracker",
-  "version": "1.8.0",
-  "description": "Sistema integrado de captura y análisis de impactos en entrenamiento de boxeo",
-  "author": "Adán",
-  "license": "MIT",
+  "name": "mobile",
+  "version": "1.9.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@react-native-community/slider": "^5.2.0",
+    "@react-navigation/bottom-tabs": "^7.18.2",
+    "@react-navigation/drawer": "^7.12.2",
+    "@react-navigation/native": "^7.3.3",
+    "expo": "~56.0.12",
+    "expo-audio": "~56.0.12",
+    "expo-file-system": "^56.0.8",
+    "expo-keep-awake": "^56.0.3",
+    "expo-screen-orientation": "~56.0.5",
+    "expo-sharing": "^56.0.18",
+    "expo-splash-screen": "~56.0.10",
+    "expo-status-bar": "~56.0.4",
+    "lucide-react-native": "^1.21.0",
+    "react": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-ble-plx": "^3.5.1",
+    "react-native-gesture-handler": "^3.0.1",
+    "react-native-safe-area-context": "^5.8.0",
+    "react-native-screens": "^4.25.2",
+    "react-native-sensors": "^7.3.6",
+    "react-native-svg": "^15.15.5",
+    "react-native-view-shot": "^5.1.1",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/react": "~19.2.2",
+    "babel-plugin-module-resolver": "^5.0.3",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
+    "typescript": "~6.0.3"
+  },
   "scripts": {
-    "dev": "tauri dev --config src/tauri/tauri.conf.json",
-    "build": "tauri build --config src/tauri/tauri.conf.json",
-    "vite:dev": "vite",
-    "vite:build": "vite build",
+    "start": "expo start",
+    "android": "expo run:android",
+    "android:release": "expo run:android --variant release",
+    "android:apk": "cd android && ./gradlew assembleRelease",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
     "test": "jest"
   },
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
     "roots": [
-      "<rootDir>/shared/__tests__",
-      "<rootDir>/src/renderer/src/__tests__"
+      "<rootDir>/src/__tests__"
     ],
     "moduleNameMapper": {
-      "^@shared/(.*)$": "<rootDir>/shared/$1"
+      "^@shared/(.*)$": "<rootDir>/../shared/$1"
     },
     "globals": {
       "ts-jest": {
@@ -27,26 +59,5 @@
       }
     }
   },
-  "dependencies": {
-    "@tauri-apps/api": "^2.11.1",
-    "lucide-react": "^1.21.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "recharts": "^2.13.3",
-    "zustand": "^4.5.5"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^2.11.3",
-    "@types/jest": "^30.0.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.5.0",
-    "jest": "^30.4.2",
-    "postcss": "^8.5.15",
-    "tailwindcss": "^3.4.19",
-    "ts-jest": "^29.4.11",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.11"
-  }
+  "private": true
 }

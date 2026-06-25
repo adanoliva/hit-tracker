@@ -4,28 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Proyecto
 
-HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real. Existe en dos plataformas:
+HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real.
 
-- **Desktop** (`src/`): Tauri 2 + React + TypeScript + Tailwind CSS
-- **Mobile** (`mobile/`): React Native + Expo (Android)
-- **Shared** (`shared/`): Tipos y servicios comunes a ambas plataformas
+- **Mobile** (raíz `/`): React Native + Expo (Android) — plataforma activa
+- **Desktop** (`desktop/`): Tauri 2 + React + TypeScript — archivado (tag `desktop-freeze`)
+- **Shared** (`shared/`): Tipos y servicios comunes
 
 El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acelerómetro/giroscopio via Bluetooth BLE.
-
-## Convención de plataformas
-
-**Toda mejora o feature se aplica a DESKTOP y MOBILE salvo que se indique explícitamente lo contrario.**
-
-Cuando una feature sea exclusiva de una plataforma, indicarlo así:
-- `[solo desktop]` — solo aplica a `src/`
-- `[solo mobile]` — solo aplica a `mobile/`
 
 ## Versiones
 
 | Plataforma | Archivo | Versión actual |
 |---|---|---|
-| Desktop | `package.json` | 1.2.1 |
-| Mobile | `mobile/package.json` | 1.2.1 |
+| Mobile | `package.json` | 1.9.0 |
 
 Las versiones siguen [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
@@ -33,20 +24,11 @@ Las versiones siguen [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PA
 - **MINOR** (`1.x.0`): feature nueva compatible con versiones anteriores
 - **MAJOR** (`x.0.0`): cambio de arquitectura o ruptura de compatibilidad
 
-**Regla**: cada vez que se haga un commit que añada funcionalidad o corrija un bug, actualizar la versión en `package.json` (Desktop) y/o `mobile/package.json` (Mobile) según corresponda. La versión se actualiza en el mismo commit que el cambio, no en uno separado.
+**Regla**: cada vez que se haga un commit que añada funcionalidad o corrija un bug, actualizar la versión en `package.json`. La versión se actualiza en el mismo commit que el cambio, no en uno separado. Para mobile, también actualizar `app.json`.
 
 ## Comandos
 
-### Desktop
 ```bash
-npm run dev       # Desarrollo (tauri dev)
-npm run build     # Build completo (tauri build)
-npm run test      # Jest — tests unitarios de lógica de negocio
-```
-
-### Mobile
-```bash
-cd mobile
 npm run start     # expo start
 npm run android   # expo run:android
 npm run test      # Jest — tests unitarios de lógica de negocio
@@ -58,7 +40,7 @@ Firmware ESP32: Arduino IDE 2.0+, board "ESP32 DevKit C", upload speed 921600, s
 
 ### Código compartido (`shared/`)
 
-Los tipos del dominio y los servicios de negocio son comunes a desktop y mobile:
+Los tipos del dominio y los servicios de negocio están en:
 
 ```
 shared/
@@ -69,19 +51,11 @@ shared/
 └─ __tests__/               Tests Jest de lógica compartida
 ```
 
-Los archivos locales de cada plataforma son **re-exports** de `@shared`:
-- `src/renderer/src/types/index.ts` → `export * from '@shared/types'`
-- `src/renderer/src/services/calibration.ts` → re-export
-- `mobile/src/core/types/index.ts` → re-export
+Los archivos locales son **re-exports** de `@shared`:
+- `src/core/types/index.ts` → re-export
 - etc.
 
-El alias `@shared/*` está configurado en:
-- Desktop: `tsconfig.web.json` + `electron.vite.config.ts`
-- Mobile: `tsconfig.json` + `metro.config.js`
-
-### Proceso Electron (Main ↔ Renderer)
-
-La comunicación entre main process y React UI va por IPC. El preload expone `window.api` con handlers para file system. **No usar `fs` directamente desde React** — todo pasa por `window.api`.
+El alias `@shared/*` está configurado en `tsconfig.json` + `metro.config.js`.
 
 ### Capas de la app
 
@@ -116,33 +90,28 @@ En modo libre (`roundDuration = 0`): el timer sube y el usuario termina la ronda
 
 ### Persistencia
 
-**Desktop** — Archivos JSON via IPC (`window.api`):
-- `<userData>/HitTracker/trainings/<id>.json`
-- `devices.json`, `profiles.json`, `app-config.json`
-
-**Mobile** — `expo-file-system`:
+`expo-file-system`:
 - `<documentDirectory>/HitTracker/trainings/training_<id>.json`
 - `devices.json`, `profiles.json`
 
 ### UI e iconos
 
-- **Desktop**: Tailwind CSS para estilos. Iconos via `lucide-react`.
-- **Mobile**: `StyleSheet` de React Native. Colores siempre desde `colors` en `mobile/src/theme.ts`. Iconos via `lucide-react-native`.
+- `StyleSheet` de React Native. Colores siempre desde `colors` en `src/theme.ts`.
+- Iconos via `lucide-react-native`.
 - Nunca usar emojis como iconos en la UI — usar Lucide en su lugar.
 - El catálogo completo de iconos disponibles está en [lucide.dev](https://lucide.dev).
 
 ### Modal "Acerca de"
 
-Existe en `Profiles/index.tsx` (desktop y mobile). Muestra versión, descripción del proyecto y enlace al repositorio. El botón `ⓘ` está fijo en la esquina inferior derecha de la pantalla de Perfiles.
+Existe en `Profiles/index.tsx`. Muestra versión, descripción del proyecto y enlace al repositorio. El botón `ⓘ` está fijo en la esquina inferior derecha de la pantalla de Perfiles.
 
 ## Tests
 
-Los tests usan **Jest + ts-jest** y cubren únicamente lógica de negocio pura (servicios y hooks puros). No se testean componentes React/React Native.
+Los tests usan **Jest + ts-jest** y cubren únicamente lógica de negocio pura (servicios y hooks puros). No se testean componentes React Native.
 
 Directorios de tests:
 - `shared/__tests__/` — lógica compartida (calibrationService, trainingService)
-- `src/renderer/src/__tests__/` — lógica exclusiva de desktop
-- `mobile/src/__tests__/` — lógica exclusiva de mobile
+- `src/__tests__/` — lógica exclusiva de mobile
 
 Convención de nombre: `HT-XXX.test.ts` para tests asociados a una feature, `<nombre>.test.ts` para tests de servicios existentes.
 

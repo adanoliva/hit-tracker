@@ -1,0 +1,52 @@
+{
+  "name": "hit-tracker",
+  "version": "1.8.0",
+  "description": "Sistema integrado de captura y análisis de impactos en entrenamiento de boxeo",
+  "author": "Adán",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tauri dev --config src/tauri/tauri.conf.json",
+    "build": "tauri build --config src/tauri/tauri.conf.json",
+    "vite:dev": "vite",
+    "vite:build": "vite build",
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/shared/__tests__",
+      "<rootDir>/src/renderer/src/__tests__"
+    ],
+    "moduleNameMapper": {
+      "^@shared/(.*)$": "<rootDir>/shared/$1"
+    },
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    }
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.1",
+    "lucide-react": "^1.21.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.13.3",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.3",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.5.0",
+    "jest": "^30.4.2",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.19",
+    "ts-jest": "^29.4.11",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
