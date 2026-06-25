@@ -1,1 +1,0 @@
-{"default":{"identifier":"default","description":"HIT TRACKER default capabilities","local":true,"windows":["main"],"permissions":["core:default","core:event:allow-listen","core:event:allow-unlisten","core:event:allow-emit","opener:default"]}}
