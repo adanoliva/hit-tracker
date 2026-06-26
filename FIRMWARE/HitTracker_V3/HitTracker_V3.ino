@@ -107,11 +107,11 @@ class ServerCallbacks : public BLEServerCallbacks {
 
 class ConfigCallbacks : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* pChar) {
-    std::string val = pChar->getValue();
+    String val = pChar->getValue();
     if (val.length() < 4) return;
     uint16_t th, cd;
-    memcpy(&th, &val[0], 2);
-    memcpy(&cd, &val[2], 2);
+    memcpy(&th, val.c_str(),     2);
+    memcpy(&cd, val.c_str() + 2, 2);
     cfgThreshold = th;
     cfgCooldown  = cd;
     dynamicFloor = (float)cfgThreshold;  // reset floor to new base
