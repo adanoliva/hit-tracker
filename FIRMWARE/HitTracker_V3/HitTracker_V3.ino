@@ -221,7 +221,7 @@ void loop() {
 
     Serial.printf("mag=%.0f floor=%.0f  ← GOLPE\n", lastMagnitude, dynamicFloor);
     if (deviceConnected) sendHitEvent(now, peakMag);
-  } else {
+  } else if (magnitude > cfgThreshold * 0.5f) {
     Serial.printf("mag=%.0f floor=%.0f\n", magnitude, dynamicFloor);
   }
 
