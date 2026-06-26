@@ -1,12 +1,13 @@
 export interface SensorReading {
   timestamp: number
-  ax: number        // V1: m/s² (float) | V2: raw ADC / 16 (integer)
+  ax: number        // V1: m/s² (float) | V2: raw ADC / 16 (integer) | V3: 0 (not sent)
   ay: number
   az: number
   gx: number
   gy: number
   gz: number
   magnitude: number // V1: m/s² float | V2: entero positivo (≈128 reposo, 600-1500+ golpe)
+  isPeak?: boolean  // V3: firmware already detected this as a confirmed hit
 }
 
 export interface Impact {

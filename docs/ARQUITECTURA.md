@@ -52,12 +52,14 @@ El hardware consiste en un **ESP32 + GY-521 (MPU-6050)** que transmite datos de 
 
 ```
 Hardware/Sensor
-      │  SensorReading {timestamp, ax, ay, az, gx, gy, gz, magnitude}
+      │  V2: SensorReading {timestamp, ax, ay, az, gx, gy, gz, magnitude}  — stream continuo
+      │  V3: SensorReading {timestamp, magnitude, isPeak:true}               — solo al detectar golpe
       ▼
 useSensorData()
-  ├─ Detecta pico: prevMag > dynamicFloor && !isRising && cooldown transcurrido
-  ├─ Cooldown dinámico: profile.rebound ?? (200ms + lastPeakMag × 0.3)
-  ├─ Umbral dinámico: sube a peak×0.4 al golpear, decae hacia base
+  ├─ V3 (isPeak=true): registra impacto directamente, omite detección de pico
+  ├─ V2: Detecta pico: prevMag > dynamicFloor && !isRising && cooldown transcurrido
+  ├─    Cooldown dinámico: profile.rebound ?? (200ms + lastPeakMag × 0.3)
+  ├─    Umbral dinámico: sube a peak×0.4 al golpear, decae hacia base
   ├─ calculateIntensity() → escala 0-100 con sensitivity
   └─ emite Impact → onImpactDetected()
       │
@@ -86,10 +88,11 @@ GY-521 (MPU-6050) ──I2C──→ ESP32
                              ├─ Lee acelerómetro 3D (ax, ay, az) a ±16g
                              ├─ Lee giroscopio 3D (gx, gy, gz)
                              ├─ Calcula magnitude = sqrt(ax²+ay²+az²)
-                             └─ Transmite vía BLE (GATT) continuamente
+                             ├─ V2: Transmite vía BLE continuamente (16 bytes/10ms)
+                             └─ V3: Detecta golpes en firmware, transmite solo eventos de golpe (6 bytes por hit)
 ```
 
-Frecuencia de muestreo: ~50Hz (20ms por muestra).
+Frecuencia de muestreo: ~100Hz (10ms por muestra).
 
 **Escala**: ±16g. En reposo: magnitude ≈ 128 unidades (1g = 128 raw). En golpe suave: 400–700+. En golpe fuerte: 1000–1500+.
 

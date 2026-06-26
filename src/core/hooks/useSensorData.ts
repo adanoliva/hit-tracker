@@ -44,10 +44,42 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
       const prev = prevReading.current
       prevReading.current = reading
 
-      if (!prev) return null
+      if (!prev && !reading.isPeak) return null
 
       const now      = reading.timestamp
-      const deltaMs  = Math.max(1, now - prev.timestamp)
+      const deltaMs  = Math.max(1, now - (prev?.timestamp ?? now - 1))
+
+      // V3: firmware already detected the hit — skip peak detection
+      if (reading.isPeak) {
+        const mag = reading.magnitude
+        const base = profile.threshold * 10
+        lastPeakTime.current  = now
+        lastPeakMag.current   = mag
+        dynamicFloor.current  = Math.max(base, mag * 0.4)
+        prevReading.current   = reading
+
+        const intensity = calibrationService.calculateIntensity(mag, profile)
+        const newPowerMax = Math.max(powerMaxRef.current, intensity)
+        powerMaxRef.current = newPowerMax
+        setPowerMax(newPowerMax)
+        const newPowerMaxMag = Math.max(powerMaxMagRef.current, Math.round(mag))
+        powerMaxMagRef.current = newPowerMaxMag
+        setPowerMaxMag(newPowerMaxMag)
+
+        const impact: Impact = { time: now, intensity, magnitude: mag, duration: 0 }
+        setImpacts((prev) => {
+          const updated = [...prev, impact]
+          const elapsed = (Date.now() - startTime.current) / 60000
+          const avgHpm = elapsed > 0 ? Math.round(updated.length / elapsed) : 0
+          const recentHits = updated.filter((i) => now - i.time < 10000)
+          const currentHpm = Math.round((recentHits.length / 10000) * 60000)
+          setHpmStats((s) => ({ current: currentHpm, average: avgHpm, max: Math.max(s.max, currentHpm) }))
+          return updated
+        })
+        return impact
+      }
+
+      if (!prev) return null
 
       // Use raw magnitude throughout — calibration threshold is also in raw units
       const mag      = reading.magnitude

@@ -7,6 +7,7 @@ import { useProfileStore } from '../../core/stores/profileStore'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useBleReading } from '../../core/hooks/useBleReading'
 import { calibrationService } from '../../core/services/calibration'
+import { sendProfileConfig, getSensorVersion } from '../../services/bleConnection'
 import type { CalibrationProfile, HitWindow } from '../../core/types'
 import type { SensorReading } from '../../core/types'
 import { colors } from '../../theme'
@@ -86,6 +87,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   const [editing, setEditing] = useState<CalibrationProfile | null>(null)
   const [showAbout, setShowAbout] = useState(false)
   const [calib, setCalib] = useState<CalibWizardState | null>(null)
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'ok' | 'error'>('idle')
   const [diagLog, setDiagLog] = useState<Array<{ mag: number; dt: number; isPeak: boolean }>>([])
   const lastDiagTimeRef   = useRef<number>(0)
 
@@ -103,9 +105,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   const recordHitWindow = useCallback(() => {
     if (reboundTimerRef.current) { clearTimeout(reboundTimerRef.current); reboundTimerRef.current = null }
     const window: HitWindow = {
-      // Use the highest magnitude seen in the window — for top-mounted sensors
-      // the elastic rebound (e.g. 435) often exceeds the initial contact (e.g. 228)
-      peak: Math.max(peakMagRef.current, reboundMaxRef.current),
+      peak: peakMagRef.current,
       rebound: Date.now() - peakTimeRef.current,
       reboundMax: reboundMaxRef.current,
     }
@@ -187,6 +187,26 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
     }
   }, [connected])
 
+  const syncProfile = async () => {
+    const profile = profiles.find((p) => p.id === selectedProfileId)
+    if (!profile || !connected) return
+    setSyncStatus('syncing')
+    try {
+      await sendProfileConfig(profile.threshold, profile.rebound ?? 400)
+      setSyncStatus('ok')
+      setTimeout(() => setSyncStatus('idle'), 2000)
+    } catch {
+      setSyncStatus('error')
+      setTimeout(() => setSyncStatus('idle'), 3000)
+    }
+  }
+
+  // Auto-sync when active profile changes (threshold/sensitivity edit or profile switch)
+  useEffect(() => {
+    if (!connected || getSensorVersion() !== 3) return
+    syncProfile()
+  }, [selectedProfileId, connected])
+
   const resetWizardRefs = () => {
     prevReadingRef.current = null
     lastHitTimeRef.current = 0
@@ -253,7 +273,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
               <Text style={s.modalTitle}>Error</Text>
               <Text style={s.calibDesc}>{calib.errorMsg}</Text>
               <View style={s.editActions}>
-                <TouchableOpacity style={s.saveBtn} onPress={openWizard}>
+                <TouchableOpacity style={[s.saveBtn, { flex: 1 }]} onPress={openWizard}>
                   <Text style={s.saveBtnText}>Reintentar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={s.cancelBtn} onPress={() => setCalib(null)}>
@@ -362,8 +382,19 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                 color={colors.secondary}
                 onChange={(v) => setEditing({ ...editing, sensitivity: v })}
               />
+              {/* ponytail: hidden=true — set to false to expose rebound tuning */}
+              {false && (
+                <SliderField
+                  label="Ventana de rebote"
+                  hint="Tiempo (ms) que el sensor espera tras un golpe antes de aceptar el siguiente."
+                  value={editing!.rebound ?? 300} min={100} max={1500} step={50}
+                  unit="ms"
+                  color={colors.textMuted}
+                  onChange={(v) => setEditing({ ...editing!, rebound: v })}
+                />
+              )}
               <View style={s.editActions}>
-                <TouchableOpacity style={s.saveBtn} onPress={handleSaveEdit}>
+                <TouchableOpacity style={[s.saveBtn, { flex: 1 }]} onPress={handleSaveEdit}>
                   <Text style={s.saveBtnText}>Guardar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={s.cancelBtn} onPress={() => setEditing(null)}>
@@ -376,7 +407,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
               <View style={s.flex1}>
                 <Text style={s.profileName}>{p.name}</Text>
                 <Text style={s.profileMeta}>
-                  Detección {p.threshold} · Potencia {p.sensitivity}{p.rebound ? ` · Rebote ${p.rebound}ms` : ''}
+                  Detección {p.threshold} · Potencia {p.sensitivity}
                 </Text>
                 {selectedProfileId === p.id && (
                   <Text style={s.activeBadge}>● Activo</Text>
@@ -386,6 +417,17 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                 {selectedProfileId !== p.id && (
                   <TouchableOpacity style={s.useBtn} onPress={() => selectProfile(p.id)}>
                     <Text style={s.useBtnText}>Usar</Text>
+                  </TouchableOpacity>
+                )}
+                {selectedProfileId === p.id && connected && getSensorVersion() === 3 && (
+                  <TouchableOpacity
+                    style={[s.calibBtn, syncStatus === 'ok' && s.syncBtnOk, syncStatus === 'error' && s.syncBtnErr]}
+                    onPress={syncProfile}
+                    disabled={syncStatus === 'syncing'}
+                  >
+                    <Text style={s.calibBtnText}>
+                      {syncStatus === 'syncing' ? '...' : syncStatus === 'ok' ? '✓ Sync' : syncStatus === 'error' ? '✗ Error' : 'Sync'}
+                    </Text>
                   </TouchableOpacity>
                 )}
                 {selectedProfileId === p.id && connected && (
@@ -420,7 +462,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
             onSubmitEditing={handleCreate}
           />
           <View style={s.editActions}>
-            <TouchableOpacity style={s.saveBtn} onPress={handleCreate}>
+            <TouchableOpacity style={[s.saveBtn, { flex: 1 }]} onPress={handleCreate}>
               <Text style={s.saveBtnText}>Crear</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.cancelBtn} onPress={() => setShowCreate(false)}>
@@ -487,7 +529,7 @@ const s = StyleSheet.create({
   editForm: { padding: 16, gap: 16 },
   fieldLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
   editActions: { flexDirection: 'row', gap: 10 },
-  saveBtn: { flex: 1, backgroundColor: colors.accent, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
+  saveBtn: { backgroundColor: colors.accent, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
   saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
   cancelBtn: { paddingHorizontal: 16, backgroundColor: colors.bgTertiary, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
   cancelBtnText: { color: colors.textSecondary, fontSize: 14 },
@@ -507,6 +549,8 @@ const s = StyleSheet.create({
   addBtnText: { color: colors.textMuted, fontSize: 14 },
   calibBtn: { borderWidth: 1, borderColor: colors.accent, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
   calibBtnText: { color: colors.accent, fontSize: 12 },
+  syncBtnOk:  { borderColor: colors.secondary },
+  syncBtnErr: { borderColor: colors.textMuted },
   calibHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   calibClose: { fontSize: 18, color: colors.textMuted, padding: 4 },
   calibStep: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginTop: 4 },

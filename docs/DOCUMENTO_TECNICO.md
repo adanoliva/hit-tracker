@@ -61,7 +61,7 @@ hit-tracker/                       ← raíz = app mobile
 │  ├─ services/
 │  │  ├─ audio.ts                  expo-audio
 │  │  ├─ ble.ts                    react-native-ble-plx (BleManager singleton)
-│  │  ├─ bleConnection.ts          connect/disconnect/parse sensor BLE
+│  │  ├─ bleConnection.ts          connect/disconnect/parse; sendProfileConfig; getSensorVersion
 │  │  └─ storage.ts                expo-file-system
 │  │
 │  └─ components/
@@ -86,13 +86,14 @@ hit-tracker/                       ← raíz = app mobile
 ```typescript
 interface SensorReading {
   timestamp: number    // ms epoch
-  ax: number           // aceleración X — raw ±16g (1g ≈ 128 unidades)
-  ay: number           // Y
-  az: number           // Z
-  gx: number           // giroscopio X (°/s)
-  gy: number           // Y
-  gz: number           // Z
+  ax: number           // aceleración X — raw ±16g (1g ≈ 128 unidades); V3: 0
+  ay: number           // Y; V3: 0
+  az: number           // Z; V3: 0
+  gx: number           // giroscopio X (°/s); V3: 0
+  gy: number           // Y; V3: 0
+  gz: number           // Z; V3: 0
   magnitude: number    // sqrt(ax²+ay²+az²) — raw; reposo ≈ 128, golpe suave 400-700+
+  isPeak?: boolean     // V3: true — el firmware ya detectó este paquete como golpe confirmado
 }
 
 interface Impact {
@@ -112,7 +113,7 @@ interface Device {
 }
 
 interface HitWindow {
-  peak: number        // magnitud máxima del golpe (raw) — max(primer pico, reboundMax)
+  peak: number        // magnitud del primer pico detectado (raw)
   rebound: number     // ms desde el pico hasta que el saco se asienta
   reboundMax: number  // magnitud máxima durante la fase de rebote
 }
@@ -240,14 +241,17 @@ function useSensorData(profile: CalibrationProfile): {
 **Algoritmo de detección** (todas las magnitudes en raw — unidades consistentes con la calibración):
 
 ```
-magnitude raw (±16g, reposo ≈ 128, golpe suave 400-700+)
+SensorReading recibido
     ↓
-1. dynamicFloor decae hacia base (profile.threshold×10) a 0.5 raw/ms
-2. isPeak = !isRising && prevMag > dynamicFloor && Δt > cooldown
-3. cooldown = profile.rebound  (si calibrado)
-            ?? 200ms + lastPeakMag × 0.3  (dinámico por magnitud)
-4. Al detectar pico: dynamicFloor sube a max(base, peak×0.4)
-5. intensity = calculateIntensity(prevMag, profile)  → 0-100
+¿reading.isPeak === true? (firmware V3 ya detectó el golpe)
+    │ sí → registra impacto directamente con reading.magnitude
+    │ no → algoritmo V1/V2:
+    │         1. dynamicFloor decae hacia base (profile.threshold×10) a 0.5 raw/ms
+    │         2. isPeak = !isRising && prevMag > dynamicFloor && Δt > cooldown
+    │         3. cooldown = profile.rebound  (si calibrado)
+    │                     ?? 200ms + lastPeakMag × 0.3  (dinámico por magnitud)
+    │         4. Al detectar pico: dynamicFloor sube a max(base, peak×0.4)
+    └─ intensity = calculateIntensity(magnitude, profile)  → 0-100
 ```
 
 El **cooldown dinámico** escala con la fuerza del golpe para cubrir rebotes más largos en golpes fuertes. Si el perfil tiene `rebound` (calculado por el wizard de calibración con datos reales del saco), ese valor tiene prioridad.
@@ -466,9 +470,27 @@ Build de producción: `eas build` (EAS Build de Expo).
 - IDE: Arduino IDE 2
 - Upload speed: 921600
 - Serial monitor: 115200 baud
-- Frecuencia de muestreo: ~50Hz
-- Protocolo BLE: GATT. Envía `{timestamp, ax, ay, az, gx, gy, gz, magnitude}` continuamente.
+- Frecuencia de muestreo: ~100Hz (10ms)
 - Escala acelerómetro: **±16g** (1g = 128 unidades raw). Reposo: magnitude ≈ 128.
+
+### Versiones
+
+| Versión | Archivo | Protocolo |
+|---|---|---|
+| V2 | `FIRMWARE/HitTracker_V2/HitTracker_V2.ino` | Stream continuo, 16 bytes/10ms `{ts, ax, ay, az, gx, gy, gz}` |
+| V3 | `FIRMWARE/HitTracker_V3/HitTracker_V3.ino` | Solo hit events, 6 bytes por golpe `{ts uint32, magnitude uint16}` |
+
+### UUIDs BLE
+
+| UUID | Tipo | Descripción |
+|---|---|---|
+| `...26a8` | NOTIFY | Lecturas (V2) / hit events (V3) |
+| `...26a9` | READ | Versión del sensor (uint8) |
+| `...26aa` | WRITE | Config en V3: `{threshold_raw uint16, cooldown_ms uint16}` |
+
+### Configuración V3 (Preferences / NVS)
+
+El firmware V3 persiste `threshold_raw` y `cooldown_ms` en NVS (namespace `ht-cfg`). Si no existen, usa defaults: threshold=300, cooldown=400ms. La app escribe la config via la characteristic `...26aa` al conectarse y al cambiar el perfil activo.
 
 **Posición física del sensor:**
 
