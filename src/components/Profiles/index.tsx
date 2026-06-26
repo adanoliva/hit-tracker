@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Linking } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import appJson from '../../../app.json'
@@ -7,25 +7,27 @@ import { useProfileStore } from '../../core/stores/profileStore'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useBleReading } from '../../core/hooks/useBleReading'
 import { calibrationService } from '../../core/services/calibration'
-import type { CalibrationProfile } from '../../core/types'
+import type { CalibrationProfile, HitWindow } from '../../core/types'
 import type { SensorReading } from '../../core/types'
 import { colors } from '../../theme'
 
-type CalibStep = 'light' | 'normal' | 'heavy' | 'done' | 'error'
+type CalibStep = 'light' | 'heavy' | 'done' | 'error'
+type CalibSubStep = 'waiting' | 'rebound' | 'accepted'
 interface CalibWizardState {
   step: CalibStep
-  light: number[]
-  normal: number[]
-  heavy: number[]
+  subStep: CalibSubStep
+  light: HitWindow[]
+  heavy: HitWindow[]
   errorMsg?: string
-  result?: { threshold: number; sensitivity: number }
+  result?: { threshold: number; sensitivity: number; rebound: number }
 }
 
-const MIN_CALIB_HIT = 200
-const HITS_PER_SERIES = 5
+const MIN_CALIB_HIT = 200       // minimum magnitude to count as a valid hit
+const INTER_HIT_COOLDOWN = 1200 // ms between hits in wizard — always wait full rebound
+const HITS_PER_SERIES = 3
+const REBOUND_TIMEOUT_MS = 1000 // capture window per hit; user resting ≈ 151-178 raw
 const STEP_LABELS: Record<Exclude<CalibStep, 'done' | 'error'>, string> = {
   light: 'Golpes suaves',
-  normal: 'Golpes normales',
   heavy: 'Golpes fuertes',
 }
 
@@ -84,12 +86,60 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   const [editing, setEditing] = useState<CalibrationProfile | null>(null)
   const [showAbout, setShowAbout] = useState(false)
   const [calib, setCalib] = useState<CalibWizardState | null>(null)
+  const [diagLog, setDiagLog] = useState<Array<{ mag: number; dt: number; isPeak: boolean }>>([])
+  const lastDiagTimeRef   = useRef<number>(0)
 
-  const prevReadingRef = useRef<SensorReading | null>(null)
-  const lastHitTimeRef = useRef<number>(0)
+  const prevReadingRef    = useRef<SensorReading | null>(null)
+  const lastHitTimeRef    = useRef<number>(0)   // wall clock ms (Date.now())
+  const subStepRef        = useRef<CalibSubStep>('waiting')
+  const peakMagRef        = useRef(0)
+  const peakTimeRef       = useRef(0)           // wall clock ms
+  const reboundMaxRef     = useRef(0)
+  const reboundTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const activeStep = calib?.step
   const wizardActive = calib !== null && activeStep !== 'done' && activeStep !== 'error'
+
+  const recordHitWindow = useCallback(() => {
+    if (reboundTimerRef.current) { clearTimeout(reboundTimerRef.current); reboundTimerRef.current = null }
+    const window: HitWindow = {
+      // Use the highest magnitude seen in the window — for top-mounted sensors
+      // the elastic rebound (e.g. 435) often exceeds the initial contact (e.g. 228)
+      peak: Math.max(peakMagRef.current, reboundMaxRef.current),
+      rebound: Date.now() - peakTimeRef.current,
+      reboundMax: reboundMaxRef.current,
+    }
+    subStepRef.current = 'accepted'
+    lastHitTimeRef.current = Date.now()
+
+    setCalib((c) => {
+      if (!c || c.step === 'done' || c.step === 'error') return c
+      const { step, light, heavy } = c
+
+      if (step === 'light') {
+        const next = [...light, window]
+        if (next.length === HITS_PER_SERIES) {
+          subStepRef.current = 'waiting'
+          return { ...c, light: next, step: 'heavy', heavy: [], subStep: 'waiting' }
+        }
+        subStepRef.current = 'waiting'
+        return { ...c, light: next, subStep: 'waiting' }
+      }
+      if (step === 'heavy') {
+        const next = [...heavy, window]
+        if (next.length === HITS_PER_SERIES) {
+          const result = calibrationService.analyzeCalibrationWindows(light, next)
+          if (!result) return { ...c, heavy: next, step: 'error', subStep: 'waiting', errorMsg: 'Los golpes fuertes no fueron suficientemente distintos a los suaves. Inténtalo de nuevo.' }
+          const profile = profiles.find((p) => p.id === selectedProfileId)
+          if (profile) updateProfile(profile.id, { threshold: result.suggestedThreshold, sensitivity: result.suggestedSensitivity, rebound: result.suggestedRebound })
+          return { ...c, heavy: next, step: 'done', subStep: 'waiting', result: { threshold: result.suggestedThreshold, sensitivity: result.suggestedSensitivity, rebound: result.suggestedRebound } }
+        }
+        subStepRef.current = 'waiting'
+        return { ...c, heavy: next, subStep: 'waiting' }
+      }
+      return c
+    })
+  }, [profiles, selectedProfileId, updateProfile])
 
   useBleReading({
     deviceId: connected?.mac ?? null,
@@ -97,37 +147,35 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
     onReading: (reading) => {
       const prev = prevReadingRef.current
       prevReadingRef.current = reading
-      if (!prev || !calib) return
-      const isRising = reading.magnitude >= prev.magnitude
-      const now = Date.now()
-      if (!isRising && prev.magnitude > MIN_CALIB_HIT && now - lastHitTimeRef.current > 200) {
-        lastHitTimeRef.current = now
-        setCalib((c) => {
-          if (!c) return c
-          const { step, light, normal, heavy } = c
-          if (step === 'light' && light.length < HITS_PER_SERIES) {
-            const next = [...light, prev.magnitude]
-            if (next.length === HITS_PER_SERIES) return { ...c, light: next, step: 'normal', normal: [] }
-            return { ...c, light: next }
-          }
-          if (step === 'normal' && normal.length < HITS_PER_SERIES) {
-            const next = [...normal, prev.magnitude]
-            if (next.length === HITS_PER_SERIES) return { ...c, normal: next, step: 'heavy', heavy: [] }
-            return { ...c, normal: next }
-          }
-          if (step === 'heavy' && heavy.length < HITS_PER_SERIES) {
-            const next = [...heavy, prev.magnitude]
-            if (next.length === HITS_PER_SERIES) {
-              const result = calibrationService.analyzeCalibrationSamples(light, normal, next)
-              if (!result) return { ...c, heavy: next, step: 'error', errorMsg: 'Los golpes fuertes no fueron suficientemente distintos a los suaves. Inténtalo de nuevo.' }
-              const profile = profiles.find((p) => p.id === selectedProfileId)
-              if (profile) updateProfile(profile.id, { threshold: result.suggestedThreshold, sensitivity: result.suggestedSensitivity })
-              return { ...c, heavy: next, step: 'done', result: { threshold: result.suggestedThreshold, sensitivity: result.suggestedSensitivity } }
-            }
-            return { ...c, heavy: next }
-          }
-          return c
-        })
+      if (!prev) return
+
+      const now = reading.timestamp
+      const sub = subStepRef.current
+
+      const wallNow = Date.now()  // use wall clock for all cooldown comparisons
+
+      // Diagnostic log: capture every reading above baseline
+      if (reading.magnitude > MIN_CALIB_HIT) {
+        const dt = lastDiagTimeRef.current ? wallNow - lastDiagTimeRef.current : 0
+        lastDiagTimeRef.current = wallNow
+        const isPeak = sub === 'waiting' && reading.magnitude < prev.magnitude && prev.magnitude > MIN_CALIB_HIT
+        setDiagLog((log) => [{ mag: Math.round(prev.magnitude), dt, isPeak }, ...log].slice(0, 12))
+      }
+
+      if (sub === 'waiting') {
+        const isRising = reading.magnitude >= prev.magnitude
+        if (!isRising && prev.magnitude > MIN_CALIB_HIT && wallNow - lastHitTimeRef.current > INTER_HIT_COOLDOWN) {
+          peakMagRef.current = prev.magnitude
+          peakTimeRef.current = wallNow
+          reboundMaxRef.current = 0
+          subStepRef.current = 'rebound'
+          setCalib((c) => c ? { ...c, subStep: 'rebound' } : c)
+          reboundTimerRef.current = setTimeout(recordHitWindow, REBOUND_TIMEOUT_MS)
+        }
+      } else if (sub === 'rebound') {
+        // Always wait for REBOUND_TIMEOUT_MS — resting range (151-178) overlaps any
+        // settled threshold, causing false early settlement on top-mounted sensors
+        reboundMaxRef.current = Math.max(reboundMaxRef.current, reading.magnitude)
       }
     },
   })
@@ -135,22 +183,33 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   // Cancel wizard if sensor disconnects
   useEffect(() => {
     if (!connected && wizardActive) {
-      setCalib({ step: 'error', light: [], normal: [], heavy: [], errorMsg: 'Sensor desconectado. La calibración se ha cancelado.' })
+      setCalib({ step: 'error', subStep: 'waiting', light: [], heavy: [], errorMsg: 'Sensor desconectado. La calibración se ha cancelado.' })
     }
   }, [connected])
 
-  const openWizard = () => {
+  const resetWizardRefs = () => {
     prevReadingRef.current = null
     lastHitTimeRef.current = 0
-    setCalib({ step: 'light', light: [], normal: [], heavy: [] })
+    lastDiagTimeRef.current = 0
+    subStepRef.current = 'waiting'
+    peakMagRef.current = 0
+    peakTimeRef.current = 0
+    reboundMaxRef.current = 0
+    if (reboundTimerRef.current) { clearTimeout(reboundTimerRef.current); reboundTimerRef.current = null }
+    setDiagLog([])
+  }
+
+  const openWizard = () => {
+    resetWizardRefs()
+    setCalib({ step: 'light', subStep: 'waiting', light: [], heavy: [] })
   }
 
   const repeatSeries = () => {
+    resetWizardRefs()
     setCalib((c) => {
       if (!c) return c
-      if (c.step === 'light') return { ...c, light: [] }
-      if (c.step === 'normal') return { ...c, normal: [] }
-      if (c.step === 'heavy') return { ...c, heavy: [] }
+      if (c.step === 'light') return { ...c, light: [], subStep: 'waiting' }
+      if (c.step === 'heavy') return { ...c, heavy: [], subStep: 'waiting' }
       return c
     })
   }
@@ -182,6 +241,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
               <Text style={s.calibResult}>
                 Detección: <Text style={{ color: colors.accent }}>{calib.result?.threshold}</Text>
                 {'  '}Potencia: <Text style={{ color: colors.secondary }}>{calib.result?.sensitivity}</Text>
+                {'  '}Rebote: <Text style={{ color: colors.textMuted }}>{calib.result?.rebound}ms</Text>
               </Text>
               <Text style={s.calibDesc}>Los valores han sido aplicados al perfil activo.</Text>
               <TouchableOpacity style={s.saveBtn} onPress={() => setCalib(null)}>
@@ -211,15 +271,30 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
               </View>
               <Text style={s.calibStep}>{STEP_LABELS[calib.step as Exclude<CalibStep, 'done' | 'error'>]}</Text>
               {(() => {
-                const arr = calib[calib.step as 'light' | 'normal' | 'heavy']
+                const arr = calib[calib.step as 'light' | 'heavy']
+                const isRebound = calib.subStep === 'rebound'
                 return (
                   <>
                     <Text style={s.calibCounter}>{arr.length} / {HITS_PER_SERIES}</Text>
-                    <Text style={s.calibDesc}>
-                      {calib.step === 'light' && 'Golpea el saco con suavidad 5 veces.'}
-                      {calib.step === 'normal' && 'Golpea el saco con fuerza media 5 veces.'}
-                      {calib.step === 'heavy' && 'Golpea el saco con toda tu fuerza 5 veces.'}
+                    <Text style={[s.calibStatus, isRebound && s.calibStatusActive]}>
+                      {isRebound ? 'Registrando rebotes...' : 'Da un golpe'}
                     </Text>
+                    <Text style={s.calibDesc}>
+                      {calib.step === 'light' && 'Golpea el saco con suavidad 3 veces. Espera entre golpe y golpe.'}
+                      {calib.step === 'heavy' && 'Golpea el saco con toda tu fuerza 3 veces. Espera entre golpe y golpe.'}
+                    </Text>
+                    <View style={s.diagPanel}>
+                      <Text style={s.diagHeader}>mag     Δt</Text>
+                      {diagLog.length === 0
+                        ? <Text style={s.diagEmpty}>— esperando lecturas —</Text>
+                        : diagLog.map((e, i) => (
+                            <Text key={i} style={[s.diagRow, e.isPeak && s.diagPeak]}>
+                              {String(e.mag).padStart(5)}   {i === diagLog.length - 1 ? '  —' : `+${e.dt}ms`}
+                              {e.isPeak ? '  ◀ GOLPE' : ''}
+                            </Text>
+                          ))
+                      }
+                    </View>
                     <TouchableOpacity style={s.cancelBtn} onPress={repeatSeries}>
                       <Text style={s.cancelBtnText}>Repetir serie</Text>
                     </TouchableOpacity>
@@ -301,7 +376,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
               <View style={s.flex1}>
                 <Text style={s.profileName}>{p.name}</Text>
                 <Text style={s.profileMeta}>
-                  Detección {p.threshold} · Potencia {p.sensitivity}
+                  Detección {p.threshold} · Potencia {p.sensitivity}{p.rebound ? ` · Rebote ${p.rebound}ms` : ''}
                 </Text>
                 {selectedProfileId === p.id && (
                   <Text style={s.activeBadge}>● Activo</Text>
@@ -438,4 +513,14 @@ const s = StyleSheet.create({
   calibCounter: { fontSize: 48, fontWeight: '800', color: colors.accent, textAlign: 'center', marginVertical: 12 },
   calibDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
   calibResult: { fontSize: 16, color: colors.textPrimary, marginVertical: 8 },
+  calibStatus: { fontSize: 15, fontWeight: '600', color: colors.textMuted, textAlign: 'center' },
+  calibStatusActive: { color: colors.secondary },
+  diagPanel: {
+    backgroundColor: colors.bgPrimary, borderRadius: 8, padding: 10,
+    borderWidth: 1, borderColor: colors.border, gap: 2,
+  },
+  diagHeader: { fontSize: 11, color: colors.textMuted, fontFamily: 'monospace', marginBottom: 4 },
+  diagEmpty: { fontSize: 12, color: colors.textMuted, fontFamily: 'monospace', textAlign: 'center', paddingVertical: 4 },
+  diagRow: { fontSize: 12, color: colors.textSecondary, fontFamily: 'monospace' },
+  diagPeak: { color: colors.accent, fontWeight: '700' },
 })

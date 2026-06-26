@@ -33,11 +33,18 @@ export interface CalibrationData {
   }
 }
 
+export interface HitWindow {
+  peak: number       // peak magnitude
+  rebound: number    // ms from peak until signal settled below baseline
+  reboundMax: number // highest magnitude seen during rebound phase
+}
+
 export interface CalibrationProfile {
   id: string
   name: string
   threshold: number
   sensitivity: number
+  rebound?: number   // personalized cooldown in ms derived from real rebound data
   calibrationData?: CalibrationData
   createdAt: number
 }

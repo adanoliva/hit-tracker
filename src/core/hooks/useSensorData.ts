@@ -17,7 +17,13 @@ interface UseSensorDataReturn {
   reset: () => void
 }
 
-const PEAK_COOLDOWN_MS = 200
+// Dynamic cooldown: base + lastPeakMag * damping (all values in raw sensor units)
+// Bottom sensor, jab soft ~665 raw: 200 + 665*0.3 = 400ms — covers 361ms rebound
+const COOLDOWN_BASE_MS     = 200
+const COOLDOWN_DAMPING     = 0.3
+
+// Dynamic threshold: rises to peak*0.4 on hit, decays back to base at this rate (units/ms)
+const THRESHOLD_DECAY_RATE = 0.5
 
 export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn {
   const [impacts, setImpacts] = useState<Impact[]>([])
@@ -25,11 +31,13 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
   const [powerMaxMag, setPowerMaxMag] = useState(0)
   const [hpmStats, setHpmStats] = useState<HPMStats>({ current: 0, average: 0, max: 0 })
 
-  const lastPeakTime  = useRef(0)
-  const prevReading   = useRef<SensorReading | null>(null)
-  const startTime     = useRef(Date.now())
-  const powerMaxRef   = useRef(0)
-  const powerMaxMagRef = useRef(0)
+  const lastPeakTime    = useRef(0)
+  const lastPeakMag     = useRef(0)
+  const dynamicFloor    = useRef(0)
+  const prevReading     = useRef<SensorReading | null>(null)
+  const startTime       = useRef(Date.now())
+  const powerMaxRef     = useRef(0)
+  const powerMaxMagRef  = useRef(0)
 
   const processReading = useCallback(
     (reading: SensorReading): Impact | null => {
@@ -38,30 +46,49 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
 
       if (!prev) return null
 
-      const now       = reading.timestamp
-      const isRising  = reading.magnitude > prev.magnitude
-      const isPeak    =
+      const now      = reading.timestamp
+      const deltaMs  = Math.max(1, now - prev.timestamp)
+
+      // Use raw magnitude throughout — calibration threshold is also in raw units
+      const mag      = reading.magnitude
+      const prevMag  = prev.magnitude
+      const base     = profile.threshold * 10
+
+      // Decay dynamic floor toward base
+      dynamicFloor.current = Math.max(base, dynamicFloor.current - THRESHOLD_DECAY_RATE * deltaMs)
+
+      const isRising = mag > prevMag
+
+      // profile.rebound is the personalized cooldown from calibration wizard
+      // fallback: dynamic formula based on last peak raw magnitude
+      const cooldown = profile.rebound
+        ?? (COOLDOWN_BASE_MS + lastPeakMag.current * COOLDOWN_DAMPING)
+
+      const isPeak =
         !isRising &&
-        prev.magnitude > profile.threshold * 10 &&
-        now - lastPeakTime.current > PEAK_COOLDOWN_MS
+        prevMag > dynamicFloor.current &&
+        now - lastPeakTime.current > cooldown
 
       if (!isPeak) return null
 
+      dynamicFloor.current = Math.max(base, prevMag * 0.4)
       lastPeakTime.current = now
-      const intensity  = calibrationService.calculateIntensity(prev.magnitude, profile)
+      lastPeakMag.current  = prevMag
+
+      const intensity = calibrationService.calculateIntensity(prevMag, profile)
 
       const newPowerMax = Math.max(powerMaxRef.current, intensity)
       powerMaxRef.current = newPowerMax
       setPowerMax(newPowerMax)
 
-      const newPowerMaxMag = Math.max(powerMaxMagRef.current, Math.round(prev.magnitude))
+      const newPowerMaxMag = Math.max(powerMaxMagRef.current, Math.round(prevMag))
       powerMaxMagRef.current = newPowerMaxMag
       setPowerMaxMag(newPowerMaxMag)
 
       const impact: Impact = {
         time:      now,
         intensity,
-        magnitude: prev.magnitude,
+        magnitude: prevMag,
         duration:  0,
       }
 
@@ -92,10 +119,12 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
     setPowerMax(0)
     setPowerMaxMag(0)
     setHpmStats({ current: 0, average: 0, max: 0 })
-    lastPeakTime.current  = 0
-    prevReading.current   = null
-    startTime.current     = Date.now()
-    powerMaxRef.current   = 0
+    lastPeakTime.current   = 0
+    lastPeakMag.current    = 0
+    dynamicFloor.current   = 0
+    prevReading.current    = null
+    startTime.current      = Date.now()
+    powerMaxRef.current    = 0
     powerMaxMagRef.current = 0
   }, [])
 

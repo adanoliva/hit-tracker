@@ -1,36 +1,49 @@
 import { calibrationService } from '../services/calibration'
-import type { CalibrationProfile } from '../types'
+import type { CalibrationProfile, HitWindow } from '../types'
 
 function makeProfile(overrides: Partial<CalibrationProfile> = {}): CalibrationProfile {
   return { id: 'test', name: 'Test', threshold: 15, sensitivity: 25, createdAt: 0, ...overrides }
 }
 
-describe('HT-014 — analyzeCalibrationSamples', () => {
-  it('calculates threshold and sensitivity for well-differentiated samples', () => {
-    const light = [250, 260, 240, 255, 245]
-    const heavy = [900, 950, 920, 880, 910]
-    const result = calibrationService.analyzeCalibrationSamples(light, [], heavy)
+function makeWindows(peaks: number[], rebound = 300): HitWindow[] {
+  return peaks.map((peak) => ({ peak, rebound, reboundMax: peak * 0.3 }))
+}
+
+describe('HT-014 — analyzeCalibrationWindows', () => {
+  it('calculates threshold, sensitivity and rebound for well-differentiated punches', () => {
+    const light = makeWindows([250, 260, 240], 280)
+    const heavy = makeWindows([900, 950, 920], 420)
+    const result = calibrationService.analyzeCalibrationWindows(light, heavy)
     expect(result).not.toBeNull()
     // lightAvg=250, base=200, range=700, threshold=200/10=20, sensitivity=700/10=70
     expect(result!.suggestedThreshold).toBeCloseTo(20, 0)
     expect(result!.suggestedSensitivity).toBeCloseTo(70, 0)
+    // rebound: max(280,420) + 80 = 500
+    expect(result!.suggestedRebound).toBe(500)
   })
 
   it('returns null when heavy is not sufficiently stronger than light', () => {
-    const light = [300, 310, 290, 305, 295]
-    const heavy = [320, 330, 310, 325, 315]
-    expect(calibrationService.analyzeCalibrationSamples(light, [], heavy)).toBeNull()
+    const light = makeWindows([300, 310, 290])
+    const heavy = makeWindows([320, 330, 310])
+    expect(calibrationService.analyzeCalibrationWindows(light, heavy)).toBeNull()
   })
 
   it('clamps extreme values within slider range (1-100)', () => {
-    const light = [400, 420, 380, 410, 390]
-    const heavy = [2500, 2600, 2400, 2550, 2450]
-    const result = calibrationService.analyzeCalibrationSamples(light, [], heavy)
+    const light = makeWindows([400, 420, 380])
+    const heavy = makeWindows([2500, 2600, 2400])
+    const result = calibrationService.analyzeCalibrationWindows(light, heavy)
     expect(result).not.toBeNull()
     expect(result!.suggestedThreshold).toBeGreaterThanOrEqual(0)
     expect(result!.suggestedThreshold).toBeLessThanOrEqual(100)
     expect(result!.suggestedSensitivity).toBeGreaterThanOrEqual(1)
     expect(result!.suggestedSensitivity).toBeLessThanOrEqual(100)
+  })
+
+  it('clamps rebound between 200ms and 700ms', () => {
+    const light = makeWindows([300, 310, 290], 50)   // very short rebound
+    const heavy = makeWindows([900, 950, 920], 1000)  // very long rebound
+    const result = calibrationService.analyzeCalibrationWindows(light, heavy)
+    expect(result!.suggestedRebound).toBe(700)  // clamped at max
   })
 })
 

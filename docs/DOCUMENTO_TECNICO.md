@@ -86,13 +86,13 @@ hit-tracker/                       ← raíz = app mobile
 ```typescript
 interface SensorReading {
   timestamp: number    // ms epoch
-  ax: number           // aceleración X (m/s²)
+  ax: number           // aceleración X — raw ±16g (1g ≈ 128 unidades)
   ay: number           // Y
   az: number           // Z
   gx: number           // giroscopio X (°/s)
   gy: number           // Y
   gz: number           // Z
-  magnitude: number    // sqrt(ax²+ay²+az²)
+  magnitude: number    // sqrt(ax²+ay²+az²) — raw; reposo ≈ 128, golpe suave 400-700+
 }
 
 interface Impact {
@@ -111,12 +111,19 @@ interface Device {
   isConnected?: boolean
 }
 
+interface HitWindow {
+  peak: number        // magnitud máxima del golpe (raw) — max(primer pico, reboundMax)
+  rebound: number     // ms desde el pico hasta que el saco se asienta
+  reboundMax: number  // magnitud máxima durante la fase de rebote
+}
+
 interface CalibrationProfile {
   id: string
   name: string
-  threshold: number            // umbral de detección (default 15.0)
-  sensitivity: number          // escala de intensidad (default 25.0)
-  validHitThreshold: number    // % del powerMax para golpe válido (default 80, rango 50-100) — ver HT-007
+  threshold: number    // base de detección en raw/10; base = threshold×10 (default 15.0)
+  sensitivity: number  // escala de intensidad en raw/10; range = sensitivity×10 (default 25.0)
+  rebound?: number     // cooldown personalizado en ms — calculado por el wizard a partir de
+                       // HitWindows reales; si ausente, se usa fórmula dinámica (200 + peak×0.3)
   calibrationData?: {
     calibratedAt: number
     samples: { light: number[]; normal: number[]; heavy: number[] }
@@ -179,21 +186,19 @@ type GameTopThree = [GameScore | null, GameScore | null, GameScore | null]
 calibrationService.createProfile(name: string): CalibrationProfile
 // → id: `profile-${Date.now()}`, threshold: 15.0, sensitivity: 25.0
 
-calibrationService.analyzeCalibrationSamples(
-  light: number[], normal: number[], heavy: number[]
-): { suggestedThreshold: number; suggestedSensitivity: number } | null
-// base = avg(light) * 0.8
-// range = avg(heavy) - base
-// → null si range < base * 0.2 (rango insuficiente: heavy no supera significativamente a light)
-// threshold = base / 10, sensitivity = range / 10, ambos clampeados (threshold: 0-100, sensitivity: 1-100)
+calibrationService.analyzeCalibrationWindows(
+  light: HitWindow[], heavy: HitWindow[]
+): { suggestedThreshold: number; suggestedSensitivity: number; suggestedRebound: number } | null
+// lightAvg = avg(light.map(w => w.peak))  — pico máximo de cada golpe (raw)
+// base = lightAvg * 0.8
+// range = avg(heavy.map(w => w.peak)) - base
+// → null si range < base * 0.2
+// threshold = base / 10, sensitivity = range / 10  (clampeados: threshold 0-100, sensitivity 1-100)
+// rebound = clamp(200, 700, max(all windows rebound durations) + 80ms)
 
 calibrationService.calculateIntensity(magnitude: number, profile: CalibrationProfile): number
-// raw = (magnitude - threshold) * sensitivity
-// → clamp(0, 100, round(raw))
-
-calibrationService.isValidHit(impact: Impact, powerMax: number, validRatio: number): boolean
-// → impact.intensity >= powerMax * validRatio
-// validRatio = profile.validHitThreshold / 100  (default 0.8)
+// base = threshold * 10,  range = sensitivity * 10  (ambos en raw units)
+// → clamp(0, 100, round((magnitude - base) / range * 100))
 ```
 
 ### trainingService (`shared/services/training.ts`)
@@ -232,12 +237,26 @@ function useSensorData(profile: CalibrationProfile): {
 }
 ```
 
-Algoritmo de detección:
-1. Compara lectura actual con la anterior
-2. Pico = magnitud bajando (`!isRising`) después de superar `threshold`
-3. Cooldown mínimo de 200ms entre golpes (`PEAK_COOLDOWN_MS`)
-4. HPM actual = golpes en últimos 10s × 6
-5. HPM promedio = total golpes / minutos transcurridos
+**Algoritmo de detección** (todas las magnitudes en raw — unidades consistentes con la calibración):
+
+```
+magnitude raw (±16g, reposo ≈ 128, golpe suave 400-700+)
+    ↓
+1. dynamicFloor decae hacia base (profile.threshold×10) a 0.5 raw/ms
+2. isPeak = !isRising && prevMag > dynamicFloor && Δt > cooldown
+3. cooldown = profile.rebound  (si calibrado)
+            ?? 200ms + lastPeakMag × 0.3  (dinámico por magnitud)
+4. Al detectar pico: dynamicFloor sube a max(base, peak×0.4)
+5. intensity = calculateIntensity(prevMag, profile)  → 0-100
+```
+
+El **cooldown dinámico** escala con la fuerza del golpe para cubrir rebotes más largos en golpes fuertes. Si el perfil tiene `rebound` (calculado por el wizard de calibración con datos reales del saco), ese valor tiene prioridad.
+
+El **umbral dinámico** (`dynamicFloor`) sube al 40% del pico tras cada golpe y decae hacia el base en ~200ms. Filtra rebotes inmediatos sin bloquear combos rápidos.
+
+HPM:
+- Actual: golpes en últimos 10s × 6
+- Promedio: total golpes / minutos transcurridos
 
 ### useTraining
 
@@ -448,4 +467,16 @@ Build de producción: `eas build` (EAS Build de Expo).
 - Upload speed: 921600
 - Serial monitor: 115200 baud
 - Frecuencia de muestreo: ~50Hz
-- Protocolo BLE: GATT. Envía `{timestamp, ax, ay, az, gx, gy, gz}` cuando `magnitude > umbral`.
+- Protocolo BLE: GATT. Envía `{timestamp, ax, ay, az, gx, gy, gz, magnitude}` continuamente.
+- Escala acelerómetro: **±16g** (1g = 128 unidades raw). Reposo: magnitude ≈ 128.
+
+**Posición física del sensor:**
+
+Colocar en el **punto de anclaje** del saco — el punto de menor oscilación pendular:
+
+| Tipo de saco | Posición |
+|---|---|
+| Saco colgado | Cerca del enganche superior |
+| Saco de pie | Base inferior, periférico al mástil |
+
+Colocarlo lejos del anclaje genera efecto látigo: rebotes con magnitud similar o superior al golpe real, difíciles de filtrar por software. No es necesario centrar el sensor exactamente — `sqrt(ax²+ay²+az²)` integra la energía de los tres ejes independientemente de la orientación o excentricidad.

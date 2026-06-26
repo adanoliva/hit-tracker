@@ -55,9 +55,10 @@ Hardware/Sensor
       │  SensorReading {timestamp, ax, ay, az, gx, gy, gz, magnitude}
       ▼
 useSensorData()
-  ├─ Detecta pico: magnitude > threshold && cooldown > 200ms
+  ├─ Detecta pico: prevMag > dynamicFloor && !isRising && cooldown transcurrido
+  ├─ Cooldown dinámico: profile.rebound ?? (200ms + lastPeakMag × 0.3)
+  ├─ Umbral dinámico: sube a peak×0.4 al golpear, decae hacia base
   ├─ calculateIntensity() → escala 0-100 con sensitivity
-  ├─ isValid: intensity >= powerMax * (profile.validHitThreshold / 100)
   └─ emite Impact → onImpactDetected()
       │
       ▼
@@ -82,13 +83,26 @@ Persistencia (expo-file-system)
 
 ```
 GY-521 (MPU-6050) ──I2C──→ ESP32
-                             ├─ Lee acelerómetro 3D (ax, ay, az)
+                             ├─ Lee acelerómetro 3D (ax, ay, az) a ±16g
                              ├─ Lee giroscopio 3D (gx, gy, gz)
                              ├─ Calcula magnitude = sqrt(ax²+ay²+az²)
-                             └─ Transmite vía BLE (GATT) si magnitude > umbral
+                             └─ Transmite vía BLE (GATT) continuamente
 ```
 
 Frecuencia de muestreo: ~50Hz (20ms por muestra).
+
+**Escala**: ±16g. En reposo: magnitude ≈ 128 unidades (1g = 128 raw). En golpe suave: 400–700+. En golpe fuerte: 1000–1500+.
+
+**Posición del sensor — regla del punto de anclaje:**
+
+El sensor debe colocarse en el punto de anclaje del saco, que es el de menor movimiento oscilatorio (pivote del péndulo). En cualquier otra posición el efecto látigo genera rebotes que el sensor puede confundir con golpes.
+
+| Tipo de saco | Punto de anclaje | Posición del sensor |
+|---|---|---|
+| Saco colgado | Parte superior (cadena/gancho) | Arriba, cerca del enganche |
+| Saco de pie | Parte inferior (base/mástil) | Abajo, periférico al mástil |
+
+No es necesario que esté centrado exactamente — `sqrt(ax²+ay²+az²)` captura energía en los tres ejes, por lo que una colocación excéntrica en el perímetro de la base da resultados igual de precisos.
 
 ### 2. Shared (código común)
 
