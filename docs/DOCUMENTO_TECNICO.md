@@ -49,8 +49,7 @@ hit-tracker/                       ← raíz = app mobile
 │  │  └─ stores/
 │  │     ├─ deviceStore.ts
 │  │     ├─ profileStore.ts
-│  │     ├─ trainingStore.ts
-│  │     └─ gameStore.ts
+│  │     └─ trainingStore.ts
 │  │
 │  ├─ hooks/
 │  │  └─ useShareSession.ts        Captura View como PNG + share sheet nativo
@@ -67,9 +66,9 @@ hit-tracker/                       ← raíz = app mobile
 │  └─ components/
 │     ├─ Dashboard/
 │     ├─ Devices/
+│     ├─ Entrenamiento/     Lista de planes, PlanRunner (warmup→core→boxing), PlanBuilder, ExerciseSelector, RoundComboEditor
 │     ├─ Profiles/
 │     ├─ Training/
-│     ├─ Game/
 │     └─ SessionDetail/
 │
 ├─ App.tsx
@@ -167,13 +166,27 @@ interface Training {
   hpmAverage: number
 }
 
-interface GameScore {
-  initials: string  // 1–4 chars, uppercase
-  score: number     // impact.magnitude (entero raw)
-  date: number      // timestamp ms
+interface BoxingRoundScript {
+  round: number         // 1-based
+  combo: string         // notación libre, ej: "1-2-3-Slip Iz-3b-6"
+  note?: string
 }
 
-type GameTopThree = [GameScore | null, GameScore | null, GameScore | null]
+interface BoxingPhaseConfig {
+  roundDuration: number   // segundos (0 = modo libre)
+  numRounds: number
+  restDuration: number    // segundos
+  roundScripts: BoxingRoundScript[]  // lista sparse — puede tener menos entradas que numRounds
+}
+
+interface WorkoutPlan {
+  id: string              // plan-<timestamp>
+  name: string
+  createdAt: number
+  warmupExerciseIds: string[]   // IDs de Exercise del catálogo
+  coreExerciseIds: string[]
+  boxing: BoxingPhaseConfig
+}
 
 ```
 
@@ -366,32 +379,6 @@ Conecta al sensor BLE por `deviceId` (vía `bleConnection.connectBleDevice`) cua
 }
 ```
 
-### gameStore
-
-`src/core/stores/gameStore.ts`
-
-```typescript
-type GamePhase = 'idle' | 'waiting' | 'new-record' | 'loser'
-
-{
-  topThree: GameTopThree        // persiste en disco; null = posición vacía
-  phase: GamePhase
-  lastScore: number | null      // magnitude del golpe registrado
-  pendingScore: number | null   // score en espera de iniciales (solo en 'new-record')
-  startGame(): void             // idle → waiting
-  cancelGame(): void            // waiting → idle, limpia scores
-  registerHit(magnitude): void  // registra primer golpe; → new-record | loser
-  submitInitials(initials): Promise<void>  // inserta en TOP 3, persiste, → idle
-  resetToIdle(): void           // loser → idle
-  loadScores(): Promise<void>   // carga game-scores.json desde disco
-}
-```
-
-Lógica de negocio pura (funciones internas):
-- `entersTopThree(score, top)` — `true` si hay hueco libre **o** `score > min` del TOP 3 lleno (estrictamente mayor)
-- `insertScore(entry, top)` — ordena por score descendente, trunca a 3 entradas
-- `minScoreForTop3(top)` — exportada; devuelve `min+1` si lleno, `0` si hay hueco
-
 ### trainingStore
 
 ```typescript
@@ -411,6 +398,38 @@ Lógica de negocio pura (funciones internas):
 }
 ```
 
+### workoutPlanStore
+
+`src/core/stores/workoutPlanStore.ts`. Se carga en el arranque de la app vía `load()`.
+
+```typescript
+{
+  plans: WorkoutPlan[]
+  loaded: boolean
+  load(): Promise<void>             // carga desde disco; llamado en App.tsx al inicio
+  addPlan(plan: Omit<WorkoutPlan, 'id' | 'createdAt'>): void   // genera id y createdAt + persiste
+  updatePlan(id, changes): void     // merge parcial + persiste
+  deletePlan(id): void              // + persiste
+  getById(id): WorkoutPlan | undefined
+}
+```
+
+### customExerciseStore
+
+`src/core/stores/customExerciseStore.ts`. Se carga en el arranque de la app vía `load()`.
+
+```typescript
+{
+  exercises: Exercise[]
+  loaded: boolean
+  load(): Promise<void>             // carga desde disco; llamado en App.tsx al inicio
+  add(ex: Omit<Exercise, 'id'>): void   // genera id = "custom-<slug>-<timestamp>" + persiste
+  remove(id: string): void              // filtra por id + persiste
+}
+```
+
+Los ejercicios custom se distinguen de los del catálogo base por el prefijo `custom-` en su `id`. `ExerciseSelector` fusiona automáticamente base + custom al listar ejercicios por categoría.
+
 ---
 
 ## Storage (`src/services/storage.ts`)
@@ -425,8 +444,10 @@ storage.saveProfiles(profiles)        // → profiles.json
 storage.loadProfiles(): CalibrationProfile[]
 storage.saveDevices(devices)          // → devices.json
 storage.loadDevices(): Device[]
-storage.loadGameScores(): GameTopThree  // → game-scores.json (fallback: [null,null,null])
-storage.saveGameScores(scores)          // → game-scores.json
+storage.saveWorkoutPlans(plans)       // → workout_plans.json
+storage.loadWorkoutPlans(): WorkoutPlan[]
+storage.saveCustomExercises(exercises) // → custom_exercises.json
+storage.loadCustomExercises(): Exercise[]
 ```
 
 ---

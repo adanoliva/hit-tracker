@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Flame, Dumbbell, Target } from 'lucide-react-native'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useProfileStore } from '../../core/stores/profileStore'
 import { colors } from '../../theme'
 
+export interface PhaseConfig {
+  includeWarmup: boolean
+  includeCore: boolean
+}
+
 interface TrainingSetupProps {
-  onStart: (roundDuration: number, numRounds: number, restDuration: number) => void
+  onStart: (roundDuration: number, numRounds: number, restDuration: number, phases: PhaseConfig) => void
   onBack: () => void
 }
 
@@ -49,17 +55,23 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
   const [roundDuration, setRoundDuration] = useState(180)
   const [numRounds, setNumRounds] = useState(3)
   const [restDuration, setRestDuration] = useState(60)
+  const [includeWarmup, setIncludeWarmup] = useState(false)
+  const [includeCore, setIncludeCore] = useState(false)
 
   const connected = useDeviceStore((s) => s.connected)
   const profiles = useProfileStore((s) => s.profiles)
   const selectedId = useProfileStore((s) => s.selectedProfileId)
   const selectProfile = useProfileStore((s) => s.selectProfile)
 
-  const totalSecs = numRounds * roundDuration + (numRounds - 1) * restDuration
+  const boxingSecs = freeMode ? 0 : numRounds * roundDuration + (numRounds - 1) * restDuration
+  const physicalMins = (includeWarmup ? 8 : 0) + (includeCore ? 15 : 0)
+  const totalMins = physicalMins + Math.ceil(boxingSecs / 60)
+
   const handleStart = () => {
     if (!connected) return
-    if (freeMode) onStart(0, 1, 0)
-    else onStart(roundDuration, numRounds, restDuration)
+    const phases: PhaseConfig = { includeWarmup, includeCore }
+    if (freeMode) onStart(0, 1, 0, phases)
+    else onStart(roundDuration, numRounds, restDuration, phases)
   }
 
   return (
@@ -136,8 +148,50 @@ export function TrainingSetup({ onStart, onBack }: TrainingSetupProps) {
         <Text style={s.summaryText}>
           Total: {numRounds} × {roundDuration / 60}min + {numRounds - 1} × {restDuration}s descanso
         </Text>
-        <Text style={s.muted}>≈ {Math.round(totalSecs / 60)} minutos</Text>
+        <Text style={s.muted}>≈ {totalMins} minutos{physicalMins > 0 ? ` (${physicalMins} min físico + ${totalMins - physicalMins} min boxeo)` : ''}</Text>
       </View>}
+
+      {/* Fases de la sesión */}
+      <View style={s.phasesSection}>
+        <Text style={s.label}>Fases de la sesión</Text>
+
+        <View style={s.phaseRow}>
+          <Flame size={18} color={colors.accent} style={s.phaseIcon} />
+          <View style={s.phaseInfo}>
+            <Text style={s.phaseTitle}>Calentamiento <Text style={s.phaseDuration}>(8 min)</Text></Text>
+            <Text style={s.muted}>Movilidad y activación</Text>
+          </View>
+          <Switch
+            value={includeWarmup}
+            onValueChange={setIncludeWarmup}
+            trackColor={{ false: colors.border, true: colors.accent }}
+            thumbColor="#fff"
+          />
+        </View>
+
+        <View style={s.phaseRow}>
+          <Dumbbell size={18} color={colors.secondary} style={s.phaseIcon} />
+          <View style={s.phaseInfo}>
+            <Text style={s.phaseTitle}>Core <Text style={s.phaseDuration}>(15 min)</Text></Text>
+            <Text style={s.muted}>Abdominales y estabilidad</Text>
+          </View>
+          <Switch
+            value={includeCore}
+            onValueChange={setIncludeCore}
+            trackColor={{ false: colors.border, true: colors.accent }}
+            thumbColor="#fff"
+          />
+        </View>
+
+        <View style={[s.phaseRow, s.phaseRowFixed]}>
+          <Target size={18} color={colors.textMuted} style={s.phaseIcon} />
+          <View style={s.phaseInfo}>
+            <Text style={s.phaseTitle}>Rounds de saco</Text>
+            <Text style={s.muted}>Configurado arriba</Text>
+          </View>
+          <Text style={s.alwaysOn}>Siempre</Text>
+        </View>
+      </View>
 
       <TouchableOpacity
         style={[s.startBtn, !connected && s.startBtnDisabled]}
@@ -190,5 +244,17 @@ const s = StyleSheet.create({
     paddingVertical: 18, alignItems: 'center'
   },
   startBtnDisabled: { backgroundColor: colors.bgTertiary },
-  startText: { fontSize: 17, fontWeight: '800', color: '#fff' }
+  startText: { fontSize: 17, fontWeight: '800', color: '#fff' },
+  phasesSection: { gap: 8 },
+  phaseRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: colors.bgSecondary, borderRadius: 12,
+    padding: 14, borderWidth: 1, borderColor: colors.border, gap: 12,
+  },
+  phaseRowFixed: { opacity: 0.6 },
+  phaseIcon: { width: 20 },
+  phaseInfo: { flex: 1 },
+  phaseTitle: { fontSize: 14, fontWeight: '700', color: colors.textPrimary },
+  phaseDuration: { fontSize: 12, color: colors.textMuted, fontWeight: '400' },
+  alwaysOn: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
 })

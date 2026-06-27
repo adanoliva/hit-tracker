@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { TouchableOpacity } from 'react-native'
-import { LayoutDashboard, Dumbbell, Gamepad2, Bluetooth, SlidersHorizontal, type LucideProps } from 'lucide-react-native'
+import { LayoutDashboard, Timer, ClipboardList, Bluetooth, SlidersHorizontal, type LucideProps } from 'lucide-react-native'
 import { Dashboard } from '../components/Dashboard'
 import { TrainingPage } from '../components/Training'
-import { GamePage } from '../components/Game'
+import { EntrenamientoPage } from '../components/Entrenamiento'
 import { DevicesPage } from '../components/Devices'
 import { ProfilesPage } from '../components/Profiles'
 import { SessionDetail } from '../components/SessionDetail'
@@ -18,8 +18,8 @@ type IconComponent = React.ComponentType<LucideProps>
 
 const TAB_ICONS: Record<string, IconComponent> = {
   Inicio: LayoutDashboard,
-  Entrenar: Dumbbell,
-  Game: Gamepad2,
+  Sesión: Timer,
+  Entrenamiento: ClipboardList,
   Dispositivos: Bluetooth,
   Perfiles: SlidersHorizontal
 }
@@ -53,7 +53,7 @@ export function MobileLayout() {
           const Icon = TAB_ICONS[route.name]
           return Icon ? <Icon size={22} color={color} /> : null
         },
-        tabBarButton: sessionActive && route.name !== 'Entrenar'
+        tabBarButton: sessionActive && route.name !== 'Sesión'
           ? (props) => <TouchableOpacity {...(props as any)} disabled style={[props.style as any, { opacity: 0.3 }]} />
           : undefined
       })}
@@ -61,13 +61,13 @@ export function MobileLayout() {
       <Tab.Screen name="Inicio">
         {({ navigation }) => (
           <Dashboard
-            onNavigate={(p) => navigation.navigate(p === 'training' ? 'Entrenar' : p)}
+            onNavigate={(p) => navigation.navigate(p === 'training' ? 'Sesión' : p)}
             onSelectTraining={setSelectedTraining}
           />
         )}
       </Tab.Screen>
-      <Tab.Screen name="Entrenar" component={TrainingPage} />
-      <Tab.Screen name="Game" component={GamePage} />
+      <Tab.Screen name="Sesión" component={TrainingPage} />
+      <Tab.Screen name="Entrenamiento" component={EntrenamientoPage} />
       <Tab.Screen name="Dispositivos" component={DevicesPage} />
       <Tab.Screen name="Perfiles" component={ProfilesPage} />
     </Tab.Navigator>

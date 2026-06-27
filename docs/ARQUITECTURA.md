@@ -137,7 +137,8 @@ src/
 │  │  ├─ deviceStore.ts
 │  │  ├─ profileStore.ts
 │  │  ├─ trainingStore.ts
-│  │  └─ gameStore.ts
+│  │  ├─ workoutPlanStore.ts
+│  │  └─ customExerciseStore.ts
 │  │
 │  ├─ services/
 │  │  ├─ calibration.ts      → re-export de @shared/services/calibration
@@ -160,9 +161,19 @@ src/
 └─ components/
    ├─ Dashboard/
    ├─ Devices/
+   ├─ Entrenamiento/
+   │  ├─ index.tsx              Lista de planes + navegación builder/runner/catalog
+   │  ├─ PlanCard.tsx           Tarjeta de plan con duración estimada y acciones
+   │  ├─ PlanRunner.tsx         Orquesta warmup→core→boxing a partir de un WorkoutPlan
+   │  ├─ PlanBuilder.tsx        Formulario de creación/edición de WorkoutPlan
+   │  ├─ ExerciseSelector.tsx   Lista de ejercicios (base + custom) con checkbox por categoría
+   │  ├─ BoxingConfigSection.tsx Controles de rounds reutilizables (duración, nº, descanso)
+   │  ├─ RoundComboEditor.tsx   Editor de combos por round con referencia de notación
+   │  ├─ CatalogScreen.tsx      Catálogo completo con tabs Calentamiento/Core/Boxing y buscador
+   │  ├─ ExerciseDetailSheet.tsx Bottom sheet de detalle de ejercicio; permite eliminar si es custom
+   │  └─ BoxingExerciseForm.tsx  Formulario para crear ejercicios de boxing personalizados
    ├─ Profiles/
    ├─ Training/
-   ├─ Game/
    └─ SessionDetail/ Detalle de sesión: gráfico scatter por round, eliminar
 ```
 
@@ -202,7 +213,8 @@ Training
 │  └─ training_<id>.json
 ├─ devices.json
 ├─ profiles.json
-└─ game-scores.json
+├─ workout_plans.json
+└─ custom_exercises.json
 ```
 
 ---

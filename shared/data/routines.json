@@ -1,0 +1,50 @@
+[
+  {
+    "id": "warmup-boxing",
+    "name": "Calentamiento Boxeo",
+    "category": "warmup",
+    "durationMin": 8,
+    "difficulty": "easy",
+    "exercises": [
+      { "exerciseId": "neck-rotations" },
+      { "exerciseId": "shoulder-circles" },
+      { "exerciseId": "wrist-rotations" },
+      { "exerciseId": "jumping-jacks" },
+      { "exerciseId": "shadow-boxing" },
+      { "exerciseId": "high-knees" },
+      { "exerciseId": "tricep-stretch" },
+      { "exerciseId": "chest-opener" }
+    ]
+  },
+  {
+    "id": "core-boxer",
+    "name": "Core Boxeador",
+    "category": "core",
+    "durationMin": 15,
+    "difficulty": "medium",
+    "exercises": [
+      { "exerciseId": "plank-isometric" },
+      { "exerciseId": "bicycle-crunch" },
+      { "exerciseId": "russian-twist" },
+      { "exerciseId": "mountain-climbers" },
+      { "exerciseId": "leg-raises" },
+      { "exerciseId": "side-plank" }
+    ]
+  },
+  {
+    "id": "fullbody-no-equipment",
+    "name": "Fullbody Sin Material",
+    "category": "fullbody",
+    "durationMin": 20,
+    "difficulty": "medium",
+    "exercises": [
+      { "exerciseId": "squats" },
+      { "exerciseId": "push-ups" },
+      { "exerciseId": "lunges" },
+      { "exerciseId": "burpees" },
+      { "exerciseId": "superman" },
+      { "exerciseId": "tricep-dips" },
+      { "exerciseId": "sumo-squat" }
+    ]
+  }
+]

@@ -92,10 +92,57 @@ export interface AppConfig {
   defaultDeviceMac?: string
 }
 
-export interface GameScore {
-  initials: string  // 1–4 chars, uppercase
-  score: number     // impact.magnitude (raw integer)
-  date: number      // timestamp ms
+
+export type ExerciseCategory = 'warmup' | 'core' | 'upper' | 'lower' | 'fullbody' | 'mobility' | 'boxing'
+
+export interface Exercise {
+  id: string
+  name: string
+  category: ExerciseCategory
+  muscles: string[]
+  equipment: 'none' | 'dumbbells' | 'pull-up-bar'
+  description: string
+  imageUrl?: string
+  duration?: number
+  reps?: number
+  rest: number
+  difficulty: 'easy' | 'medium' | 'hard'
 }
 
-export type GameTopThree = [GameScore | null, GameScore | null, GameScore | null]
+export interface RoutineExercise {
+  exerciseId: string
+  sets?: number
+  reps?: number
+  duration?: number
+}
+
+export interface Routine {
+  id: string
+  name: string
+  category: ExerciseCategory
+  durationMin: number
+  exercises: RoutineExercise[]
+  difficulty: 'easy' | 'medium' | 'hard'
+}
+
+export interface BoxingRoundScript {
+  round: number
+  combo: string
+  note?: string
+}
+
+export interface BoxingPhaseConfig {
+  roundDuration: number
+  numRounds: number
+  restDuration: number
+  roundScripts: BoxingRoundScript[]
+}
+
+export interface WorkoutPlan {
+  id: string
+  name: string
+  createdAt: number
+  warmupExerciseIds: string[]
+  coreExerciseIds: string[]
+  boxing: BoxingPhaseConfig
+}

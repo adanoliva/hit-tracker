@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import type { Training, CalibrationProfile, Device, GameTopThree } from '../core/types'
+import type { Training, CalibrationProfile, Device, WorkoutPlan, Exercise } from '../core/types'
 
 // Compatibilidad con entrenamientos grabados antes del renombrado rpm → hpm
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,12 +75,22 @@ export const storage = {
     return readJson<Device[]>(BASE + 'devices.json', [])
   },
 
-  async loadGameScores(): Promise<GameTopThree> {
-    return readJson<GameTopThree>(BASE + 'game-scores.json', [null, null, null])
+  async saveWorkoutPlans(plans: WorkoutPlan[]) {
+    await ensureDir(BASE)
+    await FileSystem.writeAsStringAsync(BASE + 'workout_plans.json', JSON.stringify(plans))
   },
 
-  async saveGameScores(scores: GameTopThree) {
+  async loadWorkoutPlans(): Promise<WorkoutPlan[]> {
+    return readJson<WorkoutPlan[]>(BASE + 'workout_plans.json', [])
+  },
+
+  async saveCustomExercises(exercises: Exercise[]) {
     await ensureDir(BASE)
-    await FileSystem.writeAsStringAsync(BASE + 'game-scores.json', JSON.stringify(scores))
-  }
+    await FileSystem.writeAsStringAsync(BASE + 'custom_exercises.json', JSON.stringify(exercises))
+  },
+
+  async loadCustomExercises(): Promise<Exercise[]> {
+    return readJson<Exercise[]>(BASE + 'custom_exercises.json', [])
+  },
+
 }

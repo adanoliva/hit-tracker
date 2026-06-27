@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Circle, Line } from 'react-native-svg'
 import type { Impact } from '../../core/types'
@@ -81,11 +81,12 @@ interface TrainingRoundProps {
   hpmStats: { current: number; average: number; max: number }
   onAbort: () => void
   onFinish: () => void
+  combo?: string
 }
 
 export function TrainingRound({
   roundNumber, totalRounds, timeRemaining, timeElapsed, isFreeMode,
-  impacts, powerMax, powerMaxMag, userPowerRef, hpmStats, onAbort, onFinish
+  impacts, powerMax, powerMaxMag, userPowerRef, hpmStats, onAbort, onFinish, combo
 }: TrainingRoundProps) {
   const { width } = useWindowDimensions()
   const { top } = useSafeAreaInsets()
@@ -116,6 +117,15 @@ export function TrainingRound({
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Combo del round (solo si viene de un WorkoutPlan con script) */}
+      {!!combo && combo.trim().length > 0 && (
+        <View style={s.comboBanner}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <Text style={s.comboText}>{combo}</Text>
+          </ScrollView>
+        </View>
+      )}
 
       {/* Gráfico */}
       <View style={s.chartContainer}>
@@ -154,6 +164,15 @@ const s = StyleSheet.create({
   finishText: { fontSize: 12, color: colors.secondary, fontWeight: '700' },
   abortBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
   abortText: { fontSize: 12, color: colors.textMuted },
+  comboBanner: {
+    backgroundColor: colors.bgSecondary, borderRadius: 12,
+    borderWidth: 1, borderColor: colors.accent + '55',
+    paddingHorizontal: 14, paddingVertical: 10,
+  },
+  comboText: {
+    fontFamily: 'monospace', fontSize: 20, fontWeight: '800',
+    color: colors.accent, letterSpacing: 1,
+  },
   chartContainer: {
     backgroundColor: colors.bgSecondary, borderRadius: 12,
     borderWidth: 1, borderColor: colors.border, overflow: 'hidden'

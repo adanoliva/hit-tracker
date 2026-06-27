@@ -31,9 +31,18 @@
 | HT-009-a | Potencia real: firmware V2 con raw int16 escalado (/16) | v1 | both | high | done | HT-008 |
 | HT-009-b | Potencia real: display raw durante sesión y gráfica en % con referencia de 5 sesiones | v1 | both | high | done | HT-008, HT-009-a |
 | HT-010 | Sistema de migraciones de datos — appVersion en Training y migrationService | v1 | both | high | done | HT-009-a |
-| HT-015-a | Catálogo de ejercicios físicos local (tipos + exerciseService + JSON curado) | v2 | shared | high | pending | — |
-| HT-015-b | WorkoutPlayer — componente guiado de ejercicios físicos con timer | v2 | both | high | pending | HT-015-a |
-| HT-015-c | Sesión Completa — configurador de fases y flujo encadenado (físico → boxeo) | v2 | both | high | pending | HT-015-a, HT-015-b |
+| HT-015-a | Catálogo de ejercicios físicos local (tipos + exerciseService + JSON curado) | v2 | shared | high | **done** | — |
+| HT-015-b | WorkoutPlayer — componente guiado de ejercicios físicos con timer | v2 | mobile | high | **done** | HT-015-a |
+| HT-015-c | Sesión Completa — configurador de fases y flujo encadenado (físico → boxeo) | v2 | mobile | high | **done** | HT-015-a, HT-015-b |
+| HT-016 | Eliminar modo Game de la aplicación | v2 | mobile | high | **done** | — |
+| HT-017 | Navegación — renombrar Sesión y añadir tab Entrenamiento | v2 | mobile | high | **done** | HT-016 |
+| HT-018 | WorkoutPlan — modelo de datos, store y persistencia | v2 | shared | high | **done** | HT-015-a |
+| HT-019-a | Entrenamiento — lista de planes y pantalla de ejecución | v2 | mobile | high | **done** | HT-017, HT-018 |
+| HT-019-b | Entrenamiento — builder de planes (nombre + selección de ejercicios) | v2 | mobile | high | **done** | HT-018, HT-019-a |
+| HT-019-c | Entrenamiento — diseñador de combos por round | v2 | mobile | medium | **done** | HT-019-b |
+| HT-020 | Sesión de boxing — guía de combo en pantalla durante el round | v2 | mobile | high | **done** | HT-018, HT-019-a |
+| HT-021-a | Catálogo de ejercicios — UI de gestión (ver, añadir, eliminar) | v2 | mobile | medium | **done** | HT-015-a, HT-017 |
+| HT-021-b | Catálogo de ejercicios — integración wger API (búsqueda e importación) | v2 | mobile | medium | pending | HT-021-a |
 
 ## Leyenda
 
