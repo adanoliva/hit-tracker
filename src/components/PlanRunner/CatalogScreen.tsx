@@ -109,7 +109,7 @@ export function CatalogScreen({ onBack, onWgerSearch }: Props) {
                 <Text style={s.name}>{item.name}</Text>
                 <Text style={s.meta}>
                   {item.muscles.slice(0, 2).join(', ')}
-                  {item.duration ? `  ·  ${item.duration}s` : item.reps ? `  ·  ${item.reps} reps` : ''}
+                  {item.category !== 'boxing' && (item.duration ? `  ·  ${item.duration}s` : item.reps ? `  ·  ${item.reps} reps` : '')}
                 </Text>
               </View>
               {isBase && <Text style={s.baseTag}>Base</Text>}

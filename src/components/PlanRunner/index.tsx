@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Plus, ClipboardList, BookOpen } from 'lucide-react-native'
 import type { WorkoutPlan } from '../../core/types'
 import { useWorkoutPlanStore } from '../../core/stores/workoutPlanStore'
+import { useDeviceStore } from '../../core/stores/deviceStore'
 import { PlanCard } from './PlanCard'
 import { PlanBuilder } from './PlanBuilder'
 import { PlanRunner } from './PlanRunner'
@@ -16,6 +17,7 @@ export function EntrenamientoPage() {
   const { top } = useSafeAreaInsets()
   const plans = useWorkoutPlanStore((s) => s.plans)
   const deletePlan = useWorkoutPlanStore((s) => s.deletePlan)
+  const connected = useDeviceStore((s) => s.connected)
 
   const [screen, setScreen] = useState<Screen>('list')
   const [activePlan, setActivePlan] = useState<WorkoutPlan | null>(null)
@@ -78,7 +80,17 @@ export function EntrenamientoPage() {
             <PlanCard
               key={plan.id}
               plan={plan}
-              onRun={() => { setActivePlan(plan); setScreen('running') }}
+              onRun={() => {
+                if (connected) { setActivePlan(plan); setScreen('running'); return }
+                Alert.alert(
+                  'Sin sensor conectado',
+                  'No hay ningún sensor BLE conectado. Puedes continuar sin datos de golpes o cancelar para conectar uno primero.',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Continuar sin sensor', onPress: () => { setActivePlan(plan); setScreen('running') } },
+                  ]
+                )
+              }}
               onEdit={() => { setEditingPlan(plan); setScreen('builder') }}
               onDelete={() => deletePlan(plan.id)}
             />

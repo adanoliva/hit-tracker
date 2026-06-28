@@ -118,19 +118,19 @@ export function TrainingRound({
         </View>
       </View>
 
-      {/* Combo del round (solo si viene de un WorkoutPlan con script) */}
-      {!!combo && combo.trim().length > 0 && (
-        <View style={s.comboBanner}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <Text style={s.comboText}>{combo}</Text>
-          </ScrollView>
-        </View>
-      )}
-
       {/* Gráfico */}
       <View style={s.chartContainer}>
         <ImpactChart impacts={impacts} powerMax={powerMax} userPowerRef={userPowerRef} width={chartWidth} height={chartHeight} />
       </View>
+
+      {/* Combo del round (solo si viene de un WorkoutPlan con script) */}
+      {!!combo && combo.trim().length > 0 && (
+        <View style={s.comboBanner}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={s.comboText}>{combo}</Text>
+          </ScrollView>
+        </View>
+      )}
 
       {/* Stats */}
       <View style={s.statsRow}>
@@ -165,13 +165,14 @@ const s = StyleSheet.create({
   abortBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
   abortText: { fontSize: 12, color: colors.textMuted },
   comboBanner: {
+    flex: 1,
     backgroundColor: colors.bgSecondary, borderRadius: 12,
     borderWidth: 1, borderColor: colors.accent + '55',
-    paddingHorizontal: 14, paddingVertical: 10,
+    paddingHorizontal: 14, paddingVertical: 12,
   },
   comboText: {
-    fontFamily: 'monospace', fontSize: 20, fontWeight: '800',
-    color: colors.accent, letterSpacing: 1,
+    fontFamily: 'monospace', fontSize: 24, fontWeight: '800',
+    color: colors.accent, letterSpacing: 1, lineHeight: 32,
   },
   chartContainer: {
     backgroundColor: colors.bgSecondary, borderRadius: 12,

@@ -15,12 +15,14 @@ import { exerciseService } from '../../core/services/exerciseService'
 import { useCustomExerciseStore } from '../../core/stores/customExerciseStore'
 import { audioService } from '../../services/audio'
 import { WorkoutPlayer } from '../Workout/WorkoutPlayer'
-import { TrainingRound } from '../Training/TrainingRound'
-import { TrainingRest } from '../Training/TrainingRest'
-import { TrainingResults } from '../Training/TrainingResults'
+import { TrainingRound } from '../Session/TrainingRound'
+import { TrainingRest } from '../Session/TrainingRest'
+import { TrainingResults } from '../Session/TrainingResults'
 import { colors } from '../../theme'
 
 type PlanPhase = 'warmup' | 'core' | 'boxing'
+
+const DUMMY_DEVICE = { mac: '', name: 'Sin sensor', createdAt: 0, lastSeen: 0 }
 
 function buildRoutine(ids: string[], name: string, category: ExerciseCategory, customs: Exercise[]): ResolvedRoutine {
   const resolvedExercises = ids
@@ -73,11 +75,10 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   // Start boxing as soon as planPhase === 'boxing'
   useEffect(() => {
     if (planPhase !== 'boxing') return
-    if (!connected) { onAbort(); return }
     reset()
     savedRef.current = false
     startTraining(
-      connected,
+      connected ?? DUMMY_DEVICE,
       profile,
       plan.boxing.roundDuration,
       plan.boxing.numRounds,
@@ -151,12 +152,12 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   // Physical phases
   if (planPhase === 'warmup') {
     const routine = buildRoutine(plan.warmupExerciseIds, 'Calentamiento', 'warmup', customExercises)
-    return <WorkoutPlayer routine={routine} onComplete={handleWarmupComplete} onAbort={handlePhysicalAbort} />
+    return <WorkoutPlayer key="warmup" routine={routine} onComplete={handleWarmupComplete} onAbort={handlePhysicalAbort} />
   }
 
   if (planPhase === 'core') {
     const routine = buildRoutine(plan.coreExerciseIds, 'Core', 'core', customExercises)
-    return <WorkoutPlayer routine={routine} onComplete={handleCoreComplete} onAbort={handlePhysicalAbort} />
+    return <WorkoutPlayer key="core" routine={routine} onComplete={handleCoreComplete} onAbort={handlePhysicalAbort} />
   }
 
   // Boxing phase
