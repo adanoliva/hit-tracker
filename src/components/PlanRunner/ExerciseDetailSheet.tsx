@@ -1,4 +1,5 @@
 import { Modal, View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { X } from 'lucide-react-native'
 import type { Exercise } from '../../core/types'
 import { colors } from '../../theme'
@@ -14,12 +15,13 @@ const DIFF_LABEL: Record<string, string> = { easy: 'Fácil', medium: 'Medio', ha
 const DIFF_COLOR: Record<string, string> = { easy: '#4caf50', medium: '#ff9800', hard: colors.accent }
 
 export function ExerciseDetailSheet({ exercise, isBase, onClose, onDelete }: Props) {
+  const { bottom } = useSafeAreaInsets()
   if (!exercise) return null
 
   return (
     <Modal visible animationType="slide" transparent onRequestClose={onClose}>
       <View style={s.overlay}>
-        <View style={s.sheet}>
+        <View style={[s.sheet, { paddingBottom: Math.max(bottom, 24) }]}>
           <View style={s.header}>
             <Text style={s.title} numberOfLines={2}>{exercise.name}</Text>
             <TouchableOpacity onPress={onClose} style={s.closeBtn}>
@@ -89,7 +91,7 @@ const s = StyleSheet.create({
   sheet: {
     backgroundColor: colors.bgSecondary,
     borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    maxHeight: '80%', paddingBottom: 24,
+    maxHeight: '80%',
   },
   header: {
     flexDirection: 'row', alignItems: 'flex-start',

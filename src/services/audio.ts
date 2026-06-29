@@ -1,5 +1,4 @@
 import { createAudioPlayer } from 'expo-audio'
-import type { AudioPlayer } from 'expo-audio'
 
 const SOUNDS = {
   bell:      require('../../assets/sounds/opening-bell.mp3') as number,
@@ -7,20 +6,10 @@ const SOUNDS = {
   countdown: require('../../assets/sounds/timer_countdown.mp3') as number,
 }
 
-// Mantener referencias activas para evitar que el GC las elimine antes de terminar
-const active = new Set<AudioPlayer>()
-
 function play(key: keyof typeof SOUNDS, rate = 1.0) {
   try {
     const player = createAudioPlayer(SOUNDS[key])
     if (rate !== 1.0) player.setPlaybackRate(rate)
-    active.add(player)
-    player.addListener('playbackStatusUpdate', (status) => {
-      if (status.didJustFinish) {
-        active.delete(player)
-        player.remove()
-      }
-    })
     player.play()
   } catch {}
 }

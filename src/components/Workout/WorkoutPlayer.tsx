@@ -27,7 +27,7 @@ export function WorkoutPlayer({ routine, onComplete, onAbort }: WorkoutPlayerPro
   if (!currentExercise) return null
 
   const isReps = timeLeft === null
-  const progressPct = `${Math.round(progress * 100)}%`
+  const progressPct = `${Math.round(progress * 100)}%` as `${number}%`
 
   return (
     <View style={[s.container, { paddingTop: top + 16, paddingBottom: bottom + 16 }]}>

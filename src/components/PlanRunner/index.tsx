@@ -9,9 +9,10 @@ import { PlanCard } from './PlanCard'
 import { PlanBuilder } from './PlanBuilder'
 import { PlanRunner } from './PlanRunner'
 import { CatalogScreen } from './CatalogScreen'
+import { WgerSearchScreen } from './WgerSearchScreen'
 import { colors } from '../../theme'
 
-type Screen = 'list' | 'builder' | 'running' | 'catalog'
+type Screen = 'list' | 'builder' | 'running' | 'catalog' | 'wger'
 
 export function EntrenamientoPage() {
   const { top } = useSafeAreaInsets()
@@ -33,10 +34,15 @@ export function EntrenamientoPage() {
     )
   }
 
+  if (screen === 'wger') {
+    return <WgerSearchScreen onBack={() => setScreen('catalog')} />
+  }
+
   if (screen === 'catalog') {
     return (
       <CatalogScreen
         onBack={() => setScreen('list')}
+        onWgerSearch={() => setScreen('wger')}
       />
     )
   }

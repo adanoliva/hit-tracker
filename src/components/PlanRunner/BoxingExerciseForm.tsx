@@ -3,6 +3,7 @@ import {
   Modal, View, Text, StyleSheet, ScrollView,
   TextInput, TouchableOpacity,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { X } from 'lucide-react-native'
 import type { Exercise, ExerciseCategory } from '../../core/types'
 import { useCustomExerciseStore } from '../../core/stores/customExerciseStore'
@@ -33,6 +34,7 @@ const CAT_TITLE: Partial<Record<ExerciseCategory, string>> = {
 const isBoxing = (cat: ExerciseCategory) => cat === 'boxing'
 
 export function BoxingExerciseForm({ category, onClose }: Props) {
+  const { bottom } = useSafeAreaInsets()
   const add = useCustomExerciseStore((s) => s.add)
 
   const [name, setName] = useState('')
@@ -65,7 +67,7 @@ export function BoxingExerciseForm({ category, onClose }: Props) {
   return (
     <Modal visible animationType="slide" transparent onRequestClose={onClose}>
       <View style={s.overlay}>
-        <View style={s.sheet}>
+        <View style={[s.sheet, { paddingBottom: Math.max(bottom, 24) }]}>
           <View style={s.header}>
             <Text style={s.title}>{CAT_TITLE[category] ?? 'Nuevo ejercicio'}</Text>
             <TouchableOpacity onPress={onClose}><X size={20} color={colors.textMuted} /></TouchableOpacity>
@@ -163,7 +165,7 @@ const s = StyleSheet.create({
   sheet: {
     backgroundColor: colors.bgSecondary,
     borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    maxHeight: '92%', paddingBottom: 24,
+    maxHeight: '92%',
   },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

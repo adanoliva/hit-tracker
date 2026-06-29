@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { activateKeepAwakeAsync } from 'expo-keep-awake'
 import { StatusBar } from 'expo-status-bar'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SplashScreen from 'expo-splash-screen'
@@ -17,6 +18,7 @@ import { colors } from './src/theme'
 import { migrationService } from '@shared/services/migration'
 
 SplashScreen.preventAutoHideAsync()
+activateKeepAwakeAsync('global')
 
 const NAV_THEME = {
   ...DarkTheme,

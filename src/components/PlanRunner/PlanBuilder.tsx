@@ -113,7 +113,7 @@ export function PlanBuilder({ existingPlan, onSave, onCancel }: PlanBuilderProps
           onToggle={() => setOpenCore((v) => !v)}
         />
         {openCore && (
-          <ExerciseSelector category={['core', 'fullbody']} selected={coreIds} onChange={setCoreIds} />
+          <ExerciseSelector category={['core', 'upper', 'lower', 'fullbody']} selected={coreIds} onChange={setCoreIds} />
         )}
       </View>
 

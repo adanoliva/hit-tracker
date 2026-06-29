@@ -41,7 +41,8 @@ hit-tracker/                       ← raíz = app mobile
 │  │  ├─ types/index.ts            → re-export @shared/types
 │  │  ├─ services/
 │  │  │  ├─ calibration.ts         → re-export @shared/services/calibration
-│  │  │  └─ trainingService.ts     → re-export @shared/services/training
+│  │  │  ├─ trainingService.ts     → re-export @shared/services/training
+│  │  │  └─ wgerService.ts         búsqueda e importación de ejercicios desde wger API
 │  │  ├─ hooks/
 │  │  │  ├─ useSensorData.ts       Detección de golpes, cálculo HPM
 │  │  │  ├─ useTraining.ts         Orquesta fases y timers
@@ -423,12 +424,13 @@ Conecta al sensor BLE por `deviceId` (vía `bleConnection.connectBleDevice`) cua
   exercises: Exercise[]
   loaded: boolean
   load(): Promise<void>             // carga desde disco; llamado en App.tsx al inicio
-  add(ex: Omit<Exercise, 'id'>): void   // genera id = "custom-<slug>-<timestamp>" + persiste
-  remove(id: string): void              // filtra por id + persiste
+  add(ex: Omit<Exercise, 'id'>): void        // genera id = "custom-<slug>-<timestamp>" + persiste
+  addExercise(ex: Exercise): void            // inserta ejercicio con id ya definido (ej. wger imports); no-op si el id ya existe
+  remove(id: string): void                   // filtra por id + persiste
 }
 ```
 
-Los ejercicios custom se distinguen de los del catálogo base por el prefijo `custom-` en su `id`. `ExerciseSelector` fusiona automáticamente base + custom al listar ejercicios por categoría.
+Los ejercicios custom se distinguen de los del catálogo base por el prefijo `custom-` (creados manualmente) o `wger-` (importados de wger) en su `id`. `ExerciseSelector` fusiona automáticamente base + custom al listar ejercicios por categoría.
 
 ---
 
@@ -449,6 +451,37 @@ storage.loadWorkoutPlans(): WorkoutPlan[]
 storage.saveCustomExercises(exercises) // → custom_exercises.json
 storage.loadCustomExercises(): Exercise[]
 ```
+
+---
+
+## wgerService (`src/core/services/wgerService.ts`)
+
+Integración con la API pública de [wger](https://wger.de/api/v2/) para buscar e importar ejercicios al catálogo local. Solo lectura — no requiere autenticación.
+
+```typescript
+interface WgerExercise {
+  id: number
+  name: string
+  description: string       // puede contener HTML — sanitizar antes de mostrar
+  category: { id: number; name: string }
+  equipment: Array<{ id: number; name: string }>
+  muscles: Array<{ name_en: string }>
+}
+
+searchExercises(query: string): Promise<WgerExercise[]>
+// GET /exercise/?format=json&language=6&equipment=7&equipment=3&limit=100
+// Intenta primero en español (language=6), fallback inglés (language=2)
+// Filtra por nombre client-side; timeout 10s
+
+mapToExercise(wger: WgerExercise): Exercise
+// id = "wger-{wger.id}"
+// category: Abs/Back→core, Shoulders/Arms→upper, Legs→lower, Chest→fullbody
+// equipment: dumbbell (id=3)→"dumbbells", body weight (id=7)→"none"
+// description: strip de HTML con regex /<[^>]*>/g
+// rest: 30, difficulty: "medium" (wger no expone este campo)
+```
+
+Filtro de equipamiento fijo: `7` (body weight) y `3` (dumbbell). No configurable en v1.
 
 ---
 
