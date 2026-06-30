@@ -97,7 +97,7 @@ class TrainingService {
     const durationMin = totalDurationMs / 60000
 
     this.current.totalImpacts = allImpacts.length
-    this.current.powerMax = allImpacts.reduce((max, i) => Math.max(max, i.intensity), 0)
+    this.current.powerMax = allImpacts.reduce((max, i) => Math.max(max, Math.round(i.magnitude ?? 0)), 0)
     this.current.hpmAverage =
       durationMin > 0 ? Math.round(allImpacts.length / durationMin) : 0
 

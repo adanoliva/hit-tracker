@@ -1,8 +1,8 @@
 # Roadmap — Hit Tracker
 
-## Software
+## App Mobile
 
-### V1 — Base — primer producto demostrable
+### V1 — Base *(completo)*
 
 | | Feature |
 |---|---|
@@ -10,71 +10,85 @@
 | ✅ | Sesiones con rondas, descansos y modo libre |
 | ✅ | Dashboard con historial y progreso |
 | ✅ | Perfiles de usuario y calibración manual |
+| ✅ | Wizard de calibración guiado (golpes ligeros/fuertes → sugiere threshold + sensitivity + rebound) |
 | ✅ | App mobile Android (Expo + React Native) |
-| ✅ | Sensor ESP32 conectado via BLE en mobile |
-| ✅ | `HT-001` Eliminación de modos de prueba (teléfono como sensor) |
-| ✅ | `HT-002` Pantalla de detalle de sesión con gráfico de golpes por round |
-| ✅ | `HT-003` Compartir sesión en redes sociales (mobile) |
-| ✅ | `HT-005` Modo Game mejorado: TOP 3 y entrada de iniciales estilo arcade |
-| ✅ | `HT-007` Umbral de golpe válido configurable por perfil |
+| ✅ | Sensor ESP32 conectado via BLE |
+| ✅ | Filtrado BLE por SERVICE_UUID — solo sensores HIT TRACKER aparecen en el escaneo |
+| ✅ | `HT-002` Detalle de sesión con gráfico scatter por round |
+| ✅ | `HT-003` Compartir sesión (PNG + texto) |
 | ✅ | `HT-008` Power máximo basado en media de las últimas 5 sesiones |
-| ✅ | `HT-009-a` Firmware V2 con raw int16 escalado (/16) |
-| ✅ | `HT-009-b` Display potencia real durante sesión y gráfica en % |
-| ✅ | `HT-010` Sistema de migraciones de datos (appVersion + migrationService) |
+| ✅ | `HT-010` Sistema de migraciones de datos (migrationService) |
 
-> Con V1 completo y el sensor físico (Fase 1 hardware) ya hay un producto real y demostrable, aunque el sensor sea un ESP32 con cables pegado al saco.
-
-### V2 — Nube y precisión BLE
+### V1.1 — Entrenamiento físico *(completo)*
 
 | | Feature |
 |---|---|
-| ⬜ | `HT-004-a` Google Drive: autenticación y gestión de cuenta |
-| ⬜ | `HT-004-b` Google Drive: sincronización automática de sesiones |
-| ⬜ | `HT-004-c` Google Drive: sincronización de perfiles con resolución de conflictos |
-| ⬜ | **Nombre de dispositivo personalizado**: el usuario define `DEVICE_NAME` en el firmware antes de flashear — aparece en la lista de sensores de la app para identificar cada saco |
-| ⬜ | **PIN de emparejamiento BLE**: el usuario define `BLE_PIN` en el firmware — solo dispositivos que lo conozcan pueden conectar al sensor |
-| ⬜ | **Filtrado de compatibilidad BLE**: la app filtra el escaneo por el `SERVICE_UUID` fijo de HIT TRACKER (`4fafc201-1fb5-459e-8fcc-c5c9c331914b`) — solo los sensores HIT TRACKER aparecen en la lista; cualquier otro dispositivo BLE cercano queda invisible |
+| ✅ | Módulo Entrenamiento: planes con calentamiento + core + boxeo |
+| ✅ | WorkoutPlan: crear, editar, ejecutar, eliminar planes |
+| ✅ | WorkoutPlayer: player de ejercicios físicos con timer/reps, descanso, saltar |
+| ✅ | Catálogo de ejercicios con tabs Calentamiento/Core/Boxing |
+| ✅ | Ejercicios custom por categoría |
+| ✅ | Integración wger API — búsqueda e importación de ejercicios |
+| ✅ | RoundComboEditor — combos por round con notación de boxeo |
+| ✅ | Fase de boxeo sin sensor (DUMMY_DEVICE) — el plan funciona sin BLE |
 
-### V3 — Calibración y multi-usuario
-
-| | Feature |
-|---|---|
-| ⬜ | `HT-006-a` Nuevo modelo de datos Perfil-Sensor (DeviceCalibration) |
-| ⬜ | `HT-006-b` Pantalla "Sesión activa": flujo combinado conectar sensor + seleccionar perfil |
-| ⬜ | `HT-006-c` Asistente de calibración guiado (3 series: suave / normal / fuerte) |
-| ⬜ | Multi-sensor / multi-usuario: sesión de grupo con vista en tiempo real por usuario |
-| ⬜ | Sección Entrenamiento físico: rutinas de calentamiento, core y fullbody |
-
-### V4 — Portabilidad de datos
+### V2 — Calibración y nube *(pendiente)*
 
 | | Feature |
 |---|---|
-| ⬜ | **Versión de hardware**: al conectar, la app lee la versión del sensor (1/2/3) vía BLE y adapta la UI |
-| ⬜ | **Sesión autónoma desde el sensor**: al pulsar el botón físico, el ESP32 graba la sesión en la SD sin necesidad de app. Al conectar vía BLE, la app detecta sesiones pendientes y las importa al historial |
-| ⬜ | Los datos viven en dos sitios: SD del sensor (fuente de verdad offline) y app (historial del usuario) |
-| ⬜ | Mismo formato JSON de sesiones — sin cambios de esquema |
+| ⬜ | `HT-006-a` Calibración vinculada a dispositivo (per Device.mac, no per perfil) |
+| ⬜ | `HT-004-a/b/c` Sincronización Google Drive (sesiones + perfiles) |
+| ⬜ | Nombre de dispositivo personalizable (definido en firmware antes de flashear) |
+| ⬜ | PIN de emparejamiento BLE (definido en firmware) |
+
+### V3 — Multi-usuario *(pendiente)*
+
+| | Feature |
+|---|---|
+| ⬜ | Multi-sensor / multi-usuario: sesión de grupo con vista por usuario en tiempo real |
+| ⬜ | `deviceStore` → `Map<profileId, deviceMac>` |
+| ⬜ | Una instancia de `useSensorData` por usuario |
+| ⬜ | Control de fase global sincronizado para todos los usuarios |
 
 ---
 
-## Hardware
+## Hardware / Firmware
 
-### Fase 1 — Prototipo *(actual)*
-- ESP32 DevKit + GY-521 en breadboard
-- Alimentación por USB
+### Fase 1 — Prototipo con batería *(actual)*
+
+- ESP32 DevKit V1 + GY-521 en breadboard
+- Batería 18650 + TP4056 + LM2596 (3.3V)
+- 4 LEDs indicadores (Rojo/Azul/Verde/Amarillo)
+- Monitorización de batería via ADC
 - Fijación al saco con bridas / cinta
+- **Firmware activo: V4**
 
-### Fase 2 — Consolidación
+### Fase 2 — Consolidación *(pendiente)*
+
 - PCB personalizada: ESP32 + MPU-6050 en placa compacta
-- Batería integrada con carga USB-C
+- Carga USB-C integrada
 - Interruptor on/off físico
-- LEDs indicadores de estado (BLE, batería baja)
 - Pruebas de durabilidad con uso real
 
-### Fase 2.5 — Autonomía
-- **Botón de acción**: pulsación corta → inicia sesión libre; segunda pulsación → finaliza y guarda en SD
-- **Módulo micro SD**: graba sesiones en local — el usuario entrena sin app y luego importa los datos al conectar vía BLE
+### Fase 3 — Autonomía sin app *(pendiente)*
 
-### Fase 3 — Producto
+- **Botón de acción**: inicia/finaliza sesión local
+- **Micro SD**: graba sesiones sin app; importación automática al conectar BLE
+- La app detecta sesiones pendientes en el sensor y las importa al historial
+
+### Fase 4 — Producto *(pendiente)*
+
 - Diseño de carcasa
 - Impresión 3D / fabricación
-- Fijación definitiva al saco: velcro, tornillos o integración en vendas
+- Fijación definitiva al saco (velcro, tornillos o integración en vendas)
+
+---
+
+## Bugs conocidos y deuda técnica
+
+| Prioridad | Descripción |
+|---|---|
+| Media | Pantalla blanca antes del splash en APK release (`windowBackground` del tema Android) |
+| Media | Modo calibración guiado: flujo de golpes en series para aprender umbrales reales |
+| Baja | % de valid hit configurable por perfil (actualmente sin campo `validHitThreshold` en tipos) |
+| Baja | Sonidos mobile — revisión y reemplazo de archivos de audio |

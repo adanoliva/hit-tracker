@@ -16,7 +16,7 @@ El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acel
 
 | Plataforma | Archivo | Versión actual |
 |---|---|---|
-| Mobile | `package.json` | 1.9.0 |
+| Mobile | `package.json` | 1.16.0 |
 
 Las versiones siguen [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
@@ -44,10 +44,15 @@ Los tipos del dominio y los servicios de negocio están en:
 
 ```
 shared/
-├─ types/index.ts           Todos los tipos: Training, Round, Impact, Device, CalibrationProfile...
+├─ types/index.ts           Todos los tipos: Training, Round, Impact, Device, CalibrationProfile, WorkoutPlan...
 ├─ services/
 │  ├─ calibration.ts        calibrationService (detección, intensidad)
-│  └─ training.ts           trainingService (singleton, gestiona rondas)
+│  ├─ training.ts           trainingService (singleton, gestiona rondas)
+│  ├─ exercise.ts           exerciseService (catálogo base)
+│  └─ migration.ts          migrationService (migra trainings legados)
+├─ data/
+│  ├─ exercises.json        Catálogo base de ejercicios
+│  └─ routines.json         Rutinas predefinidas
 └─ __tests__/               Tests Jest de lógica compartida
 ```
 
@@ -63,9 +68,9 @@ El alias `@shared/*` está configurado en `tsconfig.json` + `metro.config.js`.
 Sensor (BLE) → useSensorData() → useTraining() → trainingStore → UI
 ```
 
-- **`shared/services/`**: Lógica de negocio pura. `calibrationService`, `trainingService` (singleton con estado de la ronda activa).
-- **`hooks/`**: Puente entre servicios y UI. `useSensorData` procesa el stream raw y detecta picos. `useTraining` orquesta fases y timers de rondas/descansos.
-- **`stores/`**: Estado global con Zustand. `deviceStore`, `profileStore`, `trainingStore`.
+- **`shared/services/`**: Lógica de negocio pura. `calibrationService`, `trainingService` (singleton con estado de la ronda activa), `exerciseService`, `migrationService`.
+- **`hooks/`**: Puente entre servicios y UI. `useSensorData` procesa el stream raw y detecta picos. `useTraining` orquesta fases y timers de rondas/descansos. `useWorkoutPlayer` gestiona el player de ejercicios físicos.
+- **`stores/`**: Estado global con Zustand. `deviceStore`, `profileStore`, `trainingStore`, `workoutPlanStore`, `customExerciseStore`.
 
 ### Modelo de datos principal
 
@@ -75,9 +80,10 @@ El modelo central es `Training { rounds: Round[] }`. Cada `Round` acumula `Impac
 
 ```
 SensorReading.magnitude = sqrt(ax² + ay² + az²)
-Pico detectado cuando: magnitude baja después de superar threshold (cooldown 200ms)
-Impact.intensity = clamp(0, 100, (magnitude - threshold) * sensitivity)
-Impact.isValid = intensity >= powerMax * 0.8
+V3/V4 (isPeak=true): impacto registrado directamente sin detección de pico
+V2: pico detectado cuando magnitude baja tras superar dynamicFloor + cooldown transcurrido
+Impact.intensity = clamp(0, 100, (magnitude - base) / range * 100)
+  donde base = profile.threshold * 10, range = profile.sensitivity * 10
 ```
 
 ### Fases del entrenamiento (`useTraining`)
@@ -92,7 +98,7 @@ En modo libre (`roundDuration = 0`): el timer sube y el usuario termina la ronda
 
 `expo-file-system`:
 - `<documentDirectory>/HitTracker/trainings/training_<id>.json`
-- `devices.json`, `profiles.json`
+- `devices.json`, `profiles.json`, `workout_plans.json`, `custom_exercises.json`
 
 ### UI e iconos
 
@@ -133,8 +139,11 @@ Los agentes usan el ID de feature (ej. `HT-001`) para localizar el archivo. Si n
 ## Documentación
 
 - `docs/ARQUITECTURA.md` — arquitectura general del sistema
-- `docs/DOCUMENTO_TECNICO.md` — referencia técnica completa (tipos, hooks, stores, IPC API)
+- `docs/DOCUMENTO_TECNICO.md` — referencia técnica completa (tipos, hooks, stores, BLE, audio, build)
+- `docs/FUNCIONAL.md` — documentación funcional (pantallas, flujos, conceptos para el usuario)
 - `docs/ROADMAP.md` — estado y próximos pasos
-- `docs/SENSOR-TECNICO-V*.md` — versiones del hardware ESP32
+- `docs/COLORES.md` — paleta de colores oficial
+- `docs/GUIA-CONEXION-V1.md` — esquema de conexión hardware (ESP32 + batería + LEDs)
+- `docs/SENSOR-TECNICO-V*.md` — referencia técnica de cada versión de firmware ESP32
 - `.claude/FEATURES.md` — índice de features y su estado
 - `.claude/features/` — specs técnicas de cada feature

@@ -171,10 +171,17 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   }
 
   if (phase === 'preparing') {
+    const prepCombo = plan.boxing.roundScripts.find((s) => s.round === currentRoundNumber)?.combo
     return (
       <View style={[s.center, { paddingTop: top }]}>
         <Text style={s.prepLabel}>Prepárate...</Text>
         <Text style={s.prepTimer}>{prepTimeRemaining}</Text>
+        {prepCombo ? (
+          <View style={s.comboBox}>
+            <Text style={s.comboLabel}>Combo ronda {currentRoundNumber}</Text>
+            <Text style={s.comboText}>{prepCombo}</Text>
+          </View>
+        ) : null}
         <TouchableOpacity onPress={handleBoxingAbort}>
           <Text style={s.cancelText}>Cancelar</Text>
         </TouchableOpacity>
@@ -224,5 +231,8 @@ const s = StyleSheet.create({
   },
   prepLabel: { fontSize: 18, color: colors.textMuted },
   prepTimer: { fontSize: 96, fontFamily: 'monospace', fontWeight: '800', color: colors.accent },
+  comboBox: { alignItems: 'center', gap: 4, paddingHorizontal: 32 },
+  comboLabel: { fontSize: 12, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
+  comboText: { fontSize: 22, color: colors.textPrimary, fontWeight: '700', textAlign: 'center' },
   cancelText: { fontSize: 14, color: colors.textMuted },
 })
