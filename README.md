@@ -1,46 +1,86 @@
-# HIT TRACKER 🥊
+# HIT TRACKER
 
-> Monitoreo de entrenamiento de boxeo en tiempo real. Mide la potencia, el ritmo y la fatiga de cada golpe — ronda a ronda.
-
-## ¿Qué es?
-
-HIT TRACKER conecta un sensor inercial (ESP32 + MPU-6050) montado en el saco de boxeo con una app móvil en tiempo real. Cada golpe queda registrado con su **potencia**, **validez** y **timestamp** — agrupados por rondas, con descansos cronometrados.
-
-No requiere cámara, ni visión artificial, ni suscripción. Solo hardware de 15€ y los datos son tuyos.
+> Plataforma completa de entrenamiento de boxeo. Planes de ejercicio, sesiones con análisis en tiempo real y sensor ESP32 vía Bluetooth BLE.
 
 ---
 
-## Plataforma
+## ¿Qué es?
 
-**React Native + Expo** — Android (móvil y tablet)
+HIT TRACKER es una app móvil Android para boxeadores que quieren entrenar con estructura y medir su rendimiento. Combina dos módulos:
 
-| | |
-|---|---|
-| **Sensor** | ESP32 vía Bluetooth BLE **o** el propio móvil |
-| **Modo "Todo en 1"** | El móvil actúa como sensor sin ESP32 |
-| **Persistencia** | JSON local (`documentDirectory`) |
+**Módulo Entrenamiento** — Crea planes con calentamiento, trabajo de core y boxeo. Ejecuta el plan completo: el WorkoutPlayer te guía por los ejercicios físicos y, al terminar, arranca directamente la sesión de boxeo con los rounds y combos que hayas definido.
+
+**Módulo Sesión** — Sesión de boxeo directa conectada al sensor ESP32. Registra cada golpe con su potencia y cadencia, ronda a ronda. Al terminar, tienes el historial completo con gráficos de progreso.
+
+No requiere cámara, ni suscripción, ni cuenta. El sensor vale ~15€ y los datos son tuyos.
+
+---
+
+## Funcionalidades
+
+### Entrenamiento completo
+
+- Crea **planes de entrenamiento** con tres fases: calentamiento → core → boxeo
+- Catálogo de ejercicios integrado con tabs por categoría (Calentamiento / Core / Boxing)
+- Busca e importa ejercicios desde **[wger](https://wger.de)** — base de datos pública de entrenamiento
+- Añade ejercicios personalizados a tu catálogo
+- Define **combos por ronda**: la notación aparece en pantalla durante la cuenta atrás antes de cada round
+- El plan se ejecuta en secuencia: el WorkoutPlayer te guía por los ejercicios físicos y arranca el boxeo automáticamente al terminar
+
+### Sesión de boxeo
+
+- Detección de golpes en tiempo real via BLE (sensor ESP32) o firmware V3/V4 (detección en hardware)
+- Configura rondas, descansos y número de rounds
+- **Modo libre**: sin límite de tiempo, el usuario termina la ronda manualmente
+- Métricas en directo: potencia máxima, HPM actual y promedio, gráfico de golpes
+- Audio: campana de inicio/fin de ronda, cuenta atrás con beeps
+- Resultados al terminar con gráfico de evolución por ronda
+- Compartir sesión como imagen
+
+### Dashboard y progreso
+
+- Tu power: media de potencia de las últimas 5 sesiones con el perfil activo
+- Gráfico de progreso: HPM y potencia de las últimas 8 sesiones
+- Historial de sesiones con detalle completo (scatter por ronda, stats)
+
+### Perfiles de calibración
+
+- Múltiples perfiles (uno por tipo de saco, por persona, etc.)
+- Wizard de calibración guiado: golpea ligero y fuerte, la app sugiere umbral y sensibilidad automáticamente
+- Ajuste manual de threshold, sensitivity y rebound
 
 ---
 
 ## Hardware
 
 ```
-┌──────────────┐    I2C    ┌─────────────┐    BLE     ┌──────────┐
-│ GY-521       ├──────────▶│    ESP32    ├───────────▶│  App     │
-│ MPU-6050     │           │  DevKit C   │            │          │
-│ (accel + gyro│           │             │            │ Android  │
-│  3 ejes c/u) │           │  50 Hz      │            │ / Tablet │
-└──────────────┘           └─────────────┘            └──────────┘
+┌──────────────┐    I2C    ┌───────────────┐    BLE    ┌──────────────┐
+│  GY-521      ├──────────▶│  ESP32        ├──────────▶│  App Android │
+│  MPU-6050    │           │  DevKit V1    │           │              │
+│  ±16g        │           │  ~100 Hz      │           │              │
+└──────────────┘           └───────────────┘           └──────────────┘
+
+Alimentación: 18650 → TP4056 → LM2596 (3.3V) → ESP32
 ```
 
-**Conexión del sensor:**
+**Posición del sensor**: punto de anclaje del saco (menor oscilación pendular).
 
-| GY-521 | ESP32 |
-|--------|-------|
-| SDA    | GPIO 21 |
-| SCL    | GPIO 22 |
-| VCC    | 3.3V |
-| GND    | GND |
+| Tipo de saco | Posición |
+|---|---|
+| Saco colgado | Cerca del enganche superior |
+| Saco de pie | Base inferior, periférico al mástil |
+
+### Versiones de firmware
+
+| Versión | Protocolo | LEDs | Batería |
+|---|---|---|---|
+| V2 | Stream continuo 16 bytes/10ms | — | — |
+| V3 | Hit events 6 bytes/golpe; config BLE | — | — |
+| **V4** | Hit events 6 bytes/golpe; config + batería BLE | 4 LEDs | ADC GPIO 34 |
+
+El firmware V4 incluye 4 LEDs indicadores (encendido, BLE, golpe, reserva) y monitorización de la batería 18650 via divisor de voltaje.
+
+Ver [`docs/GUIA-CONEXION-V1.md`](docs/GUIA-CONEXION-V1.md) para el esquema de conexión completo.
 
 ---
 
@@ -49,69 +89,19 @@ No requiere cámara, ni visión artificial, ni suscripción. Solo hardware de 15
 ### 1. Firmware ESP32
 
 ```
-Arduino IDE 2 → Board: ESP32 DevKit C → Upload Speed: 921600
+Arduino IDE 2 → Board: ESP32 Dev Module → Upload Speed: 921600
 ```
 
-Abre el `.ino` del directorio `FIRMWARE/`, sube al ESP32 y verifica en el Serial Monitor (115200 baud) que imprime lecturas del sensor.
+Abre `FIRMWARE/HitTracker_V4/HitTracker_V4.ino`, sube al ESP32 y verifica en el Serial Monitor (115200 baud) que imprime lecturas.
 
 ### 2. App
 
 ```bash
 npm install
-npm run android     # o: expo start → escáner QR con Expo Go
+npm run android
 ```
 
-Requisitos: Android 8+ con Bluetooth o sin él (modo "Todo en 1").
-
----
-
-## Cómo funciona
-
-### Detección de golpes
-
-El sensor mide aceleración en 3 ejes a ~50Hz. Cuando la magnitud supera el umbral del perfil de calibración y comienza a descender, se registra un **impacto**:
-
-```
-magnitude = √(ax² + ay² + az²)
-
-Si magnitude > threshold  →  detecta pico
-intensity = clamp(0-100, (magnitude - threshold) × sensitivity)
-isValid   = intensity ≥ powerMax × (validHitThreshold / 100)  ← configurable por perfil (default 80%)
-```
-
-### Estructura de un entrenamiento
-
-```
-Training
-└── rounds: Round[]
-    ├── Round 1 { impacts[], stats: RoundStats }
-    ├── Round 2 { impacts[], stats: RoundStats }
-    └── Round N ...
-
-RoundStats
-├── totalImpacts / validHits / validHitRate
-├── powerMax / hpmAverage / hpmMax
-├── powerTrend[]     ← intensidad de cada golpe en orden
-└── isFatigued       ← 2ª mitad < 1ª mitad × 0.85
-```
-
-### Fases de la sesión
-
-```
-idle ──▶ preparing (10s) ──▶ round ──▶ resting ──▶ round ──▶ ... ──▶ finished
-                  beep×10     campana               campana               ding ding
-```
-
-El modo **libre** (`roundDuration = 0`) deja el timer subiendo; el usuario termina la ronda manualmente.
-
-### Calibración
-
-El perfil de calibración ajusta dos parámetros:
-
-- **threshold**: a partir de qué magnitud se considera un golpe
-- **sensitivity**: cómo se escala la magnitud a intensidad 0-100
-
-La calibración guiada pide golpes ligeros → normales → fuertes y sugiere valores automáticamente.
+Requisito: Android 8+ con Bluetooth activado.
 
 ---
 
@@ -120,82 +110,117 @@ La calibración guiada pide golpes ligeros → normales → fuertes y sugiere va
 ```
 hit-tracker/
 │
-├─ shared/                    ← Tipos y lógica de negocio
-│  ├─ types/index.ts          Todos los tipos del dominio
-│  └─ services/
-│     ├─ calibration.ts       calibrationService
-│     └─ training.ts          trainingService
+├─ shared/                    Tipos y lógica de negocio
+│  ├─ types/index.ts          Training, Round, Impact, WorkoutPlan, Exercise...
+│  ├─ services/               calibrationService · trainingService · exerciseService · migrationService
+│  └─ data/                   exercises.json · routines.json (catálogo base)
 │
-├─ src/                       ← App React Native
-│  ├─ core/                   hooks · stores · types (re-exports @shared)
-│  ├─ services/               audio (expo-audio) · ble · storage (expo-fs)
-│  └─ components/             Dashboard · Devices · Profiles · Training · Game
+├─ src/
+│  ├─ core/
+│  │  ├─ hooks/               useSensorData · useTraining · useWorkoutPlayer · useBleReading
+│  │  ├─ stores/              deviceStore · profileStore · trainingStore · workoutPlanStore · customExerciseStore
+│  │  └─ services/            wgerService · exerciseService (re-exports)
+│  ├─ services/               audio · ble · bleConnection · storage
+│  └─ components/
+│     ├─ Dashboard/           Inicio: stats, progreso, historial
+│     ├─ Session/             Sesión de boxeo directa
+│     ├─ PlanRunner/          Módulo Entrenamiento: planes, player, catálogo, wger
+│     ├─ Workout/             WorkoutPlayer (ejercicios físicos)
+│     ├─ Devices/             Gestión de sensores BLE
+│     ├─ Profiles/            Perfiles de calibración + wizard
+│     └─ SessionDetail/       Detalle de sesión guardada
 │
-├─ App.tsx                    Punto de entrada
-├─ metro.config.js            Resuelve @shared desde ./shared
-│
-├─ FIRMWARE/                  Firmware Arduino (ESP32)
+├─ FIRMWARE/
+│  ├─ HitTracker_V3/          Hit events + config BLE + NVS
+│  └─ HitTracker_V4/          V3 + 4 LEDs + monitorización batería
 │
 └─ docs/
-   ├─ ARQUITECTURA.md         Diagrama de componentes y flujo de datos
-   ├─ DOCUMENTO_TECNICO.md    Referencia completa de tipos, hooks, stores
-   ├─ ROADMAP.md              Estado actual y próximas features
-   └─ SENSOR-TECNICO-V*.md    Versiones del hardware ESP32
+   ├─ ARQUITECTURA.md         Flujo de datos, modelo, componentes
+   ├─ DOCUMENTO_TECNICO.md    Tipos, hooks, stores, BLE, audio, build
+   ├─ FUNCIONAL.md            Pantallas, flujos y conceptos para el usuario
+   ├─ ROADMAP.md              Estado y próximos pasos
+   ├─ COLORES.md              Paleta oficial
+   ├─ GUIA-CONEXION-V1.md     Esquema de conexión hardware
+   └─ SENSOR-TECNICO-V*.md    Referencia técnica de cada versión de firmware
 ```
 
 ---
 
-## Conceptos Clave
+## Cómo funciona
 
-### HPM — Golpes Por Minuto
+### Detección de golpes
 
-Métrica de velocidad/cadencia. Se calcula en dos ventanas:
-- **HPM actual**: golpes en los últimos 10 segundos × 6
-- **HPM promedio**: total de golpes / minutos transcurridos
+```
+magnitude = √(ax² + ay² + az²)   [unidades raw, escala /16]
 
-### Valid Hit — Golpe Válido
+V2: la app detecta el pico cuando la magnitud baja tras superar el umbral dinámico
+V3/V4: el firmware detecta el golpe y solo envía el evento (6 bytes por golpe)
 
-Un golpe es válido si su intensidad supera el umbral configurado en el perfil (por defecto 80%) del máximo detectado en la sesión. Filtra golpes débiles o involuntarios y refleja el esfuerzo real.
+intensity = clamp(0-100, (magnitude - base) / range × 100)
+  donde base = threshold × 10, range = sensitivity × 10
+```
 
-### Fatiga de ronda
+### Fases de la sesión de boxeo
 
-`isFatigued = true` cuando la intensidad promedio de la segunda mitad de la ronda es inferior al 85% de la primera mitad. Indicador de caída de rendimiento intra-ronda.
+```
+idle → preparing (10s) → round → resting → round → ... → finished
+```
+
+### Módulo Entrenamiento
+
+```
+WorkoutPlan
+  └─ warmupExerciseIds → WorkoutPlayer (calentamiento)
+  └─ coreExerciseIds   → WorkoutPlayer (core)
+  └─ boxing            → Sesión de boxeo (rondas + combos)
+```
+
+### Catálogo de ejercicios
+
+El catálogo combina tres fuentes:
+1. **Base**: ejercicios incluidos en la app (`shared/data/exercises.json`)
+2. **Custom**: ejercicios creados por el usuario
+3. **wger**: ejercicios importados desde [wger.de](https://wger.de) (búsqueda por nombre, filtro por equipamiento body weight y mancuernas)
+
+Los ejercicios importados de wger se guardan localmente y están disponibles sin conexión.
 
 ---
 
 ## Stack Técnico
 
-| Capa | |
+| Capa | Tecnología |
 |---|---|
 | Framework | Expo SDK 56 + React Native 0.85 + TypeScript 6 |
 | Estado | Zustand 5 |
+| Navegación | React Navigation 7 |
 | BLE | react-native-ble-plx 3 |
-| Sensor nativo | react-native-sensors 7 |
 | Audio | expo-audio 56 |
 | Gráficos | react-native-svg 15 |
-| Estilos | StyleSheet (RN) |
-| Build | EAS Build |
+| Persistencia | expo-file-system 56 |
+| Build | EAS Build / expo run:android |
 
 ---
 
 ## Troubleshooting
 
-**ESP32 no aparece en el móvil**
-- Verificar que Bluetooth está activado
+**ESP32 no aparece en el escaneo BLE**
+- Verificar Bluetooth activado y permisos en Android
 - Reiniciar el ESP32 (botón RST)
-- Abrir Serial Monitor para confirmar que el firmware está corriendo
-
-**La app no detecta el sensor BLE**
-- Verificar permisos de Bluetooth en Android (Ajustes → Aplicaciones → HitTracker)
-- Reiniciar el ESP32
+- Confirmar en Serial Monitor que el firmware está corriendo y anuncia `HT-PROT`
 
 **Golpes erráticos o falsos positivos**
-- Aumentar el `threshold` en el perfil de calibración
-- Añadir un condensador de 100µF entre VCC y GND del GY-521 para filtrar ruido
+- Aumentar `threshold` en el perfil de calibración
+- Usar el wizard de calibración para ajustar con golpes reales
+- Verificar que el sensor está en el punto de anclaje del saco (no en la zona de impacto)
+
+**wger no devuelve resultados**
+- Verificar conexión a internet
+- El debounce es de 2s — espera antes de ver resultados
+- Intenta términos en inglés (la API tiene más cobertura en inglés)
 
 **`@shared` no resuelve**
 - Verificar que `metro.config.js` incluye `watchFolders` apuntando a `./shared`
-- Reiniciar Metro con `--reset-cache`: `expo start --clear`
+- Reiniciar Metro: `expo start --clear`
 
 ---
 
@@ -203,24 +228,19 @@ Un golpe es válido si su intensidad supera el umbral configurado en el perfil (
 
 | Documento | Contenido |
 |---|---|
-| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Diagrama completo, flujo de datos, modelo de datos |
-| [`docs/DOCUMENTO_TECNICO.md`](docs/DOCUMENTO_TECNICO.md) | Tipos, servicios, hooks, stores, IPC API |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Estado actual, features en progreso, backlog |
-| [`docs/SENSOR-TECNICO-V1.md`](docs/SENSOR-TECNICO-V1.md) | Hardware V1: breadboard + USB |
-| [`docs/SENSOR-TECNICO-V2.md`](docs/SENSOR-TECNICO-V2.md) | Hardware V2: LiPo + botón on/off |
-| [`docs/SENSOR-TECNICO-V3.md`](docs/SENSOR-TECNICO-V3.md) | Hardware V3: micro SD, sesión autónoma |
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Flujo de datos, modelo, árbol de componentes |
+| [`docs/DOCUMENTO_TECNICO.md`](docs/DOCUMENTO_TECNICO.md) | Tipos, servicios, hooks, stores, BLE, audio |
+| [`docs/FUNCIONAL.md`](docs/FUNCIONAL.md) | Pantallas, flujos y conceptos para el usuario |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Estado actual y próximas features |
+| [`docs/GUIA-CONEXION-V1.md`](docs/GUIA-CONEXION-V1.md) | Esquema de conexión hardware (batería + LEDs) |
+| [`docs/SENSOR-TECNICO-V3.md`](docs/SENSOR-TECNICO-V3.md) | Firmware V3: hit events + config BLE |
+| [`docs/SENSOR-TECNICO-V4.md`](docs/SENSOR-TECNICO-V4.md) | Firmware V4: LEDs + batería ADC |
 
 ---
 
 ## Distribución oficial
 
-El repositorio oficial del proyecto es **[github.com/adanoliva/hit-tracker](https://github.com/adanoliva/hit-tracker)**.
-
-Las distribuciones obtenidas fuera de este repositorio (forks, re-empaquetados, instaladores de terceros) **no están verificadas ni respaldadas** por los autores originales. Pueden contener modificaciones o código adicional. Antes de instalar cualquier build, verifica la fiabilidad de la fuente.
-
-## Aviso legal
-
-Este software se distribuye **sin garantía de ningún tipo**, expresa o implícita. Los autores no se responsabilizan de daños derivados de su uso. Consulta el texto completo de la licencia para más detalles.
+El repositorio oficial es **[github.com/adanoliva/hit-tracker](https://github.com/adanoliva/hit-tracker)**. Las distribuciones fuera de este repositorio no están verificadas por los autores.
 
 ## Licencia
 
