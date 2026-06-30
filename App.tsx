@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { activateKeepAwakeAsync } from 'expo-keep-awake'
 import { StatusBar } from 'expo-status-bar'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SplashScreen from 'expo-splash-screen'
@@ -10,11 +11,14 @@ import { MobileLayout } from './src/navigation/MobileLayout'
 import { useTrainingStore } from './src/core/stores/trainingStore'
 import { useProfileStore } from './src/core/stores/profileStore'
 import { useDeviceStore } from './src/core/stores/deviceStore'
+import { useWorkoutPlanStore } from './src/core/stores/workoutPlanStore'
+import { useCustomExerciseStore } from './src/core/stores/customExerciseStore'
 import { storage } from './src/services/storage'
 import { colors } from './src/theme'
 import { migrationService } from '@shared/services/migration'
 
 SplashScreen.preventAutoHideAsync()
+activateKeepAwakeAsync('global')
 
 const NAV_THEME = {
   ...DarkTheme,
@@ -49,12 +53,16 @@ export default function App() {
   const setTrainings = useTrainingStore((s) => s.setTrainings)
   const setProfiles = useProfileStore((s) => s.setProfiles)
   const setDevices = useDeviceStore((s) => s.setDevices)
+  const loadWorkoutPlans = useWorkoutPlanStore((s) => s.load)
+  const loadCustomExercises = useCustomExerciseStore((s) => s.load)
 
   useEffect(() => {
     Promise.all([
       storage.loadTrainings(),
       storage.loadProfiles(),
-      storage.loadDevices()
+      storage.loadDevices(),
+      loadWorkoutPlans(),
+      loadCustomExercises(),
     ]).then(([trainings, profiles, devices]) => {
       const migrated = migrationService.migrate(trainings)
       migrated

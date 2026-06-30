@@ -157,9 +157,10 @@ export function useTraining(): UseTrainingReturn {
     clearTimer()
     trainingService.finishTraining()
     setPhase('idle')
+    setActivePhase('idle')
     setCompletedRounds([])
     setFinishedTraining(null)
-  }, [])
+  }, [setActivePhase])
 
   const finishCurrentRound = useCallback(() => {
     clearTimer()

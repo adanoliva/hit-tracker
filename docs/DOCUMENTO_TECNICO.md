@@ -1,8 +1,8 @@
-# HIT TRACKER - Documento Técnico
+# HIT TRACKER — Documento Técnico
 
 ## Descripción General
 
-HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real. La plataforma activa es la app móvil Android (React Native + Expo). La lógica de negocio y tipos viven en `shared/` con alias TypeScript `@shared`.
+HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real. La plataforma activa es la app móvil Android (React Native + Expo). La lógica de negocio y los tipos viven en `shared/` y se importan con el alias `@shared`.
 
 ---
 
@@ -13,71 +13,118 @@ HIT TRACKER es un sistema de monitoreo de entrenamiento de boxeo en tiempo real.
 | Framework | Expo SDK | 56 |
 | UI | React Native | 0.85 |
 | Lenguaje | TypeScript | 6 |
-| Iconos | lucide-react-native | latest |
+| Iconos | lucide-react-native | 1.21 |
 | Estado | Zustand | 5 |
+| Navegación | React Navigation (native + bottom-tabs) | 7 |
 | BLE | react-native-ble-plx | 3 |
 | Audio | expo-audio | 56 |
 | Persistencia | expo-file-system | 56 |
+| Gráficos | react-native-svg | 15 |
 | Captura de vista | react-native-view-shot | 5 |
 | Share nativo | expo-sharing | 56 |
-| Tests | Jest + ts-jest | — |
+| Pantalla activa | expo-keep-awake | 56 |
+| Tests | Jest + ts-jest | 30 / 29 |
 
 ---
 
 ## Estructura de Carpetas
 
 ```
-hit-tracker/                       ← raíz = app mobile
+hit-tracker/                         ← raíz = app mobile
 │
-├─ shared/                         ← Código común
-│  ├─ types/
-│  │  └─ index.ts                  Todos los tipos del dominio
-│  └─ services/
-│     ├─ calibration.ts            calibrationService
-│     └─ training.ts               trainingService (TrainingService class)
+├─ shared/                           ← Código común (alias @shared)
+│  ├─ types/index.ts                 Todos los tipos del dominio
+│  ├─ services/
+│  │  ├─ calibration.ts              calibrationService
+│  │  ├─ training.ts                 trainingService (singleton)
+│  │  ├─ exercise.ts                 exerciseService (catálogo base)
+│  │  └─ migration.ts                migrationService (migra trainings legados)
+│  ├─ data/
+│  │  ├─ exercises.json              Catálogo base de ejercicios
+│  │  └─ routines.json               Rutinas predefinidas
+│  ├─ constants.ts                   APP_VERSION, RAW16_FACTOR
+│  └─ __tests__/                     Tests unitarios de lógica compartida
 │
 ├─ src/
 │  ├─ core/
-│  │  ├─ types/index.ts            → re-export @shared/types
+│  │  ├─ types/index.ts              → re-export @shared/types
 │  │  ├─ services/
-│  │  │  ├─ calibration.ts         → re-export @shared/services/calibration
-│  │  │  └─ trainingService.ts     → re-export @shared/services/training
+│  │  │  ├─ calibration.ts           → re-export @shared/services/calibration
+│  │  │  ├─ trainingService.ts       → re-export @shared/services/training
+│  │  │  ├─ exerciseService.ts       getAll(), getById(), getByCategory()
+│  │  │  └─ wgerService.ts           Búsqueda e importación desde wger API
 │  │  ├─ hooks/
-│  │  │  ├─ useSensorData.ts       Detección de golpes, cálculo HPM
-│  │  │  ├─ useTraining.ts         Orquesta fases y timers
-│  │  │  └─ useBleReading.ts       Suscribe lecturas BLE al callback activo
+│  │  │  ├─ useSensorData.ts         Detección de golpes, cálculo HPM
+│  │  │  ├─ useTraining.ts           Orquesta fases y timers de rondas/descansos
+│  │  │  ├─ useBleReading.ts         Suscribe lecturas BLE al callback activo
+│  │  │  └─ useWorkoutPlayer.ts      Máquina de estados del player de ejercicios físicos
 │  │  └─ stores/
 │  │     ├─ deviceStore.ts
 │  │     ├─ profileStore.ts
 │  │     ├─ trainingStore.ts
-│  │     └─ gameStore.ts
+│  │     ├─ workoutPlanStore.ts
+│  │     └─ customExerciseStore.ts
 │  │
 │  ├─ hooks/
-│  │  └─ useShareSession.ts        Captura View como PNG + share sheet nativo
-│  │
-│  ├─ utils/
-│  │  └─ shareText.ts              generateShareText(training) → plantilla share
+│  │  ├─ useShareSession.ts          Captura PNG + share sheet nativo
+│  │  └─ useLayout.ts
 │  │
 │  ├─ services/
-│  │  ├─ audio.ts                  expo-audio
-│  │  ├─ ble.ts                    react-native-ble-plx (BleManager singleton)
-│  │  ├─ bleConnection.ts          connect/disconnect/parse; sendProfileConfig; getSensorVersion
-│  │  └─ storage.ts                expo-file-system
+│  │  ├─ audio.ts                    expo-audio: bell, beep, longBeep, countdown
+│  │  ├─ ble.ts                      BleManager singleton (react-native-ble-plx)
+│  │  ├─ bleConnection.ts            connect/disconnect/parse/sendProfileConfig
+│  │  └─ storage.ts                  expo-file-system (legacy API)
 │  │
-│  └─ components/
-│     ├─ Dashboard/
-│     ├─ Devices/
-│     ├─ Profiles/
-│     ├─ Training/
-│     ├─ Game/
-│     └─ SessionDetail/
+│  ├─ navigation/
+│  │  ├─ MobileLayout.tsx            BottomTabNavigator (5 tabs)
+│  │  └─ TabletLayout.tsx
+│  │
+│  ├─ components/
+│  │  ├─ Dashboard/index.tsx
+│  │  ├─ Devices/index.tsx
+│  │  ├─ Session/                    ← Sesión de boxeo directa
+│  │  │  ├─ index.tsx (TrainingPage)
+│  │  │  ├─ TrainingSetup.tsx
+│  │  │  ├─ TrainingRound.tsx
+│  │  │  ├─ TrainingRest.tsx
+│  │  │  └─ TrainingResults.tsx
+│  │  ├─ PlanRunner/                 ← Módulo Entrenamiento
+│  │  │  ├─ index.tsx (EntrenamientoPage)
+│  │  │  ├─ PlanRunner.tsx
+│  │  │  ├─ PlanBuilder.tsx
+│  │  │  ├─ PlanCard.tsx
+│  │  │  ├─ CatalogScreen.tsx
+│  │  │  ├─ WgerSearchScreen.tsx
+│  │  │  ├─ ExerciseSelector.tsx
+│  │  │  ├─ BoxingConfigSection.tsx
+│  │  │  ├─ RoundComboEditor.tsx
+│  │  │  ├─ ExerciseDetailSheet.tsx
+│  │  │  └─ BoxingExerciseForm.tsx
+│  │  ├─ Profiles/index.tsx
+│  │  ├─ SessionDetail/index.tsx
+│  │  └─ Workout/WorkoutPlayer.tsx
+│  │
+│  ├─ utils/shareText.ts
+│  └─ theme.ts                       Paleta de colores
 │
-├─ App.tsx
-├─ metro.config.js                 watchFolders + extraNodeModules para @shared
-├─ tsconfig.json                   paths: @shared/* → ./shared/*
-├─ desktop/                        ← archivado (tag desktop-freeze)
+├─ App.tsx                           Entry point: init, navegación
+├─ metro.config.js                   watchFolders + extraNodeModules para @shared
+├─ tsconfig.json                     paths: @shared/* → ./shared/*
+├─ web/index.html                    Landing page marketing (hit-tracker.es)
+├─ FIRMWARE/                         Firmware ESP32 (V1/V2/V3)
 └─ docs/
 ```
+
+---
+
+## Constantes (`shared/constants.ts`)
+
+```typescript
+APP_VERSION = '1.10.2'   // versión embebida en Training.appVersion al finalizar sesión
+RAW16_FACTOR = 13.06     // factor de conversión m/s² → raw/16 (uso diagnóstico)
+```
+
+> **Nota**: `APP_VERSION` en `constants.ts` es independiente de la versión en `package.json`/`app.json`. La de `constants.ts` identifica el formato del fichero de sesión guardado (para migraciones); la de `package.json` es la versión de la app publicada.
 
 ---
 
@@ -86,22 +133,21 @@ hit-tracker/                       ← raíz = app mobile
 ```typescript
 interface SensorReading {
   timestamp: number    // ms epoch
-  ax: number           // aceleración X — raw ±16g (1g ≈ 128 unidades); V3: 0
+  ax: number           // aceleración X — raw ±16g (1g ≈ 128); V3: 0
   ay: number           // Y; V3: 0
   az: number           // Z; V3: 0
-  gx: number           // giroscopio X (°/s); V3: 0
+  gx: number           // giroscopio X; V3: 0
   gy: number           // Y; V3: 0
   gz: number           // Z; V3: 0
-  magnitude: number    // sqrt(ax²+ay²+az²) — raw; reposo ≈ 128, golpe suave 400-700+
-  isPeak?: boolean     // V3: true — el firmware ya detectó este paquete como golpe confirmado
+  magnitude: number    // sqrt(ax²+ay²+az²); reposo ≈ 128, golpe suave 400-700+
+  isPeak?: boolean     // V3: true — firmware ya confirmó este evento como golpe
 }
 
 interface Impact {
-  time: number         // timestamp del golpe
-  intensity: number    // 0-100
-  magnitude: number    // raw
+  time: number         // timestamp del golpe (ms epoch)
+  intensity: number    // 0-100 (calculado con calibrationService)
+  magnitude: number    // raw del pico
   duration: number     // ms (actualmente 0, reservado)
-  isValid: boolean     // intensity >= powerMax * (profile.validHitThreshold / 100)
 }
 
 interface Device {
@@ -113,9 +159,9 @@ interface Device {
 }
 
 interface HitWindow {
-  peak: number        // magnitud del primer pico detectado (raw)
-  rebound: number     // ms desde el pico hasta que el saco se asienta
-  reboundMax: number  // magnitud máxima durante la fase de rebote
+  peak: number         // magnitud del pico detectado (raw)
+  rebound: number      // ms desde el pico hasta que la señal se asienta
+  reboundMax: number   // magnitud máxima durante la fase de rebote
 }
 
 interface CalibrationProfile {
@@ -123,8 +169,7 @@ interface CalibrationProfile {
   name: string
   threshold: number    // base de detección en raw/10; base = threshold×10 (default 15.0)
   sensitivity: number  // escala de intensidad en raw/10; range = sensitivity×10 (default 25.0)
-  rebound?: number     // cooldown personalizado en ms — calculado por el wizard a partir de
-                       // HitWindows reales; si ausente, se usa fórmula dinámica (200 + peak×0.3)
+  rebound?: number     // cooldown personalizado en ms (del wizard); si ausente → fórmula dinámica
   calibrationData?: {
     calibratedAt: number
     samples: { light: number[]; normal: number[]; heavy: number[] }
@@ -133,15 +178,13 @@ interface CalibrationProfile {
 }
 
 interface RoundStats {
-  duration: number
+  duration: number       // ms de la ronda
   totalImpacts: number
-  validHits: number
-  validHitRate: number    // 0-100 %
-  powerMax: number
-  hpmAverage: number      // golpes/minuto promedio
-  hpmMax: number
-  powerTrend: number[]    // intensidad de cada golpe en orden
-  isFatigued: boolean     // segunda mitad < primera mitad * 0.85
+  powerMax: number       // magnitud raw del golpe más fuerte
+  hpmAverage: number     // golpes/minuto promedio de la ronda
+  hpmMax: number         // HPM pico en ventana de 10s
+  powerTrend: number[]   // magnitud raw de cada golpe en orden cronológico
+  isFatigued: boolean    // 2ª mitad de golpes < 1ª mitad × 0.85
 }
 
 interface Round {
@@ -153,78 +196,136 @@ interface Round {
 }
 
 interface Training {
-  id: string              // training-<ISO>
+  id: string              // "training-<ISO-datetime>"
+  appVersion?: string     // valor de APP_VERSION al finalizar
   createdAt: number
-  device: { mac: string; name: string }
-  profile: CalibrationProfile
+  device: { mac: string; name: string }   // snapshot
+  profile: CalibrationProfile             // snapshot
   rounds: Round[]
   roundDuration: number   // segundos (0 = modo libre)
   numRounds: number
   restDuration: number    // segundos
-  totalImpacts: number    // agregado de todas las rondas
-  validHits: number
-  powerMax: number
-  hpmAverage: number
+  totalImpacts: number    // suma de todas las rondas
+  powerMax: number        // máximo global
+  hpmAverage: number      // promedio global
 }
 
-interface GameScore {
-  initials: string  // 1–4 chars, uppercase
-  score: number     // impact.magnitude (entero raw)
-  date: number      // timestamp ms
+type ExerciseCategory = 'warmup' | 'core' | 'upper' | 'lower' | 'fullbody' | 'mobility' | 'boxing'
+
+interface Exercise {
+  id: string              // base: slug; custom: "custom-<slug>-<ts>"; wger: "wger-<id>"
+  name: string
+  category: ExerciseCategory
+  muscles: string[]
+  equipment: 'none' | 'dumbbells' | 'pull-up-bar'
+  description: string
+  imageUrl?: string
+  duration?: number       // segundos (undefined → basado en reps)
+  reps?: number
+  rest: number            // segundos entre series
+  difficulty: 'easy' | 'medium' | 'hard'
 }
 
-type GameTopThree = [GameScore | null, GameScore | null, GameScore | null]
+interface BoxingRoundScript {
+  round: number           // 1-based
+  combo: string           // notación libre: "1-2-3-Slip Iz-3b-6"
+  note?: string
+}
 
+interface BoxingPhaseConfig {
+  roundDuration: number   // segundos (0 = modo libre)
+  numRounds: number
+  restDuration: number
+  roundScripts: BoxingRoundScript[]   // sparse — puede tener menos entradas que numRounds
+}
+
+interface WorkoutPlan {
+  id: string              // "plan-<timestamp>"
+  name: string
+  createdAt: number
+  warmupExerciseIds: string[]
+  coreExerciseIds: string[]
+  boxing: BoxingPhaseConfig
+}
 ```
 
 ---
 
 ## Servicios Compartidos
 
-### calibrationService (`shared/services/calibration.ts`)
+### `calibrationService` (`shared/services/calibration.ts`)
 
 ```typescript
 calibrationService.createProfile(name: string): CalibrationProfile
-// → id: `profile-${Date.now()}`, threshold: 15.0, sensitivity: 25.0
+// id: `profile-${Date.now()}`, threshold: 15.0, sensitivity: 25.0
 
 calibrationService.analyzeCalibrationWindows(
-  light: HitWindow[], heavy: HitWindow[]
+  light: HitWindow[],
+  heavy: HitWindow[]
 ): { suggestedThreshold: number; suggestedSensitivity: number; suggestedRebound: number } | null
-// lightAvg = avg(light.map(w => w.peak))  — pico máximo de cada golpe (raw)
+// lightAvg = avg(light.map(w => w.peak))
+// heavyAvg = avg(heavy.map(w => w.peak))
 // base = lightAvg * 0.8
-// range = avg(heavy.map(w => w.peak)) - base
-// → null si range < base * 0.2
-// threshold = base / 10, sensitivity = range / 10  (clampeados: threshold 0-100, sensitivity 1-100)
-// rebound = clamp(200, 700, max(all windows rebound durations) + 80ms)
+// range = heavyAvg - base
+// → null si range < base * 0.2 (no hay suficiente diferencia entre light y heavy)
+// threshold = clamp(0, 100,  round(base/10  * 10)/10)
+// sensitivity = clamp(1, 100, round(range/10 * 10)/10)
+// rebound = clamp(200, 700, max(all windows rebound) + 80)
 
 calibrationService.calculateIntensity(magnitude: number, profile: CalibrationProfile): number
-// base = threshold * 10,  range = sensitivity * 10  (ambos en raw units)
+// base  = profile.threshold  * 10   (raw units)
+// range = profile.sensitivity * 10   (raw units)
 // → clamp(0, 100, round((magnitude - base) / range * 100))
 ```
 
-### trainingService (`shared/services/training.ts`)
+### `trainingService` (`shared/services/training.ts`)
 
-Singleton (`new TrainingService()` exportado).
+Singleton exportado como `trainingService` (instancia de clase `TrainingService`).
 
 ```typescript
-trainingService.startTraining(config: TrainingConfig): Training
+trainingService.startTraining(config: {
+  device: Device,
+  profile: CalibrationProfile,
+  roundDuration: number,
+  numRounds: number,
+  restDuration: number
+}): Training
+
 trainingService.startRound(roundNumber: number): void
 trainingService.onImpactDetected(impact: Impact): void
-trainingService.finishRound(): Round | null      // calcula RoundStats
-trainingService.finishTraining(): Training | null // agrega stats totales
+trainingService.finishRound(): Round | null          // calcula RoundStats y hace push a rounds[]
+trainingService.finishTraining(): Training | null    // agrega totalImpacts, powerMax, hpmAverage, appVersion
 trainingService.getCurrentTraining(): Training | null
 trainingService.getCurrentRoundImpacts(): Impact[]
 trainingService.getPreviousRoundStats(roundNumber: number): RoundStats | null
 ```
 
 `calcRoundStats` interno:
-- `isFatigued`: promedio de la segunda mitad de golpes < primera mitad × 0.85
+- `isFatigued`: promedio magnitud 2ª mitad de impacts < promedio 1ª mitad × 0.85
+
+### `exerciseService` (`shared/services/exercise.ts`)
+
+```typescript
+exerciseService.getAll(): Exercise[]
+exerciseService.getById(id: string): Exercise | undefined
+exerciseService.getByCategory(category: ExerciseCategory): Exercise[]
+```
+
+Devuelve únicamente los ejercicios del catálogo base (`shared/data/exercises.json`). Los custom se gestionan en `customExerciseStore`.
+
+### `migrationService` (`shared/services/migration.ts`)
+
+```typescript
+migrationService.migrate(trainings: Training[]): Training[]
+// Retorna los trainings con campos normalizados a la versión actual del modelo.
+// Se ejecuta al arrancar la app (App.tsx) sobre los trainings cargados desde disco.
+```
 
 ---
 
 ## Hooks Personalizados
 
-### useSensorData
+### `useSensorData`
 
 `src/core/hooks/useSensorData.ts`
 
@@ -232,37 +333,42 @@ trainingService.getPreviousRoundStats(roundNumber: number): RoundStats | null
 function useSensorData(profile: CalibrationProfile): {
   impacts: Impact[]
   powerMax: number
-  hpmStats: { current: number; average: number; max: number }
+  powerMaxMag: number       // magnitud raw del golpe más fuerte
+  hpmStats: { current: number; average: number }
   processReading: (reading: SensorReading) => Impact | null
   reset: () => void
 }
 ```
 
-**Algoritmo de detección** (todas las magnitudes en raw — unidades consistentes con la calibración):
+**Algoritmo de detección:**
 
 ```
 SensorReading recibido
-    ↓
-¿reading.isPeak === true? (firmware V3 ya detectó el golpe)
-    │ sí → registra impacto directamente con reading.magnitude
-    │ no → algoritmo V1/V2:
-    │         1. dynamicFloor decae hacia base (profile.threshold×10) a 0.5 raw/ms
-    │         2. isPeak = !isRising && prevMag > dynamicFloor && Δt > cooldown
-    │         3. cooldown = profile.rebound  (si calibrado)
-    │                     ?? 200ms + lastPeakMag × 0.3  (dinámico por magnitud)
-    │         4. Al detectar pico: dynamicFloor sube a max(base, peak×0.4)
-    └─ intensity = calculateIntensity(magnitude, profile)  → 0-100
+    │
+    ├─ reading.isPeak === true (firmware V3)
+    │    └─ registra impacto con reading.magnitude directamente
+    │
+    └─ sin isPeak (V2/V1)
+         1. dynamicFloor decae hacia base (threshold×10) a 0.5 raw/ms
+         2. isPeak = !isRising && prevMag > dynamicFloor && Δt > cooldown
+         3. cooldown = profile.rebound               (si viene del wizard)
+                     ?? 200 + lastPeakMag × 0.3      (dinámico por magnitud)
+         4. Al detectar pico: dynamicFloor = max(base, peak × 0.4)
+
+    intensity = calculateIntensity(magnitude, profile)  → 0-100
 ```
 
-El **cooldown dinámico** escala con la fuerza del golpe para cubrir rebotes más largos en golpes fuertes. Si el perfil tiene `rebound` (calculado por el wizard de calibración con datos reales del saco), ese valor tiene prioridad.
+**HPM:**
+- `current`: golpes en últimos 10s × 6
+- `average`: total golpes / minutos transcurridos
 
-El **umbral dinámico** (`dynamicFloor`) sube al 40% del pico tras cada golpe y decae hacia el base en ~200ms. Filtra rebotes inmediatos sin bloquear combos rápidos.
+El **cooldown dinámico** escala con la fuerza del golpe para cubrir rebotes más largos en golpes fuertes. Si el perfil tiene `rebound` del wizard, ese valor tiene prioridad sobre la fórmula.
 
-HPM:
-- Actual: golpes en últimos 10s × 6
-- Promedio: total golpes / minutos transcurridos
+El **dynamicFloor** sube al 40% del pico al golpear y decae al base en ~200ms, filtrando rebotes inmediatos sin bloquear combos rápidos.
 
-### useTraining
+---
+
+### `useTraining`
 
 `src/core/hooks/useTraining.ts`
 
@@ -273,53 +379,71 @@ function useTraining(): {
   phase: TrainingPhase
   currentRoundNumber: number
   totalRounds: number
-  roundTimeRemaining: number   // segundos (cuenta atrás)
-  roundTimeElapsed: number     // segundos (modo libre)
+  roundTimeRemaining: number    // segundos — cuenta atrás (modo normal)
+  roundTimeElapsed: number      // segundos — cuenta arriba (modo libre)
   restTimeRemaining: number
-  prepTimeRemaining: number    // 10s fijos
+  prepTimeRemaining: number     // 10s fijos
   completedRounds: Round[]
   finishedTraining: Training | null
-  isFreeMode: boolean          // roundDuration === 0
-  startTraining(device, profile, roundDuration, numRounds, restDuration): void
+  isFreeMode: boolean           // roundDuration === 0
+  startTraining(device: Device, profile: CalibrationProfile, roundDuration: number, numRounds: number, restDuration: number): void
   abortTraining(): void
-  finishCurrentRound(): void   // termina ronda manualmente (modo libre)
+  finishCurrentRound(): void    // termina ronda manualmente (solo modo libre)
   getPreviousRoundStats(): RoundStats | null
 }
 ```
 
-Transiciones de fase:
-- `idle` → `preparing`: `startTraining()` — timer de 10s
-- `preparing` → `round`: timer llega a 0 — `trainingService.startRound(1)`
-- `round` → `resting`: timer llega a 0 — `trainingService.finishRound()`
-- `resting` → `round`: timer llega a 0 — `trainingService.startRound(n+1)`
-- `round` → `finished`: última ronda termina — `trainingService.finishTraining()`
+**Transiciones de fase:**
 
-### useShareSession `[solo mobile]`
+```
+idle
+  → preparing  al llamar startTraining()   [timer 10s; beep en 3s/2s, longBeep en 1s]
+  → round      timer llega a 0             [trainingService.startRound(1)]
+  → resting    timer llega a 0             [trainingService.finishRound(); bell]
+  → round      timer llega a 0             [trainingService.startRound(n+1); bell]
+  → finished   última ronda termina        [trainingService.finishTraining()]
+```
+
+Sincroniza `activePhase` en `trainingStore` al cambiar de fase para bloquear la navegación durante la sesión.
+
+---
+
+### `useWorkoutPlayer`
+
+`src/core/hooks/useWorkoutPlayer.ts`
 
 ```typescript
-function useShareSession(options: {
-  training: Training
-  chartRef: React.RefObject<View | null>   // ref a la View a capturar como PNG
-}): {
-  share: () => Promise<void>
-  isSharing: boolean
+interface ResolvedRoutine {
+  name: string
+  exercises: (Exercise & { sets?: number })[]
+}
+
+function useWorkoutPlayer(
+  routine: ResolvedRoutine,
+  onComplete: () => void,
+  onAbort: () => void
+): {
+  currentExercise: Exercise | null
+  phase: 'exercise' | 'rest'
+  timeLeft: number | null        // null si el ejercicio es por reps (sin duration)
+  setIndex: number               // serie actual (0-based)
+  totalSets: number
+  progress: number               // 0-1 dentro del ejercicio/descanso actual
+  skipped: boolean
+  isDone: boolean
+  advance(): void                // avanza al siguiente ejercicio o descanso
+  skip(): void                   // salta el ejercicio o descanso actual
+  abort(): void                  // llama onAbort()
 }
 ```
 
-Flujo al llamar `share()`:
-1. Captura `chartRef` como PNG con `react-native-view-shot` → guarda en `cacheDirectory/hit-tracker-share.png`
-2. Abre el share sheet nativo vía `expo-sharing`
-3. Si la captura falla → fallback a `Share.share({ message: text })` (solo texto)
-4. `isSharing` es `true` durante todo el proceso; el botón que lo invoca debe deshabilitarse mientras sea `true`
+Máquina de estados: `exercise ↔ rest`. Countdown automático con `setInterval`. Auto-advance cuando `timeLeft` llega a 0. Para ejercicios por reps (`duration` ausente), `timeLeft=null` y el usuario avanza manualmente con `advance()`.
 
-Texto generado por `generateShareText(training)` (`mobile/src/utils/shareText.ts`):
-```
-¡Vaya sesión! {X} min y una media de {Y} HPM. ¡A tope! 💪
-#hittracker #boxing #training
-```
-Donde `X = Math.round(totalDurationMs / 60000)` (o `"< 1 min"` si el resultado es 0) e `Y = Math.round(training.hpmAverage)`.
+---
 
-### useBleReading `[solo mobile]`
+### `useBleReading`
+
+`src/core/hooks/useBleReading.ts`
 
 ```typescript
 function useBleReading(options: {
@@ -329,87 +453,118 @@ function useBleReading(options: {
 }): void
 ```
 
-Conecta al sensor BLE por `deviceId` (vía `bleConnection.connectBleDevice`) cuando `active` es `true`. Redirige las notificaciones GATT al callback `onReading`. Se desactiva automáticamente al desmontar o cuando `active` cambia a `false`.
+Llama a `bleConnection.connectBleDevice(deviceId, callback)` cuando `active=true` y hay `deviceId`. Se desactiva automáticamente al desmontar o cuando `active` cambia a `false`. Usa ref interno para `onReading` y evitar closures stale.
+
+---
+
+### `useShareSession`
+
+`src/hooks/useShareSession.ts`
+
+```typescript
+function useShareSession(options: {
+  training: Training
+  chartRef: React.RefObject<View | null>
+}): {
+  share: () => Promise<void>
+  isSharing: boolean
+}
+```
+
+1. Captura `chartRef` como PNG con `react-native-view-shot` → `cacheDirectory/hit-tracker-share.png`
+2. Abre share sheet nativo vía `expo-sharing`
+3. Fallback si falla la captura: `Share.share({ message: text })` (solo texto)
+
+Texto generado por `generateShareText(training)`:
+```
+¡Vaya sesión! {X} min y una media de {Y} HPM. ¡A tope! 💪
+#hittracker #boxing #training
+```
 
 ---
 
 ## Stores (Zustand)
 
-### deviceStore
+### `deviceStore`
 
 ```typescript
 {
   devices: Device[]
   connected: Device | null
-  setDevices(devices): void
-  addDevice(device): void          // + persist()
-  updateDevice(mac, updates): void // + persist()
-  removeDevice(mac): void          // + persist()
-  setConnected(mac | null): void
-  persist(): void                  // invoke('save_devices') / storage.saveDevices()
+  setDevices(devices: Device[]): void
+  addDevice(device: Device): void
+  updateDevice(mac: string, updates: Partial<Device>): void
+  removeDevice(mac: string): void
+  setConnected(mac: string | null): void
+  persist(): void    // storage.saveDevices()
 }
 ```
 
-### profileStore
+### `profileStore`
+
+Incluye un `DEFAULT_PROFILE` (threshold=35, sensitivity=25) que no puede borrarse.
 
 ```typescript
 {
   profiles: CalibrationProfile[]
-  selectedProfileId: string          // ID del perfil activo
-  getSelected(): CalibrationProfile  // devuelve el perfil activo (o default si no hay)
-  setProfiles(profiles): void
-  addProfile(profile): void          // + persist()
-  updateProfile(id, updates): void   // + persist()
-  deleteProfile(id): void            // + persist()
-  selectProfile(id): void            // cambia el perfil activo + persist()
+  selectedProfileId: string
+  getSelected(): CalibrationProfile
+  setProfiles(profiles: CalibrationProfile[]): void
+  addProfile(profile: CalibrationProfile): void
+  updateProfile(id: string, updates: Partial<CalibrationProfile>): void
+  deleteProfile(id: string): void      // no-op si id === DEFAULT_PROFILE.id
+  selectProfile(id: string): void
   persist(): void
 }
 ```
 
-### gameStore
-
-`src/core/stores/gameStore.ts`
-
-```typescript
-type GamePhase = 'idle' | 'waiting' | 'new-record' | 'loser'
-
-{
-  topThree: GameTopThree        // persiste en disco; null = posición vacía
-  phase: GamePhase
-  lastScore: number | null      // magnitude del golpe registrado
-  pendingScore: number | null   // score en espera de iniciales (solo en 'new-record')
-  startGame(): void             // idle → waiting
-  cancelGame(): void            // waiting → idle, limpia scores
-  registerHit(magnitude): void  // registra primer golpe; → new-record | loser
-  submitInitials(initials): Promise<void>  // inserta en TOP 3, persiste, → idle
-  resetToIdle(): void           // loser → idle
-  loadScores(): Promise<void>   // carga game-scores.json desde disco
-}
-```
-
-Lógica de negocio pura (funciones internas):
-- `entersTopThree(score, top)` — `true` si hay hueco libre **o** `score > min` del TOP 3 lleno (estrictamente mayor)
-- `insertScore(entry, top)` — ordena por score descendente, trunca a 3 entradas
-- `minScoreForTop3(top)` — exportada; devuelve `min+1` si lleno, `0` si hay hueco
-
-### trainingStore
+### `trainingStore`
 
 ```typescript
 {
   trainings: Training[]
   activePhase: TrainingPhase
-  setActivePhase(phase): void
-  setTrainings(trainings): void
-  addTraining(training): void        // + invoke('save_training') / storage.saveTraining()
-  deleteTraining(id): void           // + invoke('delete_training') / storage.deleteTraining()
+  setActivePhase(phase: TrainingPhase): void
+  setTrainings(trainings: Training[]): void
+  addTraining(training: Training): void       // + storage.saveTraining()
+  deleteTraining(id: string): void            // + storage.deleteTraining()
   getProgressions(): {
-    powerTrend: number[]             // powerMax por ronda del último entrenamiento
-    hpmTrend: number[]               // hpmAverage por ronda
+    powerTrend: number[]    // powerMax por ronda del último training
+    hpmTrend: number[]      // hpmAverage por ronda
     isFatigued: boolean
   }
-  getUserPowerMax(profileId: string): number  // media aritmética del powerMax de las últimas 5 sesiones del perfil; 0 si no hay sesiones
+  getUserPowerMax(profileId: string): number  // media del powerMax de las últimas 5 sesiones del perfil
 }
 ```
+
+### `workoutPlanStore`
+
+```typescript
+{
+  plans: WorkoutPlan[]
+  loaded: boolean
+  load(): Promise<void>                                         // llamado en App.tsx al arrancar
+  addPlan(plan: Omit<WorkoutPlan, 'id' | 'createdAt'>): void   // genera id = "plan-<ts>"
+  updatePlan(id: string, changes: Partial<WorkoutPlan>): void
+  deletePlan(id: string): void
+  getById(id: string): WorkoutPlan | undefined
+}
+```
+
+### `customExerciseStore`
+
+```typescript
+{
+  exercises: Exercise[]
+  loaded: boolean
+  load(): Promise<void>                             // llamado en App.tsx al arrancar
+  add(ex: Omit<Exercise, 'id'>): void               // id = "custom-<slug>-<ts>"
+  addExercise(ex: Exercise): void                   // para imports wger; no-op si id ya existe
+  remove(id: string): void
+}
+```
+
+Los ejercicios se distinguen por prefijo en el `id`: sin prefijo = catálogo base, `custom-` = creado manualmente, `wger-` = importado de wger. `ExerciseSelector` fusiona automáticamente base + custom al listar.
 
 ---
 
@@ -418,37 +573,185 @@ Lógica de negocio pura (funciones internas):
 Usa `expo-file-system` (legacy API). Ruta base: `<documentDirectory>/HitTracker/`.
 
 ```typescript
-storage.saveTraining(training)        // → trainings/training_<id>.json
-storage.loadTrainings(): Training[]
-storage.deleteTraining(id)
-storage.saveProfiles(profiles)        // → profiles.json
-storage.loadProfiles(): CalibrationProfile[]
-storage.saveDevices(devices)          // → devices.json
-storage.loadDevices(): Device[]
-storage.loadGameScores(): GameTopThree  // → game-scores.json (fallback: [null,null,null])
-storage.saveGameScores(scores)          // → game-scores.json
+storage.saveTraining(training: Training): Promise<void>       // trainings/training_<id>.json
+storage.loadTrainings(): Promise<Training[]>
+storage.deleteTraining(id: string): Promise<void>
+storage.saveProfiles(profiles: CalibrationProfile[]): Promise<void>   // profiles.json
+storage.loadProfiles(): Promise<CalibrationProfile[]>
+storage.saveDevices(devices: Device[]): Promise<void>                  // devices.json
+storage.loadDevices(): Promise<Device[]>
+storage.saveWorkoutPlans(plans: WorkoutPlan[]): Promise<void>          // workout_plans.json
+storage.loadWorkoutPlans(): Promise<WorkoutPlan[]>
+storage.saveCustomExercises(exercises: Exercise[]): Promise<void>      // custom_exercises.json
+storage.loadCustomExercises(): Promise<Exercise[]>
 ```
+
+---
+
+## BLE (`src/services/bleConnection.ts`)
+
+### UUIDs
+
+| UUID (sufijo) | Tipo | Versión | Descripción |
+|---|---|---|---|
+| `...26a8` | NOTIFY | V2+ | Hit events / stream — `{uint32 timestamp_ms, uint16 magnitude}` 6 bytes (V3/V4) o 16 bytes (V2) |
+| `...26a9` | READ | V2+ | Versión firmware (`uint8`: 2/3/4) |
+| `...26aa` | WRITE | V3+ | Config: `{uint16 threshold_raw, uint16 cooldown_ms}` — 4 bytes |
+| `...26ab` | READ | **V4** | Nivel de batería — `uint8` 0-100 % |
+
+Service UUID completo: `4fafc201-1fb5-459e-8fcc-c5c9c331914b`
+
+### Parsers por versión de firmware
+
+| Versión | Bytes | Estructura | magnitude |
+|---|---|---|---|
+| V1 | 16 | `{ts uint32, ax/ay/az float32}` | `sqrt(ax²+ay²+az²)` (m/s²) |
+| V2 | 16 | `{ts uint32, ax/ay/az/gx/gy/gz int16}` | `round(sqrt(...))` raw |
+| V3 | 6 | `{ts uint32, magnitude uint16}` | raw; `isPeak: true` |
+
+### Configuración V3
+
+El firmware V3 persiste `threshold_raw` y `cooldown_ms` en NVS (namespace `ht-cfg`). La app escribe la config al conectar y al cambiar el perfil activo:
+
+```typescript
+bleConnection.sendProfileConfig(threshold: number, rebound: number): Promise<void>
+// threshold_raw = threshold * 10 (uint16)
+// cooldown_ms   = rebound        (uint16)
+```
+
+Defaults del firmware si no existe config en NVS: threshold=300, cooldown=400ms.
+
+---
+
+## wgerService (`src/core/services/wgerService.ts`)
+
+Integración con la API pública [wger.de/api/v2](https://wger.de/api/v2/). Solo lectura, sin autenticación.
+
+```typescript
+interface WgerExercise {
+  id: number
+  name: string
+  description: string          // puede contener HTML
+  category: { id: number; name: string }
+  equipment: Array<{ id: number; name: string }>
+  muscles: Array<{ name_en: string }>
+}
+
+searchExercises(query: string): Promise<WgerExercise[]>
+// GET /exerciseinfo/?format=json&language=4&equipment=7&equipment=3&limit=100
+// Intenta primero español (language=4); fallback inglés (language=2)
+// Filtra por nombre client-side con el query; timeout 10s
+
+mapToExercise(wger: WgerExercise): Exercise
+// id:          "wger-{wger.id}"
+// category:    10,12 → core | 13,8 → upper | 9 → lower | 11 → fullbody | otros → core
+// equipment:   id===3 (dumbbells) → 'dumbbells'; id===7 (body weight) → 'none'
+// description: strip HTML con /<[^>]*>/g
+// rest:        30  (wger no expone este campo)
+// difficulty:  'medium'
+```
+
+Filtro de equipamiento fijo: body weight (`7`) y dumbbells (`3`).
+
+**UI (`WgerSearchScreen`)**: búsqueda con debounce de 2s, paginación client-side a 20 resultados ("Ver más"), detail sheet con botón importar. Los ejercicios importados se guardan en `customExerciseStore` (no se duplican si el id ya existe).
 
 ---
 
 ## Audio (`src/services/audio.ts`)
 
-`expo-audio`. Métodos: `bell()`, `beep()`, `longBeep()`, `countdown()`.
+`expo-audio`. Archivos en `assets/sounds/`.
+
+| Método | Archivo | Cuándo se usa |
+|---|---|---|
+| `bell()` | `opening-bell.mp3` | Inicio y fin de ronda |
+| `beep()` | `beep.mp3` | Countdown 3s y 2s |
+| `longBeep()` | `beep.mp3` (variante larga) | Countdown 1s |
+| `countdown()` | `timer_countdown.mp3` | 10s restantes en ronda |
+
+Secuencias de audio en PlanRunner:
+- `preparing`: beep en 3s/2s, longBeep en 1s
+- `preparing → round`: bell
+- `round → resting`: bell
+- `round` a 10s restantes: countdown
+- `resting`: beep en 3s/2s, longBeep en 1s
+- `resting → round`: bell
 
 ---
 
-## Configuración de Alias TypeScript
+## Sistema de Colores (`src/theme.ts`)
 
-**`tsconfig.json`**:
-```json
-"baseUrl": ".",
-"paths": { "@shared/*": ["../shared/*"] }
+```typescript
+const colors = {
+  bgPrimary:     '#0f0f0f',
+  bgSecondary:   '#1a1a1a',
+  bgTertiary:    '#252525',
+  border:        '#2a2a2a',
+  accent:        '#ff4444',
+  accentHover:   '#ff6666',
+  secondary:     '#c0c0c0',
+  textPrimary:   '#e0e0e0',
+  textSecondary: '#a0a0a0',
+  textMuted:     '#808080',
+}
 ```
 
-**`metro.config.js`**:
+Siempre usar `colors` de `theme.ts`. Nunca colores hardcodeados en componentes. Nunca emojis como iconos — usar `lucide-react-native`.
+
+---
+
+## Configuración TypeScript + Metro
+
+**`tsconfig.json`:**
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@shared/*": ["../shared/*"] }
+  }
+}
+```
+
+**`metro.config.js`:**
 ```javascript
-config.watchFolders = [sharedRoot]          // ../shared
+config.watchFolders = [sharedRoot]            // path absoluto a ../shared
 config.resolver.extraNodeModules = { '@shared': sharedRoot }
+```
+
+---
+
+## Navegación
+
+`BottomTabNavigator` con 5 tabs. Los tabs distintos de "Sesión" se deshabilitan cuando `activePhase` es `preparing`, `round` o `resting`.
+
+| Icono | Tab | Componente | Ruta |
+|---|---|---|---|
+| LayoutDashboard | Inicio | `Dashboard` | — |
+| Timer | Sesión | `Session/index` | — |
+| ClipboardList | Entrenamiento | `PlanRunner/index` | — |
+| Bluetooth | Dispositivos | `Devices` | — |
+| SlidersHorizontal | Perfiles | `Profiles` | — |
+
+`SessionDetail` se monta sobre la navegación completa (estado local en `MobileLayout`) al tocar una sesión en Dashboard.
+
+---
+
+## Arranque de la App (`App.tsx`)
+
+```
+SplashScreen.preventAutoHideAsync()
+activateKeepAwakeAsync('global')
+  ↓
+Carga paralela:
+  storage.loadTrainings()     → migrationService.migrate() → trainingStore
+  storage.loadProfiles()      → profileStore
+  storage.loadDevices()       → deviceStore
+  storage.loadWorkoutPlans()  → workoutPlanStore
+  storage.loadCustomExercises() → customExerciseStore
+  ↓
+min(width, height) >= 600 → lockOrientationAsync(LANDSCAPE) → TabletLayout
+                          → MobileLayout (comportamiento actual)
+  ↓
+SplashScreen.hideAsync()
 ```
 
 ---
@@ -456,49 +759,64 @@ config.resolver.extraNodeModules = { '@shared': sharedRoot }
 ## Build y Distribución
 
 ```bash
-npm run start    # expo start
-npm run android  # expo run:android
-npm run test     # Jest — tests unitarios
+npm run start           # expo start (Metro)
+npm run android         # expo run:android (debug)
+npm run android:release # expo run:android --variant release
+npm run android:apk     # eas build --platform android --profile preview
+npm run android:bundle  # eas build --platform android --profile production
+npm run test            # Jest — tests unitarios de lógica de negocio
 ```
-Build de producción: `eas build` (EAS Build de Expo).
 
 ---
 
 ## Firmware ESP32
 
-- Board: ESP32 DevKit C
-- IDE: Arduino IDE 2
-- Upload speed: 921600
-- Serial monitor: 115200 baud
-- Frecuencia de muestreo: ~100Hz (10ms)
-- Escala acelerómetro: **±16g** (1g = 128 unidades raw). Reposo: magnitude ≈ 128.
+- **Board**: ESP32 DevKit C
+- **IDE**: Arduino IDE 2
+- **Upload speed**: 921600
+- **Serial monitor**: 115200 baud
+- **Frecuencia de muestreo**: ~100Hz (10ms/muestra)
+- **Escala**: ±16g, 1g = 128 raw. Reposo ≈ 128. Golpe suave 400-700. Golpe fuerte 1000-1500+.
 
-### Versiones
+| Versión | Archivo | Protocolo | LEDs | Batería ADC |
+|---|---|---|---|---|
+| V2 | `FIRMWARE/HitTracker_V2/HitTracker_V2.ino` | Stream continuo — 16 bytes/10ms | No | No |
+| V3 | `FIRMWARE/HitTracker_V3/HitTracker_V3.ino` | Hit events — 6 bytes/golpe; config BLE | No | No |
+| **V4** | `FIRMWARE/HitTracker_V4/HitTracker_V4.ino` | Hit events — 6 bytes/golpe; config + batería BLE | **4 LEDs** | **GPIO 34** |
 
-| Versión | Archivo | Protocolo |
-|---|---|---|
-| V2 | `FIRMWARE/HitTracker_V2/HitTracker_V2.ino` | Stream continuo, 16 bytes/10ms `{ts, ax, ay, az, gx, gy, gz}` |
-| V3 | `FIRMWARE/HitTracker_V3/HitTracker_V3.ino` | Solo hit events, 6 bytes por golpe `{ts uint32, magnitude uint16}` |
+---
 
-### UUIDs BLE
+## Tests
 
-| UUID | Tipo | Descripción |
-|---|---|---|
-| `...26a8` | NOTIFY | Lecturas (V2) / hit events (V3) |
-| `...26a9` | READ | Versión del sensor (uint8) |
-| `...26aa` | WRITE | Config en V3: `{threshold_raw uint16, cooldown_ms uint16}` |
+Los tests cubren únicamente lógica de negocio pura — no componentes React Native.
 
-### Configuración V3 (Preferences / NVS)
-
-El firmware V3 persiste `threshold_raw` y `cooldown_ms` en NVS (namespace `ht-cfg`). Si no existen, usa defaults: threshold=300, cooldown=400ms. La app escribe la config via la characteristic `...26aa` al conectarse y al cambiar el perfil activo.
-
-**Posición física del sensor:**
-
-Colocar en el **punto de anclaje** del saco — el punto de menor oscilación pendular:
-
-| Tipo de saco | Posición |
+| Directorio | Qué cubre |
 |---|---|
-| Saco colgado | Cerca del enganche superior |
-| Saco de pie | Base inferior, periférico al mástil |
+| `shared/__tests__/` | `calibrationService`, `trainingService` |
+| `src/__tests__/` | Lógica exclusiva de mobile |
 
-Colocarlo lejos del anclaje genera efecto látigo: rebotes con magnitud similar o superior al golpe real, difíciles de filtrar por software. No es necesario centrar el sensor exactamente — `sqrt(ax²+ay²+az²)` integra la energía de los tres ejes independientemente de la orientación o excentricidad.
+Convención de nombre: `HT-XXX.test.ts` para tests de feature, `<nombre>.test.ts` para tests de servicio.
+
+```bash
+npm run test         # ejecuta todos los tests
+```
+
+---
+
+## Notación de Combos (RoundComboEditor)
+
+| Código | Golpe |
+|---|---|
+| `1` | Jab |
+| `2` | Cross |
+| `3` | Gancho izquierdo |
+| `4` | Gancho derecho |
+| `5` | Uppercut izquierdo |
+| `6` | Uppercut derecho |
+| `b` (sufijo) | Al cuerpo (ej: `3b`) |
+| `Slip Iz` / `Slip Der` | Esquiva |
+| `Step` | Paso de salida |
+| `Duck` | Agachada |
+| `Pivot` | Giro |
+
+Ejemplo: `"1-2-3-Slip Iz-3b-6"` (máx 120 caracteres por round).

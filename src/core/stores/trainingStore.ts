@@ -49,6 +49,11 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
     const { trainings } = get()
     const sessions = trainings.filter((t) => t.profile?.id === profileId).slice(0, 5)
     if (sessions.length === 0) return 0
-    return Math.round(sessions.reduce((sum, t) => sum + t.powerMax, 0) / sessions.length)
+    // Usa round.stats.powerMax (siempre calculado con i.magnitude) en lugar de
+    // Training.powerMax, que en sesiones antiguas estaba guardado como i.intensity (0-100)
+    const perSession = sessions.map((t) =>
+      t.rounds.length > 0 ? Math.max(...t.rounds.map((r) => r.stats.powerMax)) : t.powerMax
+    )
+    return Math.round(perSession.reduce((sum, v) => sum + v, 0) / perSession.length)
   }
 }))
