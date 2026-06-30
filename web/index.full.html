@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hit Tracker — Análisis de boxeo en tiempo real</title>
-  <meta name="description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes y muestra tu progreso sesión a sesión. Disponible para Android (móvil y tablet).">
-  <meta name="keywords" content="hit tracker, boxeo, entrenamiento boxeo, sensor boxeo, ESP32, BLE, análisis golpes, app boxeo, IoT boxeo">
+  <title>Hit Tracker — Plataforma de entrenamiento de boxeo</title>
+  <meta name="description" content="Plataforma completa de entrenamiento de boxeo. Planes con calentamiento, core y sesión de boxeo en tiempo real. Sensor ESP32 vía BLE. Catálogo de ejercicios integrado con wger. Android.">
+  <meta name="keywords" content="hit tracker, boxeo, entrenamiento boxeo, planes de entrenamiento, sensor boxeo, ESP32, BLE, análisis golpes, app boxeo, wger, catálogo ejercicios">
   <meta name="author" content="Hit Tracker">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hit-tracker.es/">
@@ -13,8 +13,8 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hit-tracker.es/">
-  <meta property="og:title" content="Hit Tracker — Análisis de boxeo en tiempo real">
-  <meta property="og:description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes y muestra tu progreso sesión a sesión.">
+  <meta property="og:title" content="Hit Tracker — Plataforma de entrenamiento de boxeo">
+  <meta property="og:description" content="Planes de entrenamiento completos: calentamiento, core y boxeo en tiempo real. Sensor ESP32 vía BLE. Catálogo integrado con wger. Android.">
   <meta property="og:image" content="https://hit-tracker.es/screenshoot/mobile/dashboard.png">
   <meta property="og:locale" content="es_ES">
   <meta property="og:site_name" content="Hit Tracker">
@@ -22,8 +22,8 @@
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://hit-tracker.es/">
-  <meta name="twitter:title" content="Hit Tracker — Análisis de boxeo en tiempo real">
-  <meta name="twitter:description" content="Sistema IoT de análisis de entrenamiento de boxeo en tiempo real. Sensor ESP32 vía Bluetooth BLE. Detecta golpes y muestra tu progreso sesión a sesión.">
+  <meta name="twitter:title" content="Hit Tracker — Plataforma de entrenamiento de boxeo">
+  <meta name="twitter:description" content="Planes de entrenamiento completos: calentamiento, core y boxeo en tiempo real. Sensor ESP32 vía BLE. Catálogo integrado con wger. Android.">
   <meta name="twitter:image" content="https://hit-tracker.es/screenshoot/mobile/dashboard.png">
 
   <link rel="icon" href="logo.png" type="image/png">
@@ -54,14 +54,14 @@
           <span class="accent-text">Cada golpe <span style="color:var(--accent)">cuenta.</span></span>
         </h1>
         <p class="hero-subtitle">
-          Monitorea tus impactos en tiempo real. Entrena más inteligente.
+          Planes de entrenamiento completos. Análisis en tiempo real. Sensor ESP32 vía BLE.
         </p>
         <p class="hero-description">
-          Sistema IoT de captura y análisis de golpes para boxeo. Conecta tu saco, calibra y sigue tu progreso al detalle.
+          Crea planes con calentamiento, core y boxeo. Ejecuta la sesión guiada y mide cada golpe al instante. Catálogo integrado con wger para descubrir nuevos ejercicios.
         </p>
-        
+
         <p class="hero-footer">
-          Basado en ESP32 + React. Código abierto. GPL v3.
+          Basado en ESP32 + React Native. Código abierto. GPL v3.
         </p>
       </div>
 
@@ -170,39 +170,39 @@
       
       <div class="features-grid">
         <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>Planes de Entrenamiento</h3>
+          <p>Crea planes completos: calentamiento, core y boxeo. Define rondas, descansos y combos por ronda. El plan se ejecuta en secuencia, guiado paso a paso.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Catálogo con wger</h3>
+          <p>Busca e importa ejercicios desde wger, la base de datos pública de entrenamiento. Filtra por equipamiento y guarda los que uses en tu catálogo local.</p>
+        </div>
+
+        <div class="feature-card">
           <div class="feature-icon">📊</div>
-          <h3>Análisis en Tiempo Real</h3>
-          <p>Visualiza tus impactos al instante. Gráficos dinámicos que capturan cada golpe.</p>
+          <h3>Sesión de Boxeo en Directo</h3>
+          <p>Cada golpe registrado al instante: potencia, HPM y cadencia ronda a ronda. Campana de inicio y fin. Resultados completos al terminar.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">⚙️</div>
           <h3>Calibración Inteligente</h3>
-          <p>Ajusta el sensor a tu estilo. Crea perfiles personalizados para diferentes tipos de entrenamiento.</p>
+          <p>Wizard guiado: golpea ligero y fuerte, la app sugiere umbral y sensibilidad automáticamente. Múltiples perfiles para diferentes sacos o personas.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">📈</div>
-          <h3>Sigue tu Progreso</h3>
-          <p>Métricas detalladas: Power máximo, HPM, Valid Hits. Mira cómo mejoras semana a semana.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">🎯</div>
-          <h3>Sesiones Estructuradas</h3>
-          <p>Entrena con objetivos. Sesiones de 3, 5 o 10 minutos con feedback sonoro y visual.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">💾</div>
-          <h3>Almacenamiento Local</h3>
-          <p>Tus datos te pertenecen. Guardados localmente sin conexión a internet requerida.</p>
+          <h3>Progreso Histórico</h3>
+          <p>Power máximo y HPM de las últimas sesiones. Gráfico de evolución por ronda. Todo guardado localmente, sin cuenta ni suscripción.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">🔧</div>
           <h3>Código Abierto</h3>
-          <p>Hardware y software open-source. Modifica, amplía y comparte tus mejoras.</p>
+          <p>Firmware, app y hardware open-source bajo GPL v3. Construye tu propio sensor por menos de 15€ y adapta el proyecto a tu forma de entrenar.</p>
         </div>
       </div>
     </div>
@@ -216,24 +216,24 @@
       <div class="steps">
         <div class="step">
           <div class="step-number">1</div>
-          <h3>Conecta el Sensor</h3>
-          <p>Sincroniza el sensor con la aplicación via Bluetooth. La app detecta el dispositivo automáticamente.</p>
+          <h3>Crea tu Plan</h3>
+          <p>Define calentamiento, core y boxeo. Elige ejercicios del catálogo o busca en wger. Añade combos a cada ronda de boxeo.</p>
         </div>
 
         <div class="step-arrow">→</div>
 
         <div class="step">
           <div class="step-number">2</div>
-          <h3>Calibra</h3>
-          <p>Ajusta los parámetros del sensor a tu estilo: sensibilidad, umbral de detección y potencia máxima.</p>
+          <h3>Conecta el Sensor</h3>
+          <p>Sujeta el ESP32 al saco y emparéjalo por BLE. La app lo detecta automáticamente. Calibra con el wizard si es la primera vez.</p>
         </div>
 
         <div class="step-arrow">→</div>
 
         <div class="step">
           <div class="step-number">3</div>
-          <h3>Entrena</h3>
-          <p>Inicia la sesión de entrenamiento. El sensor captura datos a 100Hz y la app los procesa en tiempo real.</p>
+          <h3>Ejecuta</h3>
+          <p>La app te guía por los ejercicios físicos y arranca la sesión de boxeo automáticamente. Cada golpe se registra en tiempo real.</p>
         </div>
 
         <div class="step-arrow">→</div>
@@ -241,7 +241,7 @@
         <div class="step">
           <div class="step-number">4</div>
           <h3>Analiza</h3>
-          <p>Al terminar, resultados detallados. Power máximo, HPM, valid hits, progreso histórico.</p>
+          <p>Power máximo, HPM promedio y gráfico de evolución por ronda. Compara con sesiones anteriores y mira cómo progresas.</p>
         </div>
       </div>
 
@@ -269,9 +269,9 @@
         <div class="spec-column">
           <h3>Métricas</h3>
           <ul>
-            <li><strong>Power:</strong> Intensidad golpe (0-100)</li>
-            <li><strong>Valid Hit:</strong> Golpes > 80% power max</li>
+            <li><strong>Power:</strong> Magnitud del golpe (raw)</li>
             <li><strong>HPM:</strong> Golpes por minuto</li>
+            <li><strong>HPM promedio:</strong> Media de la ronda</li>
             <li><strong>Accuracy:</strong> ±2% en magnitud</li>
             <li><strong>Latency:</strong> &lt;50ms procesamiento</li>
             <li><strong>Storage:</strong> Ilimitado (archivos JSON)</li>
@@ -301,20 +301,19 @@
       <h2>Crea el tuyo</h2>
       <p class="cta-text">
         HitTracker es un proyecto completamente abierto, publicado bajo licencia <strong>GPL v3</strong>.
-        Esto significa que el código fuente de la aplicación es libre de usar,
-        estudiar, modificar y distribuir. Si quieres adaptarlo a tu saco, a tu gimnasio o a tu forma de entrenar,
-        tienes todo el derecho a hacerlo. Eso sí: cualquier versión modificada que distribuyas debe publicarse
-        también bajo GPL v3, con el código fuente disponible y reconociendo el proyecto original. La libertad se comparte, no se cierra.
+        El código de la app, el firmware del sensor y el esquema de conexión son libres de usar,
+        estudiar, modificar y distribuir. Si quieres adaptarlo a tu saco, tu gimnasio o tu forma de entrenar,
+        tienes todo el derecho. Eso sí: cualquier versión modificada que distribuyas debe publicarse
+        también bajo GPL v3. La libertad se comparte, no se cierra.
       </p>
       <p class="cta-text">
-        Lo mismo aplica al hardware. El esquema del sensor está basado en componentes accesibles:
-        un <strong>ESP32</strong> y un módulo <strong>GY-521 (MPU-6050)</strong>, disponibles por menos de 10€.
-        Con un poco de soldadura y el firmware incluido en el repositorio, puedes construir tu propio sensor
-        desde cero y conectarlo a la app en minutos. ¿Te animas a diseñar una carcasa molona?
+        El sensor se construye con un <strong>ESP32 DevKit V1</strong> y un módulo <strong>GY-521 (MPU-6050)</strong>, por menos de 15€.
+        El firmware V4 incluye 4 LEDs indicadores y monitorización de batería. Con el esquema incluido en el repositorio,
+        puedes tenerlo funcionando en una tarde.
       </p>
       <p class="cta-text">
-        El repositorio incluye el código del firmware, la app mobile y la documentación
-        necesaria para ponerte en marcha. Las contribuciones son bienvenidas.
+        El repositorio incluye firmware, app mobile, planes de ejercicios base y documentación completa.
+        Las contribuciones son bienvenidas.
       </p>
       <div class="download-buttons">
         <a href="https://github.com/adanoliva/hit-tracker#" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
