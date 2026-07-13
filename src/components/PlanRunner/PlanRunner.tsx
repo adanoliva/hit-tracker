@@ -114,7 +114,9 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   }, [prepTimeRemaining, phase])
 
   useEffect(() => {
-    if (phase === 'round' && roundTimeRemaining === 10) audioService.countdown()
+    if (phase !== 'round') return
+    if (roundTimeRemaining >= 2 && roundTimeRemaining <= 10) audioService.countdownTick()
+    if (roundTimeRemaining === 1) audioService.countdownEnd()
   }, [roundTimeRemaining, phase])
 
   useEffect(() => {
@@ -125,7 +127,9 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
 
   useEffect(() => {
     if (phase !== 'round' || impacts.length === 0) return
-    trainingService.onImpactDetected(impacts[impacts.length - 1])
+    const lastImpact = impacts[impacts.length - 1]
+    trainingService.onImpactDetected(lastImpact)
+    if (userPowerRef.current > 0 && lastImpact.magnitude > userPowerRef.current) audioService.beep()
   }, [impacts, phase])
 
   useBleReading({
