@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de privacidad — Hit Tracker</title>
+  <meta name="description" content="Política de privacidad de Hit Tracker: qué datos recopila la app, cómo se almacenan y qué permisos utiliza.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://hit-tracker.es/privacidad.html">
+  <link rel="icon" href="logo.png" type="image/png">
+  <style>
+    :root {
+      --bg-primary: #0f0f0f;
+      --bg-secondary: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #ff4444;
+      --text-primary: #e0e0e0;
+      --text-muted: #808080;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 96px;
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back:hover { color: var(--text-primary); }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      height: 44px;
+      width: auto;
+    }
+
+    .logo-text {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    .slogan {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--text-primary);
+      margin-bottom: 40px;
+    }
+
+    .slogan .accent { color: var(--accent); }
+
+    .page-title {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .page-title .accent { color: var(--accent); }
+
+    .updated {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    p, li {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    a { color: var(--accent); }
+
+    strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <a class="back" href="https://hit-tracker.es">&larr; Volver al inicio</a>
+
+    <div class="logo">
+      <img src="logo.png" alt="Hit Tracker" />
+      <div class="logo-text">Hit<span>Tracker</span></div>
+    </div>
+    <h1 class="slogan">Cada golpe <span class="accent">cuenta.</span></h1>
+
+    <p class="page-title">Política de <span class="accent">privacidad</span></p>
+    <p class="updated">Última actualización: julio de 2026</p>
+
+    <h2>1. Responsable</h2>
+    <p>Adán Oliva, contacto: <a href="mailto:hola@adanoliva.es">hola@adanoliva.es</a>. Hit Tracker es un proyecto independiente, sin entidad comercial detrás. El código fuente es público en <a href="https://github.com/adanoliva/hit-tracker" target="_blank" rel="noopener noreferrer">github.com/adanoliva/hit-tracker</a>.</p>
+
+    <h2>2. Qué datos recopilamos</h2>
+    <p><strong>Ninguno.</strong> Ni esta web ni la aplicación móvil recopilan datos personales identificables. En concreto:</p>
+    <ul>
+      <li>Esta web no usa cookies, propias ni de terceros.</li>
+      <li>Esta web no usa ningún servicio de analítica, medición o seguimiento (Google Analytics, píxeles, etc).</li>
+      <li>La aplicación móvil no tiene backend ni servidor propio: no existe ningún lugar donde tus datos puedan almacenarse fuera de tu dispositivo.</li>
+      <li>No se crean cuentas de usuario ni se pide ningún dato de identificación (nombre, email, etc).</li>
+    </ul>
+
+    <h2>3. Datos almacenados en tu dispositivo</h2>
+    <p>La aplicación guarda localmente, únicamente en tu teléfono, la siguiente información necesaria para su funcionamiento:</p>
+    <ul>
+      <li>Sesiones de entrenamiento (golpes registrados, estadísticas de cada ronda).</li>
+      <li>Perfiles de calibración del sensor.</li>
+      <li>Planes de entrenamiento y ejercicios personalizados.</li>
+      <li>Dispositivos Bluetooth vinculados (nombre y dirección MAC del sensor).</li>
+    </ul>
+    <p>Estos datos se guardan como archivos en el almacenamiento privado de la app y nunca se envían a ningún servidor. Si desinstalas la aplicación, estos datos se eliminan junto con ella.</p>
+
+    <h2>4. Conexión con servicios externos</h2>
+    <p>El catálogo de ejercicios de la app funciona sin conexión con un catálogo propio incluido en la aplicación. De forma opcional, si el usuario decide buscar o importar ejercicios adicionales, la app realiza consultas a la <a href="https://wger.de" target="_blank" rel="noopener noreferrer">API pública de wger</a> (un catálogo de ejercicios de terceros, independiente de Hit Tracker). Estas consultas solo incluyen el término de búsqueda introducido por el usuario — no se envía ningún dato personal ni identificativo. Consulta la política de privacidad de <a href="https://wger.de" target="_blank" rel="noopener noreferrer">wger.de</a> para más información sobre ese servicio.</p>
+
+    <h2>5. Permisos que utiliza la aplicación</h2>
+    <ul>
+      <li><strong>Bluetooth:</strong> para conectar con el sensor ESP32 que se coloca en el saco de boxeo. No se usa para localizar al usuario ni se comparte con terceros.</li>
+      <li><strong>Almacenamiento:</strong> para guardar tus sesiones, perfiles y planes localmente, como se describe en el punto 3.</li>
+      <li><strong>Audio:</strong> para reproducir los avisos sonoros de la sesión (campana, cuenta atrás). La app no graba audio en ningún momento.</li>
+    </ul>
+
+    <h2>6. Menores de edad</h2>
+    <p>Hit Tracker no está dirigida específicamente a menores de edad y no recopila intencionadamente datos de menores — coherente con el punto 2, ya que no se recopila ningún dato personal de ningún usuario.</p>
+
+    <h2>7. Cambios en esta política</h2>
+    <p>Si esta política cambia (por ejemplo, al añadir una nueva funcionalidad que implique tratamiento de datos), se actualizará esta misma página y la fecha de "última actualización" indicada arriba.</p>
+
+    <h2>8. Contacto</h2>
+    <p>Para cualquier consulta sobre esta política, escribe a <a href="mailto:hola@adanoliva.es">hola@adanoliva.es</a> o abre un issue en el <a href="https://github.com/adanoliva/hit-tracker/issues" target="_blank" rel="noopener noreferrer">repositorio de GitHub</a>.</p>
+  </div>
+</body>
+</html>

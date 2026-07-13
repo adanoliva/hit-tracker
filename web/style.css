@@ -831,6 +831,10 @@ code {
   color: var(--text-muted);
 }
 
+.footer-copy a {
+  color: var(--text-muted);
+}
+
 @media (max-width: 640px) {
   .footer-content {
     gap: 24px;

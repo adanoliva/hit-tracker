@@ -76,7 +76,8 @@ const sf = StyleSheet.create({
 })
 
 const APP_VERSION = appJson.expo.version
-const REPO_URL = 'https://github.com/adanoliva/hit-tracker'
+const WEB_URL = 'https://hit-tracker.es'
+const PRIVACY_URL = 'https://hit-tracker.es/privacidad.html'
 
 export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   const { top } = useSafeAreaInsets()
@@ -335,8 +336,11 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
           <Text style={s.modalDesc}>
             Sistema de monitoreo de entrenamiento de boxeo en tiempo real. Detecta y registra golpes al saco mediante un sensor ESP32 conectado por Bluetooth.
           </Text>
-          <TouchableOpacity onPress={() => Linking.openURL(REPO_URL)}>
-            <Text style={s.modalLink}>{REPO_URL}</Text>
+          <TouchableOpacity onPress={() => Linking.openURL(WEB_URL)}>
+            <Text style={s.modalLink}>{WEB_URL}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)}>
+            <Text style={s.modalLink}>Política de privacidad</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.modalClose} onPress={() => setShowAbout(false)}>
             <Text style={s.modalCloseText}>Cerrar</Text>
