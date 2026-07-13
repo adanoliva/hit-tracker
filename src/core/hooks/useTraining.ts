@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import type { Device, CalibrationProfile, Round, RoundStats, Training } from '../types'
 import { trainingService } from '../services/trainingService'
 import { useTrainingStore } from '../stores/trainingStore'
+import { audioService } from '../../services/audio'
 
 type TrainingPhase = 'idle' | 'preparing' | 'round' | 'resting' | 'finished'
 
@@ -137,6 +138,7 @@ export function useTraining(): UseTrainingReturn {
       setFinishedTraining(null)
       setPhase('preparing')
 
+      audioService.enableDucking()
       trainingService.startTraining({ device, profile, roundDuration, numRounds, restDuration })
 
       timerRef.current = setInterval(() => {
