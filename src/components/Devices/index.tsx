@@ -147,12 +147,12 @@ export function DevicesPage({ onBack }: { onBack?: () => void }) {
             />
             <View style={s.modalLabels}>
               <View style={s.modalLabelCol}>
-                <Text style={s.modalLabelTitle}>Frontal</Text>
-                <Text style={s.modalLabelDesc}>Letras de frente hacia ti · flecha ↓</Text>
+                <Text style={s.modalLabelTitle}>Saco colgado</Text>
+                <Text style={s.modalLabelDesc}>Parte superior · zona redonda de arriba</Text>
               </View>
               <View style={s.modalLabelCol}>
-                <Text style={s.modalLabelTitle}>Encima</Text>
-                <Text style={s.modalLabelDesc}>Letras hacia arriba · parte superior hacia ti ↗</Text>
+                <Text style={s.modalLabelTitle}>Saco de pie</Text>
+                <Text style={s.modalLabelDesc}>Parte inferior · pegado al saco, paralelo al suelo</Text>
               </View>
             </View>
           </View>
