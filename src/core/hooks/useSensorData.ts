@@ -22,8 +22,12 @@ interface UseSensorDataReturn {
 const COOLDOWN_BASE_MS     = 200
 const COOLDOWN_DAMPING     = 0.3
 
-// Dynamic threshold: rises to peak*0.4 on hit, decays back to base at this rate (units/ms)
-const THRESHOLD_DECAY_RATE = 0.5
+// Dynamic threshold: rises to peak*0.4 on hit, decays exponentially back to base.
+// lambda is derived from the effective rebound (same value used for cooldown, see below)
+// so that after `effectiveRebound` ms the floor has recovered 95% of the way to base —
+// a single source of truth for "how long the bag keeps rebounding", instead of a second
+// independent decay constant that could drift out of sync with the calibrated cooldown.
+const FLOOR_RECOVERY_FRACTION = 0.05
 
 export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn {
   const [impacts, setImpacts] = useState<Impact[]>([])
@@ -86,15 +90,18 @@ export function useSensorData(profile: CalibrationProfile): UseSensorDataReturn 
       const prevMag  = prev.magnitude
       const base     = profile.threshold * 10
 
-      // Decay dynamic floor toward base
-      dynamicFloor.current = Math.max(base, dynamicFloor.current - THRESHOLD_DECAY_RATE * deltaMs)
+      // profile.rebound is the personalized cooldown from calibration wizard
+      // fallback: dynamic formula based on last peak raw magnitude
+      const effectiveRebound = profile.rebound
+        ?? (COOLDOWN_BASE_MS + lastPeakMag.current * COOLDOWN_DAMPING)
+
+      // Exponential decay toward base: after effectiveRebound ms, 95% recovered
+      const lambda = -Math.log(FLOOR_RECOVERY_FRACTION) / effectiveRebound
+      dynamicFloor.current = base + (dynamicFloor.current - base) * Math.exp(-lambda * deltaMs)
 
       const isRising = mag > prevMag
 
-      // profile.rebound is the personalized cooldown from calibration wizard
-      // fallback: dynamic formula based on last peak raw magnitude
-      const cooldown = profile.rebound
-        ?? (COOLDOWN_BASE_MS + lastPeakMag.current * COOLDOWN_DAMPING)
+      const cooldown = effectiveRebound
 
       const isPeak =
         !isRising &&

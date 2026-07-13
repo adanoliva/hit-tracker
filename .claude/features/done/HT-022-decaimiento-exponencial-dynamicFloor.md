@@ -69,17 +69,24 @@ Con decaimiento exponencial puro, matemáticamente nunca se llega exactamente a 
 
 ## Acceptance Criteria
 
-- [ ] El `dynamicFloor` decae exponencialmente, no linealmente.
-- [ ] `lambda` se deriva de `profile.rebound` (o del fallback dinámico si no hay `rebound` calibrado) — no existe ninguna constante de decaimiento hardcodeada e independiente.
-- [ ] Un golpe fuerte seguido de un golpe normal a ~150-200ms se detecta correctamente como dos impactos (caso que hoy falla o es marginal con decaimiento lineal).
-- [ ] Perfiles existentes (con o sin `rebound`) no requieren recalibración para seguir funcionando razonablemente.
-- [ ] Tests unitarios de `useSensorData` actualizados para reflejar el nuevo decaimiento.
+- [x] El `dynamicFloor` decae exponencialmente, no linealmente.
+- [x] `lambda` se deriva de `profile.rebound` (o del fallback dinámico si no hay `rebound` calibrado) — no existe ninguna constante de decaimiento hardcodeada e independiente (se eliminó `THRESHOLD_DECAY_RATE`).
+- [x] Un golpe fuerte seguido de un golpe normal a ~150-200ms se detecta correctamente como dos impactos — verificado en test (`HT-022.test.ts`, caso "combo golpe fuerte + golpe ligero"). **Pendiente de validación con sacos/combos reales.**
+- [x] Perfiles existentes (con o sin `rebound`) no requieren recalibración — el cambio es solo en cómo se usa `rebound`/fallback, no en su valor.
+- [x] Tests unitarios para el nuevo decaimiento en `src/__tests__/HT-022.test.ts` (no se pudo testear el hook `useSensorData` directamente porque el proyecto no tiene `@testing-library/react-hooks` ni similar instalado, y la convención existente — ver HT-008, HT-024 — es reimplicar la lógica pura extraída en el test; se siguió ese mismo patrón).
 
 ## Deliverables
 
-1. **Código**: cambio en `useSensorData.ts` (cálculo de `dynamicFloor` y `lambda`).
-2. **Tests**: casos con golpe fuerte + combo rápido, golpe ligero tras golpe fuerte, perfil sin `rebound` (fallback).
-3. **Documentación**: actualizar la sección de `useSensorData` en `DOCUMENTO_TECNICO.md` (el punto 1 del algoritmo de detección, que hoy dice "decae... a 0.5 raw/ms").
+1. **Código**: cambio en `useSensorData.ts` (cálculo de `dynamicFloor` y `lambda`, constantes `FLOOR_RECOVERY_FRACTION`, reutiliza `COOLDOWN_BASE_MS`/`COOLDOWN_DAMPING` existentes en vez de duplicarlas).
+2. **Tests**: `src/__tests__/HT-022.test.ts` — 5/5 pasando (derivación de lambda, recuperación 95% en `effectiveRebound` ms, fallback sin `rebound`, nunca decae bajo `base`, combo fuerte+ligero).
+3. **Documentación**: actualizada sección `useSensorData` en `DOCUMENTO_TECNICO.md`.
+
+## QA
+
+- ✅ TypeScript: sin errores (`npx tsc --noEmit`)
+- ✅ Tests HT-022: 7/7 pasando (QA añadió 2 casos de borde: `prevMag > dynamicFloor` con el floor a milésimas de `base` tras varias vidas medias — el riesgo explícito de la spec —, y decaimiento monótono con deltas de 1ms simulando jitter de BLE)
+- ✅ Tests globales: 106/106 pasando (12 suites), sin regresiones
+- ⚠️ Pendiente de validación manual: probar con sacos/combos reales (golpes ligeros tras un golpe fuerte), tal como señala el riesgo de QA de la spec. Los tests cubren la matemática del decaimiento pero no pueden ejercitar el hook `useSensorData` en sí (sin `@testing-library/react-hooks` en el proyecto), así que no sustituyen la validación con hardware real.
 
 ## Estimated Effort
 

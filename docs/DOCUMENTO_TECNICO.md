@@ -351,10 +351,12 @@ SensorReading recibido
     │    └─ registra impacto con reading.magnitude directamente
     │
     └─ sin isPeak (V2/V1)
-         1. dynamicFloor decae hacia base (threshold×10) a 0.5 raw/ms
+         1. dynamicFloor decae exponencialmente hacia base (threshold×10):
+              lambda = -ln(0.05) / effectiveRebound
+              dynamicFloor = base + (dynamicFloor - base) × e^(-lambda × Δt)
          2. isPeak = !isRising && prevMag > dynamicFloor && Δt > cooldown
-         3. cooldown = profile.rebound               (si viene del wizard)
-                     ?? 200 + lastPeakMag × 0.3      (dinámico por magnitud)
+         3. effectiveRebound = cooldown = profile.rebound   (si viene del wizard)
+                              ?? 200 + lastPeakMag × 0.3    (dinámico por magnitud)
          4. Al detectar pico: dynamicFloor = max(base, peak × 0.4)
 
     intensity = calculateIntensity(magnitude, profile)  → 0-100
@@ -364,9 +366,9 @@ SensorReading recibido
 - `current`: golpes en últimos 10s × 6
 - `average`: total golpes / minutos transcurridos
 
-El **cooldown dinámico** escala con la fuerza del golpe para cubrir rebotes más largos en golpes fuertes. Si el perfil tiene `rebound` del wizard, ese valor tiene prioridad sobre la fórmula.
+El **cooldown dinámico** escala con la fuerza del golpe para cubrir rebotes más largos en golpes fuertes. Si el perfil tiene `rebound` del wizard, ese valor tiene prioridad sobre la fórmula. Este mismo `effectiveRebound` (cooldown) es también la única fuente de verdad para el decaimiento del `dynamicFloor` — no hay una segunda constante de amortiguación independiente.
 
-El **dynamicFloor** sube al 40% del pico al golpear y decae al base en ~200ms, filtrando rebotes inmediatos sin bloquear combos rápidos.
+El **dynamicFloor** sube al 40% del pico al golpear y decae exponencialmente hacia base: `lambda` se deriva de `effectiveRebound` de forma que a los `effectiveRebound` ms el floor ha recuperado el 95% del camino hacia base. Cae rápido al principio (justo cuando la vibración del saco es más violenta) y se suaviza al acercarse a base, dejando más margen que el decaimiento lineal anterior para detectar combos rápidos y potentes sin bloquear golpes ligeros que llegan poco después de uno fuerte.
 
 ---
 
