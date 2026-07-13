@@ -43,6 +43,9 @@
 | HT-020 | Sesión de boxing — guía de combo en pantalla durante el round | v2 | mobile | high | **done** | HT-018, HT-019-a |
 | HT-021-a | Catálogo de ejercicios — UI de gestión (ver, añadir, eliminar) | v2 | mobile | medium | **done** | HT-015-a, HT-017 |
 | HT-021-b | Catálogo de ejercicios — integración wger API (búsqueda e importación) | v2 | mobile | medium | done | HT-021-a |
+| HT-022 | Decaimiento exponencial del dynamicFloor (derivado de rebound calibrado) | v3 | mobile | medium | pending | — |
+| HT-023 | Aviso sonoro al superar el máximo histórico (con ducking de audio) | v2 | mobile | medium | done | — |
+| HT-024 | Aviso de bajada de ritmo (cadencia), independiente de isFatigued | v2 | both | medium | done | — |
 
 ## Leyenda
 

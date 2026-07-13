@@ -19,7 +19,7 @@ const formatDuration = (ms: number) => {
 // Fixtures
 const emptyStats: RoundStats = {
   duration: 0, totalImpacts: 0,
-  powerMax: 0, hpmAverage: 0, hpmMax: 0, powerTrend: [], isFatigued: false
+  powerMax: 0, hpmAverage: 0, hpmMax: 0, powerTrend: [], isFatigued: false, isCadenceDropped: false
 }
 
 const emptyProfile: CalibrationProfile = {

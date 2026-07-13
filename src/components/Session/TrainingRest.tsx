@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { TrendingDown } from 'lucide-react-native'
 import type { RoundStats } from '../../core/types'
 import { colors } from '../../theme'
 
@@ -70,7 +71,14 @@ export function TrainingRest({
 
           {roundStats.isFatigued && (
             <View style={s.fatigue}>
-              <Text style={s.fatigueText}>⚠ Fatiga detectada en esta ronda</Text>
+              <Text style={s.fatigueText}>⚠ Potencia bajando en esta ronda</Text>
+            </View>
+          )}
+
+          {roundStats.isCadenceDropped && (
+            <View style={s.cadence}>
+              <TrendingDown size={14} color={colors.secondary} />
+              <Text style={s.cadenceText}>Ritmo bajando en esta ronda</Text>
             </View>
           )}
         </View>
@@ -93,5 +101,7 @@ const s = StyleSheet.create({
   delta: { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, gap: 6 },
   deltaRow: { flexDirection: 'row', gap: 16 },
   fatigue: { backgroundColor: `${colors.accent}1a`, borderRadius: 8, padding: 8 },
-  fatigueText: { fontSize: 12, color: colors.accent }
+  fatigueText: { fontSize: 12, color: colors.accent },
+  cadence: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: `${colors.secondary}1a`, borderRadius: 8, padding: 8 },
+  cadenceText: { fontSize: 12, color: colors.secondary }
 })

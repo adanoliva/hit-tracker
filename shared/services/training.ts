@@ -22,6 +22,8 @@ function calcRoundStats(impacts: Impact[], duration: number): RoundStats {
   const secondAvg = secondHalf.length > 0 ? secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length : 0
   const isFatigued = firstAvg > 0 && secondAvg < firstAvg * 0.85
 
+  const isCadenceDropped = calcCadenceDropped(impacts, duration)
+
   return {
     duration,
     totalImpacts,
@@ -29,8 +31,34 @@ function calcRoundStats(impacts: Impact[], duration: number): RoundStats {
     hpmAverage,
     hpmMax: 0,
     powerTrend,
-    isFatigued
+    isFatigued,
+    isCadenceDropped
   }
+}
+
+// Impact.time viene del reloj del sensor BLE (millis() del ESP32), no de Date.now(),
+// así que el punto medio se ancla en el primer golpe (mismo reloj) en vez de round.startTime.
+const MIN_IMPACTS_FIRST_HALF = 4
+const MIN_IMPACTS_SECOND_HALF = 2
+const CADENCE_DROP_THRESHOLD = 0.7
+
+function calcCadenceDropped(impacts: Impact[], duration: number): boolean {
+  if (impacts.length === 0 || duration <= 0) return false
+
+  const roundMidTime = impacts[0].time + duration / 2
+  const firstHalf = impacts.filter((i) => i.time < roundMidTime)
+  const secondHalf = impacts.filter((i) => i.time >= roundMidTime)
+
+  if (firstHalf.length < MIN_IMPACTS_FIRST_HALF || secondHalf.length < MIN_IMPACTS_SECOND_HALF) return false
+
+  const firstHalfDuration = roundMidTime - impacts[0].time
+  const secondHalfDuration = impacts[0].time + duration - roundMidTime
+  if (firstHalfDuration <= 0 || secondHalfDuration <= 0) return false
+
+  const firstHalfRate = firstHalf.length / firstHalfDuration
+  const secondHalfRate = secondHalf.length / secondHalfDuration
+
+  return secondHalfRate < firstHalfRate * CADENCE_DROP_THRESHOLD
 }
 
 class TrainingService {

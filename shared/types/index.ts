@@ -58,6 +58,7 @@ export interface RoundStats {
   hpmMax: number
   powerTrend: number[]
   isFatigued: boolean
+  isCadenceDropped: boolean
 }
 
 export interface Round {

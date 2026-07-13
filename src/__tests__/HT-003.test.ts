@@ -15,7 +15,8 @@ function makeTraining(overrides: Partial<Training> & { roundDurations?: number[]
       hpmAverage: 0,
       hpmMax: 0,
       powerTrend: [],
-      isFatigued: false
+      isFatigued: false,
+      isCadenceDropped: false
     }
   }))
   return {

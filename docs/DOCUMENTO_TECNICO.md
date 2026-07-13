@@ -184,7 +184,8 @@ interface RoundStats {
   hpmAverage: number     // golpes/minuto promedio de la ronda
   hpmMax: number         // HPM pico en ventana de 10s
   powerTrend: number[]   // magnitud raw de cada golpe en orden cronológico
-  isFatigued: boolean    // 2ª mitad de golpes < 1ª mitad × 0.85
+  isFatigued: boolean    // 2ª mitad de golpes < 1ª mitad × 0.85 (potencia)
+  isCadenceDropped: boolean // 2ª mitad de la ronda (por tiempo) < 70% del ritmo de la 1ª mitad (golpes/ms)
 }
 
 interface Round {
@@ -301,7 +302,8 @@ trainingService.getPreviousRoundStats(roundNumber: number): RoundStats | null
 ```
 
 `calcRoundStats` interno:
-- `isFatigued`: promedio magnitud 2ª mitad de impacts < promedio 1ª mitad × 0.85
+- `isFatigued`: promedio magnitud 2ª mitad de impacts < promedio 1ª mitad × 0.85 — partición **por índice** de golpe.
+- `isCadenceDropped`: ritmo (golpes/ms) de la 2ª mitad de la ronda < 70% del ritmo de la 1ª mitad — partición **por tiempo**, no por índice (para no sesgar la medición si el ritmo ya varía dentro de la ronda). El punto medio se ancla en `impacts[0].time`, no en `round.startTime`, porque `Impact.time` usa el reloj del sensor BLE (`millis()` del ESP32) mientras que `round.startTime`/`endTime` usan `Date.now()` — son relojes distintos. Requiere un mínimo de 4 golpes en la 1ª mitad y 2 en la 2ª para evaluarse; si no se cumple, queda en `false`. Señal independiente de `isFatigued` (potencia vs. volumen), ambas pueden darse juntas, por separado o ninguna.
 
 ### `exerciseService` (`shared/services/exercise.ts`)
 
@@ -405,6 +407,10 @@ idle
 ```
 
 Sincroniza `activePhase` en `trainingStore` al cambiar de fase para bloquear la navegación durante la sesión.
+
+Al llamar `startTraining()` también se activa `audioService.enableDucking()` una única vez por sesión (`setAudioModeAsync` con `interruptionMode: 'duckOthers'`), para que la música externa (Spotify, etc.) baje de volumen durante los avisos sonoros en vez de mezclarse o silenciarse.
+
+**Aviso sonoro al superar el máximo histórico:** `Session/index.tsx` y `PlanRunner.tsx` calculan `userPowerRef` una sola vez al montar (`getUserPowerMax(profile.id)`). En el efecto que procesa cada `Impact` nuevo, si `userPowerRef.current > 0 && impact.magnitude > userPowerRef.current` se dispara `audioService.beep()`. Sin cooldown adicional — si se encadenan varios golpes que superan el máximo, suena en cada uno.
 
 ---
 
