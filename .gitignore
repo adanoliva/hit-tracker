@@ -24,3 +24,4 @@ out/
 desktop/src/tauri/target/
 desktop/out/
 desktop/dist/
+.claude
