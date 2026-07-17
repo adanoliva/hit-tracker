@@ -77,8 +77,9 @@ export function Dashboard({ onNavigate, onSelectTraining }: { onNavigate: (s: st
   const removeTraining = useTrainingStore((s) => s.deleteTraining)
   const getUserPowerMax = useTrainingStore((s) => s.getUserPowerMax)
   const connected = useDeviceStore((s) => s.connected)
-  const getSelected = useProfileStore((s) => s.getSelected)
-  const profile = getSelected()
+  const profiles = useProfileStore((s) => s.profiles)
+  const selectedProfileId = useProfileStore((s) => s.selectedProfileId)
+  const profile = profiles.find((p) => p.id === selectedProfileId) ?? profiles[0]
   const userPower = getUserPowerMax(profile.id)
   const profileSessions = trainings.filter((t) => t.profile?.id === profile.id)
 

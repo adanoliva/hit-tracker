@@ -116,17 +116,9 @@ export function SessionDetail({ training, onBack, onDelete }: SessionDetailProps
           <Text style={s.headerDevice}>{training.device.name}</Text>
           <Text style={s.headerDate}>{formatDate(training.createdAt)}</Text>
         </View>
-        <View style={s.headerActions}>
-          <TouchableOpacity onPress={share} disabled={isSharing} style={s.shareBtn}>
-            {isSharing
-              ? <ActivityIndicator size={14} color={colors.textMuted} />
-              : <Share2 size={16} color={colors.textMuted} />
-            }
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleDelete} style={s.deleteBtn}>
-            <Text style={s.deleteText}>Eliminar</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={handleDelete} style={s.deleteBtn}>
+          <Text style={s.deleteText}>Eliminar</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Global stats */}
@@ -184,6 +176,14 @@ export function SessionDetail({ training, onBack, onDelete }: SessionDetailProps
                 <RoundChart round={round} width={chartWidth} />
               </View>
             </View>
+
+            <TouchableOpacity onPress={share} disabled={isSharing} style={s.shareBtnFull}>
+              {isSharing
+                ? <ActivityIndicator size={16} color="#fff" />
+                : <Share2 size={16} color="#fff" />
+              }
+              <Text style={s.shareBtnFullText}>Compartir</Text>
+            </TouchableOpacity>
           </>
         )}
       </ScrollView>
@@ -203,8 +203,6 @@ const s = StyleSheet.create({
   headerCenter: { alignItems: 'center', flex: 1 },
   headerDevice: { fontSize: 11, color: colors.textMuted },
   headerDate: { fontSize: 13, fontWeight: '600', color: colors.textPrimary },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  shareBtn: { padding: 6 },
   deleteBtn: { paddingVertical: 4, paddingHorizontal: 8, borderWidth: 1, borderColor: colors.border, borderRadius: 6 },
   deleteText: { fontSize: 11, color: colors.textMuted },
   globalStats: {
@@ -233,6 +231,11 @@ const s = StyleSheet.create({
     backgroundColor: colors.bgSecondary, borderRadius: 12,
     borderWidth: 1, borderColor: colors.border, padding: 12,
   },
+  shareBtnFull: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: colors.accent, borderRadius: 12, paddingVertical: 14,
+  },
+  shareBtnFullText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 })
 
 const chart = StyleSheet.create({

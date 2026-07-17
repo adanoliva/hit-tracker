@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useIsFocused } from '@react-navigation/native'
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
 import { audioService } from '../../services/audio'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
@@ -18,10 +19,11 @@ import { colors } from '../../theme'
 
 export function TrainingPage({ onBack }: { onBack?: () => void }) {
   const connected    = useDeviceStore((s) => s.connected)
-  const getSelected  = useProfileStore((s) => s.getSelected)
+  const profiles = useProfileStore((s) => s.profiles)
+  const selectedProfileId = useProfileStore((s) => s.selectedProfileId)
   const addTraining  = useTrainingStore((s) => s.addTraining)
   const getUserPowerMax = useTrainingStore((s) => s.getUserPowerMax)
-  const profile      = getSelected()
+  const profile      = profiles.find((p) => p.id === selectedProfileId) ?? profiles[0]
   const { top }      = useSafeAreaInsets()
   const userPowerRef = useRef(getUserPowerMax(profile.id))
 
@@ -35,6 +37,8 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
   } = useTraining()
 
   const savedRef = useRef(false)
+
+  useEffect(() => { audioService.enableDucking() }, [])
 
   useEffect(() => {
     if (phase !== 'idle') activateKeepAwakeAsync()
@@ -59,7 +63,7 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
     prevPhaseRef.current = phase
     if (phase === 'resting') audioService.twoBell()
     if (phase === 'finished') audioService.threeBell()
-    if (phase === 'round' && prev === 'resting') audioService.oneBell()
+    if (phase === 'round' && (prev === 'resting' || prev === 'preparing')) audioService.oneBell()
   }, [phase])
 
   useEffect(() => {
@@ -104,6 +108,15 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
     reset()
     setActive(false)
   }
+
+  const isFocused = useIsFocused()
+  useEffect(() => {
+    if (!isFocused && finishedTraining) {
+      abortTraining()
+      reset()
+      setActive(false)
+    }
+  }, [isFocused, finishedTraining])
 
   if (finishedTraining) {
     return (

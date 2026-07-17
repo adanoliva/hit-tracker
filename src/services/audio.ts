@@ -9,9 +9,16 @@ const SOUNDS = {
   countdownEnd:  require('../../assets/sounds/timer_countdown-end.mp3') as number,
 }
 
+// ponytail: players precargados para evitar el delay de decode al primer play() de cada uno
+const players = Object.fromEntries(
+  Object.entries(SOUNDS).map(([key, asset]) => [key, createAudioPlayer(asset)])
+) as Record<keyof typeof SOUNDS, ReturnType<typeof createAudioPlayer>>
+
 function play(key: keyof typeof SOUNDS) {
   try {
-    createAudioPlayer(SOUNDS[key]).play()
+    const player = players[key]
+    player.seekTo(0)
+    player.play()
   } catch {}
 }
 

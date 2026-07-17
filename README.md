@@ -33,7 +33,7 @@ No requiere cámara, ni suscripción, ni cuenta. El sensor vale ~15€ y los dat
 - Configura rondas, descansos y número de rounds
 - **Modo libre**: sin límite de tiempo, el usuario termina la ronda manualmente
 - Métricas en directo: potencia máxima, HPM actual y promedio, gráfico de golpes
-- Audio: campana de inicio/fin de ronda, cuenta atrás con beeps
+- Audio: campana distinta para inicio de ronda, fin de ronda y fin de sesión; cuenta atrás con beeps
 - Resultados al terminar con gráfico de evolución por ronda
 - Compartir sesión como imagen
 
@@ -41,13 +41,14 @@ No requiere cámara, ni suscripción, ni cuenta. El sensor vale ~15€ y los dat
 
 - Tu power: media de potencia de las últimas 5 sesiones con el perfil activo
 - Gráfico de progreso: HPM y potencia de las últimas 8 sesiones
-- Historial de sesiones con detalle completo (scatter por ronda, stats)
+- Historial de sesiones (más reciente primero) con detalle completo (scatter por ronda, stats)
 
 ### Perfiles de calibración
 
 - Múltiples perfiles (uno por tipo de saco, por persona, etc.)
 - Wizard de calibración guiado: golpea ligero y fuerte, la app sugiere umbral y sensibilidad automáticamente
 - Ajuste manual de threshold, sensitivity y rebound
+- Eliminar un perfil pide confirmación y borra también sus sesiones guardadas
 
 ---
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useIsFocused } from '@react-navigation/native'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
@@ -55,10 +56,11 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   const { top } = useSafeAreaInsets()
   const customExercises = useCustomExerciseStore((s) => s.exercises)
   const connected = useDeviceStore((s) => s.connected)
-  const getSelected = useProfileStore((s) => s.getSelected)
+  const profiles = useProfileStore((s) => s.profiles)
+  const selectedProfileId = useProfileStore((s) => s.selectedProfileId)
   const addTraining = useTrainingStore((s) => s.addTraining)
   const getUserPowerMax = useTrainingStore((s) => s.getUserPowerMax)
-  const profile = getSelected()
+  const profile = profiles.find((p) => p.id === selectedProfileId) ?? profiles[0]
   const userPowerRef = useRef(getUserPowerMax(profile.id))
 
   const [planPhase, setPlanPhase] = useState<PlanPhase>(() => firstPhase(plan))
@@ -71,6 +73,8 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   } = useTraining()
 
   const savedRef = useRef(false)
+
+  useEffect(() => { audioService.enableDucking() }, [])
 
   // Start boxing as soon as planPhase === 'boxing'
   useEffect(() => {
@@ -105,7 +109,7 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
     prevPhaseRef.current = phase
     if (phase === 'resting') audioService.twoBell()
     if (phase === 'finished') audioService.threeBell()
-    if (phase === 'round' && prev === 'resting') audioService.oneBell()
+    if (phase === 'round' && (prev === 'resting' || prev === 'preparing')) audioService.oneBell()
   }, [phase])
 
   useEffect(() => {
@@ -151,6 +155,15 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
     reset()
     onAbort()
   }
+
+  const isFocused = useIsFocused()
+  useEffect(() => {
+    if (!isFocused && finishedTraining) {
+      abortTraining()
+      reset()
+      onDone()
+    }
+  }, [isFocused, finishedTraining])
 
   // Physical phases
   if (planPhase === 'warmup') {

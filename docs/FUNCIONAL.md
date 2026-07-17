@@ -17,7 +17,7 @@ La pantalla de inicio muestra el estado global del entrenamiento:
 - **Estado del sensor**: si hay un sensor BLE conectado y el perfil de calibración activo
 - **Tu poder**: media de powerMax de las últimas 5 sesiones con el perfil activo
 - **Gráfico de progreso**: barras de HPM y línea de potencia de las últimas 8 sesiones
-- **Sesiones recientes**: lista de sesiones del perfil activo, con fecha, rondas y stats principales
+- **Sesiones recientes**: lista de sesiones del perfil activo, ordenada de más reciente a más antigua, con fecha, rondas y stats principales
 - **Botón Nueva sesión**: acceso rápido a la configuración de una sesión de boxeo directa
 
 Toca cualquier sesión para ver su detalle completo.
@@ -48,7 +48,7 @@ El botón **Empezar** está deshabilitado si no hay sensor BLE conectado.
 Preparación (10s) → Ronda → Descanso → Ronda → ... → Resultados
 ```
 
-**Preparación**: cuenta atrás de 10 segundos con señales de audio (beep en 3s/2s, campana al 0).
+**Preparación**: cuenta atrás de 10 segundos con señales de audio (beep en 3s/2s/1s, campana de inicio de ronda al llegar a 0).
 
 **Durante la ronda** se muestran en tiempo real:
 - Timer de la ronda (cuenta atrás o arriba en modo libre)
@@ -59,8 +59,10 @@ Preparación (10s) → Ronda → Descanso → Ronda → ... → Resultados
 - Gráfico en vivo de intensidad por golpe
 - Combo asignado al round (si el plan tiene scripts)
 
+**Fin de ronda**: en los últimos 10s suena un tick de cuenta atrás y en el segundo 1 un aviso final; al llegar a 0 suena una campana — distinta según si quedan más rondas (campana de descanso) o era la última (campana de fin de sesión).
+
 **Durante el descanso**:
-- Cuenta atrás del descanso
+- Cuenta atrás del descanso con beeps en 3s/2s/1s
 - Stats de la ronda que acaba de terminar
 - Comparativa con la ronda anterior (tendencia)
 - Indicador de fatiga si la segunda mitad fue notablemente más floja
@@ -167,6 +169,7 @@ Un perfil de calibración define cómo interpreta la app los datos del sensor:
 - Se puede tener múltiples perfiles (ej: uno por tipo de saco, uno por persona)
 - El **perfil activo** es el que se usa en las sesiones y en el Dashboard
 - Hay un perfil **Default** que no puede eliminarse
+- Al eliminar un perfil se pide confirmación: el borrado elimina también todas las sesiones guardadas de ese perfil, de forma irreversible
 
 #### Wizard de calibración
 

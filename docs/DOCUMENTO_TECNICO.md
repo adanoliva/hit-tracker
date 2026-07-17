@@ -70,7 +70,7 @@ hit-tracker/                         ← raíz = app mobile
 │  │  └─ useLayout.ts
 │  │
 │  ├─ services/
-│  │  ├─ audio.ts                    expo-audio: bell, beep, longBeep, countdown
+│  │  ├─ audio.ts                    expo-audio: oneBell/twoBell/threeBell, beep, countdownTick/countdownEnd
 │  │  ├─ ble.ts                      BleManager singleton (react-native-ble-plx)
 │  │  ├─ bleConnection.ts            connect/disconnect/parse/sendProfileConfig
 │  │  └─ storage.ts                  expo-file-system (legacy API)
@@ -401,11 +401,11 @@ function useTraining(): {
 
 ```
 idle
-  → preparing  al llamar startTraining()   [timer 10s; beep en 3s/2s, longBeep en 1s]
-  → round      timer llega a 0             [trainingService.startRound(1)]
-  → resting    timer llega a 0             [trainingService.finishRound(); bell]
-  → round      timer llega a 0             [trainingService.startRound(n+1); bell]
-  → finished   última ronda termina        [trainingService.finishTraining()]
+  → preparing  al llamar startTraining()   [timer 10s; beep en 3s/2s/1s]
+  → round      timer llega a 0             [trainingService.startRound(1); oneBell]
+  → resting    timer llega a 0             [trainingService.finishRound(); twoBell]
+  → round      timer llega a 0             [trainingService.startRound(n+1); oneBell]
+  → finished   última ronda termina        [trainingService.finishTraining(); threeBell]
 ```
 
 Sincroniza `activePhase` en `trainingStore` al cambiar de fase para bloquear la navegación durante la sesión.
@@ -534,8 +534,9 @@ Incluye un `DEFAULT_PROFILE` (threshold=35, sensitivity=25) que no puede borrars
   activePhase: TrainingPhase
   setActivePhase(phase: TrainingPhase): void
   setTrainings(trainings: Training[]): void
-  addTraining(training: Training): void       // + storage.saveTraining()
+  addTraining(training: Training): void       // + storage.saveTraining(); antepone al array (newest-first)
   deleteTraining(id: string): void            // + storage.deleteTraining()
+  deleteTrainingsByProfile(profileId: string): void  // borra todas las sesiones de un perfil (+ storage.deleteTraining por cada una)
   getProgressions(): {
     powerTrend: number[]    // powerMax por ronda del último training
     hpmTrend: number[]      // hpmAverage por ronda
@@ -671,18 +672,23 @@ Filtro de equipamiento fijo: body weight (`7`) y dumbbells (`3`).
 
 | Método | Archivo | Cuándo se usa |
 |---|---|---|
-| `bell()` | `opening-bell.mp3` | Inicio y fin de ronda |
-| `beep()` | `beep.mp3` | Countdown 3s y 2s |
-| `longBeep()` | `beep.mp3` (variante larga) | Countdown 1s |
-| `countdown()` | `timer_countdown.mp3` | 10s restantes en ronda |
+| `oneBell()` | `one-bell.mp3` | Inicio de round |
+| `twoBell()` | `two-bell.mp3` | Fin de round → resting (no es el último) |
+| `threeBell()` | `three-bell.mp3` | Fin de round → finished (último round de la sesión) |
+| `beep()` | `beep.mp3` | Countdown 3s/2s/1s (preparing y resting) |
+| `countdownTick()` | `timer_countdown-once.mp3` | Últimos 10s del round |
+| `countdownEnd()` | `timer_countdown-end.mp3` | Round en el segundo 1 |
 
-Secuencias de audio en PlanRunner:
-- `preparing`: beep en 3s/2s, longBeep en 1s
-- `preparing → round`: bell
-- `round → resting`: bell
-- `round` a 10s restantes: countdown
-- `resting`: beep en 3s/2s, longBeep en 1s
-- `resting → round`: bell
+Secuencias de audio en `Session/index.tsx` y `PlanRunner.tsx` (misma lógica en ambos):
+- `preparing`: beep en 3s/2s/1s
+- `preparing → round`: oneBell
+- `round`: countdownTick en los últimos 10s, countdownEnd en el segundo 1
+- `round → resting`: twoBell
+- `resting`: beep en 3s/2s/1s
+- `resting → round`: oneBell
+- `round → finished` (último round): threeBell
+
+`opening-bell.mp3` queda sin uso tras el cambio a los tres tonos diferenciados.
 
 ---
 
