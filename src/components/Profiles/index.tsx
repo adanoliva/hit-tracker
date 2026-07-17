@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Linking } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Linking, Alert } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import appJson from '../../../app.json'
 import Slider from '@react-native-community/slider'
 import { useProfileStore } from '../../core/stores/profileStore'
+import { useTrainingStore } from '../../core/stores/trainingStore'
 import { useDeviceStore } from '../../core/stores/deviceStore'
 import { useBleReading } from '../../core/hooks/useBleReading'
 import { calibrationService } from '../../core/services/calibration'
@@ -82,6 +83,23 @@ const PRIVACY_URL = 'https://hit-tracker.es/privacidad.html'
 export function ProfilesPage({ onBack }: { onBack?: () => void }) {
   const { top } = useSafeAreaInsets()
   const { profiles, selectedProfileId, addProfile, updateProfile, deleteProfile, selectProfile } = useProfileStore()
+  const deleteTrainingsByProfile = useTrainingStore((s) => s.deleteTrainingsByProfile)
+
+  const confirmDeleteProfile = (p: CalibrationProfile) => {
+    Alert.alert(
+      'Eliminar perfil',
+      `Se eliminará "${p.name}" y todas sus sesiones guardadas. Esta acción no se puede deshacer.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar', style: 'destructive', onPress: () => {
+            deleteTrainingsByProfile(p.id)
+            deleteProfile(p.id)
+          }
+        }
+      ]
+    )
+  }
   const connected = useDeviceStore((s) => s.connected)
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
@@ -443,7 +461,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                   <Text style={s.editBtnText}>Editar</Text>
                 </TouchableOpacity>
                 {p.id !== 'default-v1' && (
-                  <TouchableOpacity style={s.editBtn} onPress={() => deleteProfile(p.id)}>
+                  <TouchableOpacity style={s.editBtn} onPress={() => confirmDeleteProfile(p)}>
                     <Text style={[s.editBtnText, { color: colors.accent }]}>Eliminar</Text>
                   </TouchableOpacity>
                 )}

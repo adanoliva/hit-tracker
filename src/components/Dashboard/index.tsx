@@ -154,7 +154,7 @@ export function Dashboard({ onNavigate, onSelectTraining }: { onNavigate: (s: st
         <FlatList
           style={styles.sessionList}
           contentContainerStyle={styles.sessionListContent}
-          data={[...profileSessions].reverse()}
+          data={profileSessions}
           keyExtractor={(t) => t.id}
           renderItem={({ item: t }) => (
             <TouchableOpacity style={styles.sessionCard} onPress={() => onSelectTraining(t)} activeOpacity={0.7}>

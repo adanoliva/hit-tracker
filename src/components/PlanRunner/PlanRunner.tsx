@@ -103,14 +103,14 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   useEffect(() => {
     const prev = prevPhaseRef.current
     prevPhaseRef.current = phase
-    if (phase === 'resting' || phase === 'finished') audioService.bell()
-    if (phase === 'round' && prev === 'resting') audioService.bell()
+    if (phase === 'resting') audioService.twoBell()
+    if (phase === 'finished') audioService.threeBell()
+    if (phase === 'round' && prev === 'resting') audioService.oneBell()
   }, [phase])
 
   useEffect(() => {
     if (phase !== 'preparing') return
-    if (prepTimeRemaining === 3 || prepTimeRemaining === 2) audioService.beep()
-    if (prepTimeRemaining === 1) audioService.longBeep()
+    if (prepTimeRemaining === 3 || prepTimeRemaining === 2 || prepTimeRemaining === 1) audioService.beep()
   }, [prepTimeRemaining, phase])
 
   useEffect(() => {
@@ -121,8 +121,7 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
 
   useEffect(() => {
     if (phase !== 'resting') return
-    if (restTimeRemaining === 3 || restTimeRemaining === 2) audioService.beep()
-    if (restTimeRemaining === 1) audioService.longBeep()
+    if (restTimeRemaining === 3 || restTimeRemaining === 2 || restTimeRemaining === 1) audioService.beep()
   }, [restTimeRemaining, phase])
 
   useEffect(() => {

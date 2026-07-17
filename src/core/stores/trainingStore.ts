@@ -11,6 +11,7 @@ interface TrainingState {
   setTrainings: (trainings: Training[]) => void
   addTraining: (training: Training) => void
   deleteTraining: (id: string) => void
+  deleteTrainingsByProfile: (profileId: string) => void
   getProgressions: () => { powerTrend: number[]; hpmTrend: number[]; isFatigued: boolean }
   getUserPowerMax: (profileId: string) => number
 }
@@ -30,6 +31,12 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
   deleteTraining: (id) => {
     set((state) => ({ trainings: state.trainings.filter((t) => t.id !== id) }))
     storage.deleteTraining(id)
+  },
+
+  deleteTrainingsByProfile: (profileId) => {
+    const toDelete = get().trainings.filter((t) => t.profile?.id === profileId)
+    set((state) => ({ trainings: state.trainings.filter((t) => t.profile?.id !== profileId) }))
+    toDelete.forEach((t) => storage.deleteTraining(t.id))
   },
 
   getProgressions: () => {
