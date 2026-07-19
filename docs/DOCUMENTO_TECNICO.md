@@ -214,11 +214,11 @@ interface Training {
 type ExerciseCategory = 'warmup' | 'core' | 'upper' | 'lower' | 'fullbody' | 'mobility' | 'boxing'
 
 interface Exercise {
-  id: string              // base: slug; custom: "custom-<slug>-<ts>"; wger: "wger-<id>"
+  id: string              // base: slug o "gv-<id>" (importado del dataset GymVisual); custom: "custom-<slug>-<ts>"; wger: "wger-<id>"
   name: string
   category: ExerciseCategory
   muscles: string[]
-  equipment: 'none' | 'dumbbells' | 'pull-up-bar'
+  equipment: 'none' | 'dumbbells' | 'kettlebell' | 'pull-up-bar'
   description: string
   imageUrl?: string
   duration?: number       // segundos (undefined → basado en reps)
@@ -314,6 +314,20 @@ exerciseService.getByCategory(category: ExerciseCategory): Exercise[]
 ```
 
 Devuelve únicamente los ejercicios del catálogo base (`shared/data/exercises.json`). Los custom se gestionan en `customExerciseStore`.
+
+#### Origen del catálogo warmup/core (`id` con prefijo `gv-`)
+
+Los ejercicios de calentamiento y core del catálogo base (`id: "gv-<id>"`) están adaptados a partir del dataset público **[exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset)** (MIT License) — nombre, instrucciones (traducidas/adaptadas al español) y agrupación muscular provienen de ahí; el `id` numérico tras `gv-` es el ID original del dataset. Solo se importó texto: **no se han usado las imágenes/GIFs del dataset**, ya que su copyright pertenece a Gym Visual (gymvisual.com) y requieren licencia comercial aparte. Filtrado aplicado: solo ejercicios sin equipamiento de gimnasio (`body weight`, `dumbbell`, `kettlebell`), sin duplicados por patrón de movimiento.
+
+#### Imágenes de ejercicios (opcional, sistema de assets locales)
+
+Las imágenes/GIFs (cuando se licencien de Gym Visual) se colocan en `assets/exercises/<id-dataset>.gif` (sin el prefijo `gv-`) y se generan como `require()` estáticos mediante:
+
+```bash
+npm run images:gen   # escanea assets/exercises/ y regenera src/generated/exerciseImages.ts
+```
+
+`CatalogScreen` consulta `EXERCISE_IMAGES[exercise.id]`; si no existe, no se muestra imagen (no falla). Ver `assets/exercises/README.md` para la lista de IDs pendientes.
 
 ### `migrationService` (`shared/services/migration.ts`)
 

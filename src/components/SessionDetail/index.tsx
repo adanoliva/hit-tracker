@@ -128,6 +128,7 @@ export function SessionDetail({ training, onBack, onDelete }: SessionDetailProps
           { label: 'Golpes', value: training.totalImpacts, color: colors.accent },
           { label: 'Power máx', value: powerMax, color: colors.secondary },
           { label: 'HPM prom.', value: Math.round(training.hpmAverage), color: colors.textPrimary },
+          { label: 'kCal', value: Math.round((training.calories ?? 0) + (training.warmupCalories ?? 0) + (training.coreCalories ?? 0)), color: colors.accent },
         ].map(({ label, value, color }) => (
           <View key={label} style={s.globalStat}>
             <Text style={s.statLabel}>{label}</Text>

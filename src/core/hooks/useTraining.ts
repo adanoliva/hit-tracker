@@ -94,7 +94,7 @@ export function useTraining(): UseTrainingReturn {
         if (prev <= 1) {
           clearTimer()
 
-          const round = trainingService.finishRound()
+          const round = trainingService.finishRound(configRef.current.roundDuration * 1000)
           if (round) {
             setCompletedRounds((prevRounds) => {
               const updated = [...prevRounds, round]

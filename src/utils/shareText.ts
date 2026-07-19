@@ -5,5 +5,6 @@ export function generateShareText(training: Training): string {
   const minutes = Math.round(totalMs / 60000)
   const durationStr = minutes === 0 ? '< 1 min' : `${minutes} min`
   const hpm = Math.round(training.hpmAverage)
-  return `¡Vaya sesión! ${durationStr} y una media de ${hpm} HPM. ¡A tope! 💪\n#hittracker #boxing #training`
+  const calories = Math.round((training.calories ?? 0) + (training.warmupCalories ?? 0) + (training.coreCalories ?? 0))
+  return `¡Vaya sesión! ${durationStr}, una media de ${hpm} HPM y ${calories} kCal quemadas. ¡A tope! 💪\n#hittracker #boxing #training`
 }

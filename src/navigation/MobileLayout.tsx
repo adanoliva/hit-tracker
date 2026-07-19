@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { TouchableOpacity } from 'react-native'
+import { BackHandler, ToastAndroid, TouchableOpacity } from 'react-native'
 import { LayoutDashboard, Timer, ClipboardList, Bluetooth, SlidersHorizontal, type LucideProps } from 'lucide-react-native'
 import { Dashboard } from '../components/Dashboard'
 import { TrainingPage } from '../components/Session'
@@ -30,6 +30,22 @@ export function MobileLayout() {
   const activePhase = useTrainingStore((s) => s.activePhase)
   const sessionActive = SESSION_PHASES.includes(activePhase)
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null)
+  const lastBackPress = useRef(0)
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (selectedTraining) {
+        setSelectedTraining(null)
+        return true
+      }
+      const now = Date.now()
+      if (now - lastBackPress.current < 2000) return false
+      lastBackPress.current = now
+      ToastAndroid.show('Pulsa de nuevo para salir', ToastAndroid.SHORT)
+      return true
+    })
+    return () => sub.remove()
+  }, [selectedTraining])
 
   if (selectedTraining) {
     return (

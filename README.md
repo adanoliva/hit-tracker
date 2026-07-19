@@ -21,8 +21,8 @@ No requiere cámara, ni suscripción, ni cuenta. El sensor vale ~15€ y los dat
 ### Entrenamiento completo
 
 - Crea **planes de entrenamiento** con tres fases: calentamiento → core → boxeo
-- Catálogo de ejercicios integrado con tabs por categoría (Calentamiento / Core / Boxing)
-- Busca e importa ejercicios desde **[wger](https://wger.de)** — base de datos pública de entrenamiento
+- Catálogo de ejercicios integrado con tabs por categoría (Calentamiento / Core / Boxing), adaptado del dataset público **[exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset)** (MIT License)
+- Busca e importa ejercicios adicionales desde **[wger](https://wger.de)** — base de datos pública de entrenamiento
 - Añade ejercicios personalizados a tu catálogo
 - Define **combos por ronda**: la notación aparece en pantalla durante la cuenta atrás antes de cada round
 - El plan se ejecuta en secuencia: el WorkoutPlayer te guía por los ejercicios físicos y arranca el boxeo automáticamente al terminar
@@ -184,6 +184,8 @@ El catálogo combina tres fuentes:
 3. **wger**: ejercicios importados desde [wger.de](https://wger.de) (búsqueda por nombre, filtro por equipamiento body weight y mancuernas)
 
 Los ejercicios importados de wger se guardan localmente y están disponibles sin conexión.
+
+**Atribución**: los ejercicios de calentamiento y core del catálogo base (`id` con prefijo `gv-`) están adaptados —nombre, instrucciones y grupos musculares, traducidos al español— del dataset público [hasaneyldrm/exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset), publicado bajo licencia MIT. Solo se ha usado el texto del dataset; las imágenes/GIFs originales son © [Gym Visual](https://gymvisual.com) y no están incluidas — la app soporta añadirlas localmente (`assets/exercises/`, ver `npm run images:gen`) si se licencian aparte.
 
 ---
 

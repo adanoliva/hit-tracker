@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  TextInput, FlatList,
+  TextInput, FlatList, Image,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ArrowLeft, Search, Plus, ExternalLink } from 'lucide-react-native'
@@ -10,6 +10,7 @@ import { exerciseService } from '../../core/services/exerciseService'
 import { useCustomExerciseStore } from '../../core/stores/customExerciseStore'
 import { ExerciseDetailSheet } from './ExerciseDetailSheet'
 import { BoxingExerciseForm } from './BoxingExerciseForm'
+import { EXERCISE_IMAGES } from '../../generated/exerciseImages'
 import { colors } from '../../theme'
 
 interface Props {
@@ -104,7 +105,11 @@ export function CatalogScreen({ onBack, onWgerSearch }: Props) {
           const isBase = baseIds.has(item.id)
           return (
             <TouchableOpacity style={s.row} onPress={() => setSelected(item)}>
-              <View style={[s.dot, { backgroundColor: DIFF_DOT[item.difficulty] }]} />
+              {EXERCISE_IMAGES[item.id] ? (
+                <Image source={EXERCISE_IMAGES[item.id]} style={s.thumb} />
+              ) : (
+                <View style={[s.dot, { backgroundColor: DIFF_DOT[item.difficulty] }]} />
+              )}
               <View style={s.info}>
                 <Text style={s.name}>{item.name}</Text>
                 <Text style={s.meta}>
@@ -162,6 +167,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, padding: 12,
   },
   dot: { width: 8, height: 8, borderRadius: 4 },
+  thumb: { width: 36, height: 36, borderRadius: 8, backgroundColor: colors.bgPrimary },
   info: { flex: 1 },
   name: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
   meta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },

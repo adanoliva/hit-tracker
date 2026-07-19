@@ -1,169 +1,640 @@
 [
   {
-    "id": "neck-rotations",
-    "name": "Rotaciones de cuello",
+    "id": "gv-1160",
+    "name": "Burpee",
     "category": "warmup",
-    "muscles": ["Cuello", "Trapecio"],
+    "muscles": [
+      "Cardiovascular",
+      "Cuádriceps",
+      "Isquiotibiales",
+      "Gemelos"
+    ],
     "equipment": "none",
-    "description": "Rota el cuello lentamente en círculos completos. Mantén la espalda recta y los hombros relajados. Alterna dirección cada 15 segundos.",
+    "description": "Comienza de pie con los pies separados a la altura de los hombros. Baja el cuerpo hacia una posición de sentadilla flexionando las rodillas y colocando las manos en el suelo frente a ti. Lleva los pies hacia atrás de una patada hasta una posición de flexión de brazos. Realiza una flexión de brazos, manteniendo el cuerpo en línea recta. Salta con los pies de vuelta a la posición de sentadilla. Salta hacia arriba explosivamente, llevando los brazos por encima de la cabeza. Aterriza suavemente y baja de inmediato a una posición de sentadilla para comenzar la siguiente repetición.",
     "duration": 30,
-    "rest": 5,
+    "rest": 10,
     "difficulty": "easy"
   },
   {
-    "id": "shoulder-circles",
-    "name": "Círculos de hombros",
+    "id": "gv-3223",
+    "name": "Salto estrella",
     "category": "warmup",
-    "muscles": ["Hombros", "Trapecios"],
+    "muscles": [
+      "Cardiovascular",
+      "Cuádriceps",
+      "Isquiotibiales",
+      "Gemelos"
+    ],
     "equipment": "none",
-    "description": "Eleva los hombros hacia las orejas y traza círculos amplios hacia atrás. Mantén los brazos relajados a los lados. Alterna dirección a mitad del tiempo.",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros y los brazos a los costados. Flexiona ligeramente las rodillas y salta hacia arriba de forma explosiva. Mientras saltas, separa las piernas y extiende los brazos hacia los lados, formando una figura de estrella con tu cuerpo. Aterriza suavemente sobre la punta de los pies con las rodillas ligeramente flexionadas. Repite el número de repeticiones deseado.",
     "duration": 30,
-    "rest": 5,
+    "rest": 10,
     "difficulty": "easy"
   },
   {
-    "id": "wrist-rotations",
+    "id": "gv-0685",
+    "name": "Carrera en el sitio",
+    "category": "warmup",
+    "muscles": [
+      "Cardiovascular",
+      "Cuádriceps",
+      "Isquiotibiales",
+      "Gemelos"
+    ],
+    "equipment": "none",
+    "description": "Comienza de pie con los pies separados a la altura de la cadera. Activa el core y mantén la parte superior del cuerpo relajada. Comienza a trotar en el lugar, levantando las rodillas hacia el pecho y aterrizando suavemente sobre la punta de los pies. Mantén un ritmo constante y continúa trotando durante la duración o distancia deseada. Recuerda respirar profundamente y mantener una buena postura durante todo el ejercicio.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-3655",
+    "name": "Zancada con rodilla alta",
+    "category": "warmup",
+    "muscles": [
+      "Cardiovascular",
+      "Cuádriceps",
+      "Isquiotibiales",
+      "Glúteos"
+    ],
+    "equipment": "none",
+    "description": "Ponte de pie con los pies separados a la altura de la cadera. Levanta la rodilla derecha hacia el pecho lo más alto que puedas mientras mantienes el equilibrio sobre la pierna izquierda. Da un paso adelante con el pie derecho y baja el cuerpo a una posición de zancada, flexionando ambas rodillas a un ángulo de 90 grados. Empújate con el pie derecho y lleva la rodilla izquierda hacia el pecho. Da un paso adelante con el pie izquierdo y baja el cuerpo a una posición de zancada. Continúa alternando las piernas y avanzando con zancadas, manteniendo el core activado y un ritmo constante. Repite el número de repeticiones deseado.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-3222",
+    "name": "Salto en sentadilla parcial",
+    "category": "warmup",
+    "muscles": [
+      "Cardiovascular",
+      "Cuádriceps",
+      "Isquiotibiales",
+      "Gemelos"
+    ],
+    "equipment": "none",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros. Flexiona las rodillas y baja el cuerpo hacia una posición de sentadilla. Salta de forma explosiva, extendiendo las caderas y las rodillas mientras balanceas los brazos para generar impulso. Aterriza suavemente sobre la punta de los pies y pasa de inmediato a la siguiente repetición. Repite el número de repeticiones deseado.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-3219",
+    "name": "Salto de tijera",
+    "category": "warmup",
+    "muscles": [
+      "Cardiovascular",
+      "Cuádriceps",
+      "Isquiotibiales",
+      "Gemelos"
+    ],
+    "equipment": "none",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros. Salta del suelo y al mismo tiempo cruza la pierna derecha por delante de la pierna izquierda. Al aterrizar, cambia rápidamente de pierna, cruzando la pierna izquierda por delante de la pierna derecha. Continúa alternando las piernas y saltando lo más rápido posible. Repite el número de repeticiones deseado.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-3361",
+    "name": "Saltos laterales (skater)",
+    "category": "warmup",
+    "muscles": [
+      "Cardiovascular",
+      "Cuádriceps",
+      "Isquiotibiales",
+      "Glúteos"
+    ],
+    "equipment": "none",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros. Dobla ligeramente las rodillas y salta hacia la derecha, aterrizando sobre el pie derecho. Al aterrizar, balancea la pierna izquierda detrás de la pierna derecha y toca el suelo con los dedos del pie izquierdo. Salta inmediatamente hacia la izquierda, aterrizando sobre el pie izquierdo. Al aterrizar, balancea la pierna derecha detrás de la pierna izquierda y toca el suelo con los dedos del pie derecho. Continúa alternando los lados, saltando y tocando el suelo con cada pierna. Repite el número de repeticiones deseado.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-3318",
+    "name": "Giro de brazos 360°",
+    "category": "warmup",
+    "muscles": [
+      "Cardiovascular",
+      "Hombros",
+      "Core"
+    ],
+    "equipment": "none",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros y las rodillas ligeramente flexionadas. Mantén los brazos extendidos rectos frente a ti, paralelos al suelo. Activa el core y mueve los brazos en un movimiento circular, rotando el torso mientras lo haces. Continúa el movimiento circular, moviendo los brazos y rotando el torso el número de repeticiones deseado. Recuerda respirar durante todo el ejercicio.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-3360",
+    "name": "Marcha del oso",
+    "category": "warmup",
+    "muscles": [
+      "Cardiovascular",
+      "Core",
+      "Hombros",
+      "Tríceps"
+    ],
+    "equipment": "none",
+    "description": "Comienza apoyado sobre manos y rodillas, con las manos justo debajo de los hombros y las rodillas justo debajo de las caderas. Levanta las rodillas ligeramente del suelo, manteniendo la espalda plana y el core activado. Mueve la mano derecha y el pie izquierdo hacia adelante simultáneamente, seguido de la mano izquierda y el pie derecho. Continúa avanzando a gatas, alternando los movimientos de manos y pies. Mantén un ritmo constante y el core firme durante todo el ejercicio. Continúa durante la distancia o el tiempo deseado.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-0630",
+    "name": "Mountain climbers",
+    "category": "warmup",
+    "muscles": [
+      "Cardiovascular",
+      "Core",
+      "Hombros",
+      "Tríceps"
+    ],
+    "equipment": "none",
+    "description": "Comienza en una posición de plancha alta con las manos justo debajo de los hombros y el cuerpo en línea recta. Activa el core y lleva la rodilla derecha hacia el pecho, luego cambia rápidamente y lleva la rodilla izquierda hacia el pecho. Continúa alternando las piernas con un movimiento de carrera, manteniendo las caderas bajas y el core activado. Mantén un ritmo constante y respira de forma regular durante todo el ejercicio. Repite el número de repeticiones deseado.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-1368",
+    "name": "Círculos de tobillo",
+    "category": "warmup",
+    "muscles": [
+      "Gemelos",
+      "Tobillos"
+    ],
+    "equipment": "none",
+    "description": "Siéntate en el suelo con las piernas extendidas frente a ti. Levanta una pierna del suelo y rota el tobillo con un movimiento circular. Realiza el número de círculos deseado en una dirección, luego cambia a la dirección contraria. Repite con la otra pierna.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-3561",
+    "name": "Puente de glúteo con marcha",
+    "category": "warmup",
+    "muscles": [
+      "Glúteos",
+      "Isquiotibiales",
+      "Cuádriceps"
+    ],
+    "equipment": "none",
+    "description": "Túmbate sobre tu espalda con las rodillas flexionadas y los pies apoyados en el suelo. Activa los glúteos y levanta las caderas del suelo, formando una línea recta desde las rodillas hasta los hombros. Manteniendo las caderas elevadas, levanta un pie del suelo y lleva la rodilla hacia el pecho. Baja el pie de nuevo al suelo y repite el movimiento con la otra pierna. Continúa alternando las piernas con un movimiento de marcha mientras mantienes la posición de puente. Repite el número de repeticiones deseado.",
+    "duration": 30,
+    "rest": 10,
+    "difficulty": "easy"
+  },
+  {
+    "id": "gv-1428",
     "name": "Rotaciones de muñecas",
     "category": "warmup",
-    "muscles": ["Antebrazos", "Muñecas"],
+    "muscles": [
+      "Antebrazos",
+      "Manos",
+      "Muñecas"
+    ],
     "equipment": "none",
-    "description": "Extiende los brazos al frente y rota las muñecas en círculos amplios. Esencial antes del trabajo con saco para evitar lesiones.",
-    "duration": 30,
-    "rest": 5,
-    "difficulty": "easy"
-  },
-  {
-    "id": "jumping-jacks",
-    "name": "Jumping jacks",
-    "category": "warmup",
-    "muscles": ["Piernas", "Hombros", "Cardiovascular"],
-    "equipment": "none",
-    "description": "Salta abriendo piernas y brazos simultáneamente, luego regresa. Mantén un ritmo constante y aterriza suavemente con las rodillas ligeramente flexionadas.",
-    "duration": 45,
-    "rest": 10,
-    "difficulty": "easy"
-  },
-  {
-    "id": "shadow-boxing",
-    "name": "Sombra libre",
-    "category": "warmup",
-    "muscles": ["Hombros", "Core", "Cardiovascular"],
-    "equipment": "none",
-    "description": "Muévete libremente lanzando combinaciones imaginarias. Trabaja el footwork, gira las caderas en cada golpe y mantén la guardia alta.",
-    "duration": 120,
-    "rest": 15,
-    "difficulty": "easy"
-  },
-  {
-    "id": "high-knees",
-    "name": "Rodillas al pecho alternas",
-    "category": "warmup",
-    "muscles": ["Piernas", "Core", "Cardiovascular"],
-    "equipment": "none",
-    "description": "Eleva las rodillas alternativamente hasta la altura de la cadera a ritmo rápido. Mantén el torso erguido y los brazos en movimiento como al correr.",
+    "description": "Extiende los brazos rectos frente a ti. Cierra ambas manos en un puño. Gira las muñecas en un movimiento circular, manteniendo los brazos quietos. Continúa los círculos de muñeca el número de repeticiones deseado.",
     "duration": 30,
     "rest": 10,
     "difficulty": "easy"
   },
   {
-    "id": "tricep-stretch",
-    "name": "Estiramiento de tríceps",
+    "id": "gv-0721",
+    "name": "Estiramiento lateral de muñeca",
     "category": "warmup",
-    "muscles": ["Tríceps", "Hombros"],
+    "muscles": [
+      "Antebrazos",
+      "Muñecas",
+      "Manos"
+    ],
     "equipment": "none",
-    "description": "Lleva un brazo por detrás de la cabeza y empuja el codo con la otra mano. Mantén el estiramiento sin rebotar. Cambia de brazo a la mitad.",
-    "duration": 20,
-    "rest": 5,
+    "description": "Ponte de pie con los pies separados a la altura de los hombros y los brazos extendidos frente a ti. Extiende el brazo derecho hacia el lado, paralelo al suelo, con la palma hacia abajo. Con la mano izquierda, sujeta la mano derecha y tira de ella suavemente hacia tu cuerpo, sintiendo un estiramiento en el antebrazo derecho. Mantén el estiramiento durante 15-30 segundos, luego suelta. Repite del otro lado.",
+    "duration": 30,
+    "rest": 10,
     "difficulty": "easy"
   },
   {
-    "id": "chest-opener",
-    "name": "Apertura de pecho",
-    "category": "warmup",
-    "muscles": ["Pecho", "Hombros", "Bíceps"],
-    "equipment": "none",
-    "description": "Entrelaza los dedos detrás de la espalda, abre el pecho y eleva los brazos ligeramente. Respira profundo y mantén el cuello neutro.",
-    "duration": 30,
-    "rest": 5,
-    "difficulty": "easy"
-  },
-  {
-    "id": "plank-isometric",
-    "name": "Plancha isométrica",
+    "id": "gv-0002",
+    "name": "Flexión lateral 45°",
     "category": "core",
-    "muscles": ["Core", "Abdominales", "Hombros"],
+    "muscles": [
+      "Abdominales",
+      "Oblicuos"
+    ],
     "equipment": "none",
-    "description": "Apoya antebrazos y punteras en el suelo formando una línea recta. Contrae el abdomen, no eleves las caderas ni las dejes caer. Respira de forma controlada.",
-    "sets": 3,
-    "duration": 30,
-    "rest": 20,
-    "difficulty": "medium"
-  },
-  {
-    "id": "bicycle-crunch",
-    "name": "Crunch bicicleta",
-    "category": "core",
-    "muscles": ["Oblicuos", "Abdominales"],
-    "equipment": "none",
-    "description": "Tumbado boca arriba, lleva el codo derecho hacia la rodilla izquierda mientras extiendes la pierna derecha. Alterna de forma controlada sin jalar el cuello.",
-    "sets": 3,
-    "reps": 20,
-    "rest": 20,
-    "difficulty": "medium"
-  },
-  {
-    "id": "russian-twist",
-    "name": "Russian twist",
-    "category": "core",
-    "muscles": ["Oblicuos", "Core"],
-    "equipment": "none",
-    "description": "Siéntate con las rodillas flexionadas y la espalda inclinada ~45°. Gira el torso de lado a lado tocando el suelo. Sube intensidad elevando los pies.",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros y los brazos extendidos hacia abajo a los lados. Manteniendo la espalda recta y el core activado, flexiona lentamente el torso hacia un lado, bajando la mano hacia la rodilla. Haz una pausa por un momento en la parte inferior, luego regresa lentamente a la posición inicial. Repite del otro lado. Continúa alternando lados durante el número de repeticiones deseado.",
     "sets": 3,
     "reps": 15,
     "rest": 20,
     "difficulty": "medium"
   },
   {
-    "id": "mountain-climbers",
-    "name": "Mountain climbers",
+    "id": "gv-0003",
+    "name": "Bicicleta abdominal",
     "category": "core",
-    "muscles": ["Core", "Hombros", "Cardiovascular"],
+    "muscles": [
+      "Abdominales",
+      "Flexores de cadera"
+    ],
     "equipment": "none",
-    "description": "En posición de plancha alta, lleva las rodillas al pecho de forma alterna y rápida. Mantén las caderas bajas y el core activo durante todo el movimiento.",
+    "description": "Túmbate sobre tu espalda con las manos colocadas detrás de la cabeza. Levanta las piernas del suelo y flexiona las rodillas formando un ángulo de 90 grados. Lleva el codo derecho hacia la rodilla izquierda mientras simultáneamente estiras la pierna derecha. Regresa a la posición inicial y repite el movimiento del lado opuesto, llevando el codo izquierdo hacia la rodilla derecha mientras estiras la pierna izquierda. Continúa alternando lados con un movimiento de pedaleo durante el número de repeticiones deseado.",
     "sets": 3,
-    "duration": 30,
+    "reps": 15,
     "rest": 20,
     "difficulty": "medium"
   },
   {
-    "id": "leg-raises",
-    "name": "Leg raises",
+    "id": "gv-2466",
+    "name": "Puente-escalador cruzado",
     "category": "core",
-    "muscles": ["Abdominales inferiores", "Core"],
+    "muscles": [
+      "Abdominales",
+      "Glúteos",
+      "Cuádriceps",
+      "Isquiotibiales"
+    ],
     "equipment": "none",
-    "description": "Tumbado boca arriba con manos bajo los glúteos, eleva las piernas rectas hasta 90° y bájalas sin tocar el suelo. Mantén la zona lumbar pegada al suelo.",
+    "description": "Comienza en una posición de plancha alta con las manos justo debajo de los hombros y el cuerpo en línea recta. Activa el core y levanta el pie derecho del suelo, llevando la rodilla derecha hacia el codo izquierdo. Vuelve a colocar el pie derecho en la posición inicial y repite el movimiento llevando el pie izquierdo hacia el codo derecho. Continúa alternando los lados, moviéndote a un ritmo controlado. Mantén las caderas niveladas y evita levantarlas demasiado alto o dejarlas caer demasiado bajo. Mantén un patrón de respiración constante durante todo el ejercicio. Repite el número de repeticiones deseado.",
     "sets": 3,
-    "reps": 12,
+    "reps": 15,
     "rest": 20,
     "difficulty": "medium"
   },
   {
-    "id": "side-plank",
-    "name": "Plancha lateral",
+    "id": "gv-0262",
+    "name": "Crunch cruzado",
     "category": "core",
-    "muscles": ["Oblicuos", "Core", "Cadera"],
+    "muscles": [
+      "Abdominales",
+      "Oblicuos"
+    ],
     "equipment": "none",
-    "description": "Apoya el antebrazo y el pie lateral formando una línea recta. Eleva la cadera y mantenla alta. Cambia de lado entre series.",
-    "sets": 2,
+    "description": "Túmbate sobre tu espalda con las rodillas flexionadas y los pies apoyados en el suelo. Coloca las manos detrás de la cabeza con los codos apuntando hacia afuera. Activando el abdomen, levanta la parte superior del cuerpo del suelo y gira para llevar el codo derecho hacia la rodilla izquierda. Haz una pausa por un momento en la parte superior, luego baja lentamente la parte superior del cuerpo de vuelta a la posición inicial. Repite en el otro lado, llevando el codo izquierdo hacia la rodilla derecha. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0274",
+    "name": "Crunch en suelo",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Flexores de cadera"
+    ],
+    "equipment": "none",
+    "description": "Túmbate sobre tu espalda con las rodillas flexionadas y los pies apoyados en el suelo. Coloca las manos detrás de la cabeza con los codos apuntando hacia afuera. Activa el abdomen y levanta los hombros del suelo, flexionándote hacia adelante en dirección a las rodillas. Haz una pausa breve en la parte alta, luego baja lentamente los hombros de vuelta a la posición inicial. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0276",
+    "name": "Dead bug",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Flexores de cadera",
+      "Lumbares"
+    ],
+    "equipment": "none",
+    "description": "Túmbate boca arriba con los brazos extendidos hacia el techo. Flexiona las rodillas y levanta las piernas del suelo, formando un ángulo de 90 grados en las caderas y las rodillas. Activa el core y la zona lumbar para presionar la zona lumbar contra el suelo. Baja lentamente el brazo derecho y la pierna izquierda hacia el suelo, manteniéndolos rectos y justo por encima del suelo. Haz una pausa breve y luego vuelve a la posición inicial. Repite el movimiento con el brazo izquierdo y la pierna derecha. Continúa alternando lados durante el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0407",
+    "name": "Flexión lateral con mancuerna",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Oblicuos"
+    ],
+    "equipment": "dumbbells",
+    "description": "Ponte de pie con la espalda recta y los pies separados a la altura de los hombros, sujetando una mancuerna con una mano y dejando que cuelgue a tu costado. Manteniendo la espalda recta y el core activado, inclínate lentamente hacia el lado opuesto de la mancuerna, bajando el peso tanto como te sea posible con comodidad. Haz una pausa por un momento, luego regresa lentamente a la posición inicial. Repite el número de repeticiones deseado, luego cambia de lado y repite.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0464",
+    "name": "Plancha frontal con giro",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Oblicuos",
+      "Hombros"
+    ],
+    "equipment": "none",
+    "description": "Comienza en posición de plancha alta con las manos directamente debajo de los hombros y el cuerpo en línea recta de la cabeza a los pies. Activa el core y los glúteos para mantener una posición estable. Gira el torso hacia la derecha, levantando el brazo derecho y extendiéndolo hacia el techo. Mantén las caderas y las piernas estables mientras giras. Mantén la posición por un momento, luego regresa a la posición inicial. Repite el giro hacia el lado izquierdo. Continúa alternando lados durante el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-1471",
+    "name": "Oruga (inchworm)",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Hombros",
+      "Isquiotibiales"
+    ],
+    "equipment": "none",
+    "description": "Comienza de pie con los pies separados a la altura de las caderas. Inclínate hacia adelante desde la cintura y coloca las manos en el suelo frente a ti. Camina con las manos hacia adelante hasta quedar en posición de plancha alta, con el cuerpo en línea recta de la cabeza a los pies. Haz una pausa breve, luego camina con las manos de vuelta hacia los pies, manteniendo las piernas lo más rectas posible. Cuando las manos lleguen a los pies, ponte de pie de nuevo en la posición inicial. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0507",
+    "name": "Abdominal navaja",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Flexores de cadera"
+    ],
+    "equipment": "none",
+    "description": "Túmbate boca arriba con las piernas extendidas y los brazos por encima de la cabeza. Activa el core y levanta las piernas y la parte superior del cuerpo al mismo tiempo, llevando las manos hacia los dedos de los pies. Haz una pausa por un momento en la parte superior, luego baja lentamente las piernas y la parte superior del cuerpo de vuelta a la posición inicial. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0524",
+    "name": "Press inclinado con kettlebell",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Hombros",
+      "Tríceps",
+      "Oblicuos"
+    ],
+    "equipment": "kettlebell",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros, sosteniendo una pesa rusa en la mano derecha. Dobla ligeramente las rodillas y empuja la pesa rusa por encima de la cabeza con el brazo derecho, manteniendo el codo bloqueado. Rota el torso hacia la izquierda, trasladando tu peso al pie izquierdo. Flexiona la rodilla izquierda y baja el torso hacia el suelo, manteniendo el brazo derecho extendido por encima de la cabeza. Mientras bajas, mantén la mirada en la pesa rusa y el pecho elevado. Cuando tu mano izquierda toque el suelo, empuja con el pie izquierdo y estira la pierna izquierda, llevando las caderas hacia adelante. Mientras llevas las caderas hacia adelante, usa el core y el brazo derecho para empujar la pesa rusa de vuelta a la posición inicial. Repite el número de repeticiones deseado, luego cambia de lado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0532",
+    "name": "Kettlebell en ocho",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Hombros",
+      "Antebrazos"
+    ],
+    "equipment": "kettlebell",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros, sujetando una pesa rusa con una mano. Flexiona ligeramente las rodillas e inclínate hacia adelante desde las caderas, manteniendo la espalda recta. Pasa la pesa rusa entre las piernas, cambiándola de mano cuando llegue detrás de las piernas. Cuando la pesa rusa vuelva hacia adelante, pásala a la otra mano entre las piernas. Continúa pasando la pesa rusa entre las piernas con un movimiento en forma de ocho. Mantén un ritmo constante y activa el core durante todo el ejercicio. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0554",
+    "name": "Molino de viento con kettlebell",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Oblicuos",
+      "Hombros"
+    ],
+    "equipment": "kettlebell",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros, sujetando una pesa rusa en la mano derecha por encima de la cabeza. Rota el pie izquierdo hacia afuera unos 45 grados y mantén el pie derecho apuntando hacia adelante. Inclina el torso hacia el lado izquierdo, manteniendo el brazo derecho extendido por encima de la cabeza y la mirada en la pesa rusa. Baja el torso tanto como puedas mientras mantienes el brazo derecho recto y el brazo izquierdo extendido hacia el lado. Haz una pausa breve, luego vuelve a la posición inicial empujando con el pie derecho y activando los oblicuos. Repite el número de repeticiones deseado, luego cambia de lado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-1688",
+    "name": "Zancada con giro",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Cuádriceps",
+      "Glúteos",
+      "Isquiotibiales"
+    ],
+    "equipment": "none",
+    "description": "Comienza de pie con los pies separados a la altura de los hombros. Da un paso adelante con el pie derecho, bajando el cuerpo hasta una posición de zancada. Al hacer la zancada, gira el torso hacia la derecha, llevando el codo izquierdo hacia la rodilla derecha. Haz una pausa breve y luego vuelve a la posición inicial. Repite hacia el otro lado, dando un paso adelante con el pie izquierdo y girando el torso hacia la izquierda. Continúa alternando lados durante el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0865",
+    "name": "Elevación de piernas y cadera",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Flexores de cadera"
+    ],
+    "equipment": "none",
+    "description": "Túmbate sobre tu espalda con las piernas extendidas y los brazos a los lados. Coloca las manos debajo de los glúteos como apoyo. Activa el core y levanta las piernas del suelo, elevándolas hacia el techo. Haz una pausa por un momento en la parte superior, luego baja lentamente las piernas de vuelta a la posición inicial. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-3147",
+    "name": "Báscula pélvica",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Lumbares"
+    ],
+    "equipment": "none",
+    "description": "Túmbate sobre tu espalda con las rodillas flexionadas y los pies apoyados en el suelo. Coloca las manos a los lados del cuerpo. Activa el abdomen e inclina la pelvis hacia arriba, presionando la zona lumbar contra el suelo. Mantén esta posición durante unos segundos, concentrándote en contraer el abdomen. Deshaz la inclinación y vuelve a la posición inicial. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-1687",
+    "name": "Paso atrás con alcance sobre cabeza",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Glúteos",
+      "Isquiotibiales",
+      "Cuádriceps"
+    ],
+    "equipment": "none",
+    "description": "Ponte de pie con los pies separados a la altura de las caderas y los brazos a los lados del cuerpo. Da un paso hacia atrás con el pie derecho, apoyándote en la punta del pie. Flexiona la rodilla izquierda y baja el cuerpo a una posición de zancada. Mientras bajas a la zancada, lleva simultáneamente los brazos por encima de la cabeza. Haz una pausa por un momento en la parte baja de la zancada y luego vuelve a la posición inicial empujando con el talón izquierdo y llevando el pie derecho hacia adelante. Repite el movimiento hacia el otro lado, retrocediendo con el pie izquierdo y flexionando la rodilla derecha. Continúa alternando lados durante el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-3119",
+    "name": "Sentadilla profunda",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Cuádriceps",
+      "Glúteos"
+    ],
+    "equipment": "none",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros, los dedos de los pies ligeramente hacia afuera. Baja el cuerpo flexionando las rodillas y empujando las caderas hacia atrás como si te sentaras en una silla. Mantén el pecho hacia arriba y la espalda recta durante todo el movimiento. Baja hasta que los muslos queden paralelos al suelo o hasta donde puedas llegar cómodamente. Haz una pausa por un momento en la parte inferior, luego empuja con los talones para regresar a la posición inicial. Repite el número de repeticiones deseado.",
+    "sets": 3,
     "duration": 20,
-    "rest": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0872",
+    "name": "Crunch inverso",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Flexores de cadera"
+    ],
+    "equipment": "none",
+    "description": "Túmbate boca arriba con los brazos extendidos a los lados del cuerpo. Flexiona las rodillas y levanta los pies del suelo, llevando los muslos perpendiculares al suelo. Contrae el abdomen y eleva las caderas del suelo, llevando las rodillas hacia el pecho. Haz una pausa por un momento en la parte superior, luego baja lentamente las caderas de vuelta a la posición inicial. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0687",
+    "name": "Russian twist",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Oblicuos"
+    ],
+    "equipment": "none",
+    "description": "Siéntate en el suelo con las rodillas flexionadas y los pies apoyados en el suelo. Inclínate ligeramente hacia atrás manteniendo la espalda recta y el core activado. Junta las manos frente al pecho o sujeta una pesa si lo deseas. Levanta los pies del suelo, equilibrándote sobre los isquiones. Gira el torso hacia la derecha, llevando las manos o la pesa hacia el lado derecho del cuerpo. Haz una pausa por un momento, luego gira el torso hacia la izquierda, llevando las manos o la pesa hacia el lado izquierdo del cuerpo. Continúa alternando lados durante el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-3699",
+    "name": "Toque de hombro",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Hombros",
+      "Tríceps"
+    ],
+    "equipment": "none",
+    "description": "Comienza en una posición de plancha alta con las manos justo debajo de los hombros y el cuerpo en línea recta. Activa el core y levanta la mano derecha del suelo, extendiéndola para tocar el hombro izquierdo. Coloca la mano derecha de nuevo en el suelo y repite tocando el hombro derecho con la mano izquierda. Continúa alternando los toques de hombro mientras mantienes las caderas y el torso estables. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0705",
+    "name": "Puente lateral",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Oblicuos",
+      "Glúteos"
+    ],
+    "equipment": "none",
+    "description": "Túmbate de lado con las piernas extendidas y una sobre la otra. Coloca el antebrazo en el suelo justo debajo del hombro, con el codo flexionado en un ángulo de 90 grados. Activa el core y levanta las caderas del suelo, formando una línea recta desde la cabeza hasta los pies. Mantén esta posición durante el tiempo deseado. Baja las caderas de vuelta a la posición inicial. Repite del otro lado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-0777",
+    "name": "Rotación de tronco con mancuerna",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Oblicuos",
+      "Lumbares"
+    ],
+    "equipment": "dumbbells",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros y sujeta una mancuerna con una mano. Flexiona ligeramente las rodillas e inclínate hacia adelante desde la cintura, manteniendo la espalda recta. Extiende el brazo con la mancuerna hacia el pie opuesto, rotando el torso mientras lo haces. Regresa a la posición inicial y repite del otro lado. Continúa alternando lados durante el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-2329",
+    "name": "Giro de columna",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Oblicuos",
+      "Lumbares"
+    ],
+    "equipment": "none",
+    "description": "Siéntate en el suelo con las piernas extendidas frente a ti. Dobla las rodillas y coloca los pies planos sobre el suelo, separados a la altura de la cadera. Coloca las manos detrás de la cabeza con los codos apuntando hacia afuera. Activa el abdomen y gira lentamente el torso hacia la derecha, llevando el codo derecho hacia la rodilla izquierda. Haz una pausa por un momento al final de la rotación, luego regresa lentamente a la posición inicial. Repite el giro hacia el lado izquierdo, llevando el codo izquierdo hacia la rodilla derecha. Continúa alternando lados durante el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-2802",
+    "name": "Elevación de piernas con giro",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Oblicuos",
+      "Flexores de cadera"
+    ],
+    "equipment": "none",
+    "description": "Túmbate sobre tu espalda con las piernas extendidas y los brazos a los lados. Coloca las manos debajo de los glúteos como apoyo. Activa el abdomen y levanta ambas piernas del suelo, manteniéndolas rectas. Mientras levantas las piernas, gira las caderas hacia un lado, llevando las piernas hacia el hombro opuesto. Haz una pausa por un momento en la parte superior, luego baja lentamente las piernas de vuelta a la posición inicial. Repite el movimiento, esta vez girando las caderas hacia el otro lado. Continúa alternando lados durante el número de repeticiones deseado.",
+    "sets": 3,
+    "reps": 15,
+    "rest": 20,
+    "difficulty": "medium"
+  },
+  {
+    "id": "gv-3420",
+    "name": "V-sit",
+    "category": "core",
+    "muscles": [
+      "Abdominales",
+      "Flexores de cadera"
+    ],
+    "equipment": "none",
+    "description": "Siéntate en el suelo con las piernas extendidas frente a ti. Inclínate ligeramente hacia atrás y levanta las piernas del suelo, manteniéndolas rectas. Al mismo tiempo, levanta la parte superior del cuerpo del suelo y extiende los brazos hacia las piernas. Mantén esta posición durante unos segundos, luego baja lentamente la parte superior del cuerpo y las piernas de nuevo a la posición inicial. Repite el número de repeticiones deseado.",
+    "sets": 3,
+    "duration": 20,
+    "rest": 20,
     "difficulty": "medium"
   },
   {
     "id": "squats",
     "name": "Sentadillas",
     "category": "fullbody",
-    "muscles": ["Cuádriceps", "Glúteos", "Isquiotibiales"],
+    "muscles": [
+      "Cuádriceps",
+      "Glúteos",
+      "Isquiotibiales"
+    ],
     "equipment": "none",
     "description": "Pies a la anchura de hombros, baja flexionando rodillas hasta que los muslos queden paralelos al suelo. Mantén el pecho erguido y las rodillas en línea con los pies.",
     "sets": 3,
@@ -175,7 +646,11 @@
     "id": "push-ups",
     "name": "Flexiones",
     "category": "fullbody",
-    "muscles": ["Pecho", "Tríceps", "Hombros"],
+    "muscles": [
+      "Pecho",
+      "Tríceps",
+      "Hombros"
+    ],
     "equipment": "none",
     "description": "Manos a la anchura de hombros, baja el pecho hasta rozar el suelo manteniendo el cuerpo recto. Empuja explosivamente en la subida.",
     "sets": 3,
@@ -187,7 +662,11 @@
     "id": "lunges",
     "name": "Zancadas alternas",
     "category": "fullbody",
-    "muscles": ["Cuádriceps", "Glúteos", "Equilibrio"],
+    "muscles": [
+      "Cuádriceps",
+      "Glúteos",
+      "Equilibrio"
+    ],
     "equipment": "none",
     "description": "Da un paso adelante y baja la rodilla trasera casi hasta el suelo. Empuja con el talón delantero para volver. Alterna piernas en cada repetición.",
     "sets": 3,
@@ -199,7 +678,10 @@
     "id": "burpees",
     "name": "Burpees",
     "category": "fullbody",
-    "muscles": ["Fullbody", "Cardiovascular"],
+    "muscles": [
+      "Fullbody",
+      "Cardiovascular"
+    ],
     "equipment": "none",
     "description": "Desde de pie: agáchate, apoya las manos, salta a plancha, haz una flexión, vuelve a la cuclillas y salta con brazos arriba. Mantén el ritmo constante.",
     "sets": 3,
@@ -211,7 +693,11 @@
     "id": "superman",
     "name": "Superman (lumbar)",
     "category": "fullbody",
-    "muscles": ["Lumbares", "Glúteos", "Espalda alta"],
+    "muscles": [
+      "Lumbares",
+      "Glúteos",
+      "Espalda alta"
+    ],
     "equipment": "none",
     "description": "Tumbado boca abajo con brazos extendidos, eleva simultáneamente brazos y piernas manteniendo la tensión 2 segundos. Baja de forma controlada.",
     "sets": 3,
@@ -223,7 +709,10 @@
     "id": "tricep-dips",
     "name": "Fondos de tríceps",
     "category": "fullbody",
-    "muscles": ["Tríceps", "Hombros"],
+    "muscles": [
+      "Tríceps",
+      "Hombros"
+    ],
     "equipment": "none",
     "description": "Apoya las manos en una silla o el borde de la cama con los dedos hacia adelante. Baja el cuerpo flexionando los codos y empuja para subir.",
     "sets": 3,
@@ -235,7 +724,11 @@
     "id": "sumo-squat",
     "name": "Sentadilla sumo",
     "category": "fullbody",
-    "muscles": ["Aductores", "Glúteos", "Cuádriceps"],
+    "muscles": [
+      "Aductores",
+      "Glúteos",
+      "Cuádriceps"
+    ],
     "equipment": "none",
     "description": "Pies más separados que la anchura de hombros con los pies girados 45°. Baja manteniendo la espalda recta. Trabaja especialmente la cara interna del muslo.",
     "sets": 3,
@@ -247,7 +740,10 @@
     "id": "hip-flexor-stretch",
     "name": "Estiramiento de flexores de cadera",
     "category": "mobility",
-    "muscles": ["Flexores de cadera", "Cuádriceps"],
+    "muscles": [
+      "Flexores de cadera",
+      "Cuádriceps"
+    ],
     "equipment": "none",
     "description": "Arrodíllate en una rodilla y empuja la cadera hacia adelante hasta sentir el estiramiento. Mantén el torso erguido. Cambia de pierna a la mitad.",
     "duration": 30,
@@ -258,7 +754,10 @@
     "id": "hip-circles",
     "name": "Círculos de cadera",
     "category": "mobility",
-    "muscles": ["Cadera", "Core"],
+    "muscles": [
+      "Cadera",
+      "Core"
+    ],
     "equipment": "none",
     "description": "Con manos en la cadera y pies a la anchura de hombros, traza círculos amplios con la pelvis en ambas direcciones. Ayuda a liberar tensión lumbar.",
     "duration": 30,
@@ -269,7 +768,10 @@
     "id": "pike-push-ups",
     "name": "Flexiones en pica",
     "category": "upper",
-    "muscles": ["Hombros", "Tríceps"],
+    "muscles": [
+      "Hombros",
+      "Tríceps"
+    ],
     "equipment": "none",
     "description": "En posición de pica (caderas altas), baja la cabeza hacia el suelo flexionando los codos. Empuja hacia arriba. Trabaja los hombros como en un press militar.",
     "sets": 3,
@@ -281,7 +783,10 @@
     "id": "calf-raises",
     "name": "Elevaciones de gemelos",
     "category": "lower",
-    "muscles": ["Gemelos", "Soleos"],
+    "muscles": [
+      "Gemelos",
+      "Soleos"
+    ],
     "equipment": "none",
     "description": "De pie con los pies juntos, elévate sobre las puntas de los pies al máximo y baja de forma controlada. Esencial para el footwork y la explosividad.",
     "sets": 3,
@@ -293,7 +798,11 @@
     "id": "boxing-jab-cross",
     "name": "Combinación 1-2 (Jab-Cross)",
     "category": "boxing",
-    "muscles": ["Hombros", "Pecho", "Core"],
+    "muscles": [
+      "Hombros",
+      "Pecho",
+      "Core"
+    ],
     "equipment": "none",
     "description": "Secuencia base del boxeo. Jab de exploración seguido de cross potente. Trabaja la distancia y la rotación de caderas.",
     "duration": 60,
@@ -304,7 +813,12 @@
     "id": "boxing-1-2-3",
     "name": "Combinación 1-2-3 (Jab-Cross-Gancho)",
     "category": "boxing",
-    "muscles": ["Hombros", "Pecho", "Bíceps", "Core"],
+    "muscles": [
+      "Hombros",
+      "Pecho",
+      "Bíceps",
+      "Core"
+    ],
     "equipment": "none",
     "description": "Extensión del 1-2 con gancho izquierdo de remate. Requiere buen pivote de cadera en el gancho. Ideal para trabajar fluidez de combinaciones.",
     "duration": 60,
@@ -315,7 +829,12 @@
     "id": "boxing-1-2-3-2",
     "name": "Combinación 1-2-3-2",
     "category": "boxing",
-    "muscles": ["Hombros", "Pecho", "Bíceps", "Core"],
+    "muscles": [
+      "Hombros",
+      "Pecho",
+      "Bíceps",
+      "Core"
+    ],
     "equipment": "none",
     "description": "Cuatro golpes fluidos: jab, cross, gancho izq, cross de remate. El segundo cross debe llegar con el peso ya transferido. Combinación muy usada en sparring.",
     "duration": 60,
@@ -326,7 +845,11 @@
     "id": "boxing-body-head",
     "name": "Golpe al cuerpo + cabeza (2b-3)",
     "category": "boxing",
-    "muscles": ["Hombros", "Oblicuos", "Core"],
+    "muscles": [
+      "Hombros",
+      "Oblicuos",
+      "Core"
+    ],
     "equipment": "none",
     "description": "Cross al cuerpo (doblando rodillas) seguido de gancho a la cabeza. Enseña a abrir la guardia del rival trabajando distintas alturas.",
     "duration": 60,
@@ -337,7 +860,11 @@
     "id": "boxing-slip-counter",
     "name": "Esquiva + Contraataque (Slip-2-3)",
     "category": "boxing",
-    "muscles": ["Cuello", "Core", "Hombros"],
+    "muscles": [
+      "Cuello",
+      "Core",
+      "Hombros"
+    ],
     "equipment": "none",
     "description": "Esquiva lateral imaginando un jab entrante, contraataca con cross y gancho. Trabaja el ritmo defensivo-ofensivo y el movimiento de cabeza.",
     "duration": 60,
@@ -348,7 +875,11 @@
     "id": "boxing-double-jab-cross",
     "name": "Doble Jab + Cross (1-1-2)",
     "category": "boxing",
-    "muscles": ["Hombros", "Pecho", "Core"],
+    "muscles": [
+      "Hombros",
+      "Pecho",
+      "Core"
+    ],
     "equipment": "none",
     "description": "Jab doble para ganar distancia y distraer, cross potente de remate. El primer jab mide, el segundo presiona, el cross remata. Combinación de control de distancia.",
     "duration": 60,
@@ -359,7 +890,12 @@
     "id": "boxing-uppercut-hook",
     "name": "Uppercut + Gancho (5-3)",
     "category": "boxing",
-    "muscles": ["Bíceps", "Hombros", "Core", "Piernas"],
+    "muscles": [
+      "Bíceps",
+      "Hombros",
+      "Core",
+      "Piernas"
+    ],
     "equipment": "none",
     "description": "Uppercut izquierdo al cuerpo subiendo hacia el mentón, seguido de gancho izquierdo. Golpes cortos de mucho poder. Requiere bajar el centro de gravedad.",
     "duration": 60,
@@ -370,7 +906,11 @@
     "id": "boxing-jab-slip-cross",
     "name": "Jab + Esquiva + Cross (1-Slip-2)",
     "category": "boxing",
-    "muscles": ["Hombros", "Core", "Cuello"],
+    "muscles": [
+      "Hombros",
+      "Core",
+      "Cuello"
+    ],
     "equipment": "none",
     "description": "Jab para provocar respuesta, esquiva del contraataque imaginario, cross de remate. Trabaja la lectura de la situación y el movimiento de cabeza entre golpes.",
     "duration": 60,
@@ -381,7 +921,11 @@
     "id": "boxing-footwork-jab",
     "name": "Trabajo de pies + Jab (Step-1-Step)",
     "category": "boxing",
-    "muscles": ["Pantorrillas", "Cuádriceps", "Hombros"],
+    "muscles": [
+      "Pantorrillas",
+      "Cuádriceps",
+      "Hombros"
+    ],
     "equipment": "none",
     "description": "Paso de avance, jab, paso de salida. Entrena el movimiento circular y la entrada/salida de la zona de pegada. Base del boxeo de movimiento.",
     "duration": 60,
@@ -392,7 +936,12 @@
     "id": "boxing-power-cross",
     "name": "Cross de poder (2 × series)",
     "category": "boxing",
-    "muscles": ["Pecho", "Hombros", "Core", "Piernas"],
+    "muscles": [
+      "Pecho",
+      "Hombros",
+      "Core",
+      "Piernas"
+    ],
     "equipment": "none",
     "description": "Series de cross máximos con recuperación entre cada golpe. Trabaja la generación de potencia desde el suelo, la rotación de cadera y la extensión completa del brazo.",
     "duration": 45,

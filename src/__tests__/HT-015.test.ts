@@ -15,7 +15,7 @@ test('getRoutineById warmup-boxing resolves 8 exercises in order', () => {
   const r = exerciseService.getRoutineById('warmup-boxing')
   expect(r).toBeDefined()
   expect(r!.resolvedExercises).toHaveLength(8)
-  expect(r!.resolvedExercises[0].id).toBe('neck-rotations')
+  expect(r!.resolvedExercises[0].id).toBe('gv-1428')
 })
 
 test('invalid exerciseId in routine is omitted silently', () => {

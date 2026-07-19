@@ -16,7 +16,8 @@ function makeTraining(overrides: Partial<Training> & { roundDurations?: number[]
       hpmMax: 0,
       powerTrend: [],
       isFatigued: false,
-      isCadenceDropped: false
+      isCadenceDropped: false,
+      calories: 0
     }
   }))
   return {
@@ -31,6 +32,7 @@ function makeTraining(overrides: Partial<Training> & { roundDurations?: number[]
     totalImpacts: 0,
     powerMax: 0,
     hpmAverage: 0,
+    calories: 0,
     ...rest
   }
 }
@@ -45,7 +47,7 @@ describe('HT-003 — Compartir sesión en redes sociales', () => {
       const result = generateShareText(training)
 
       // Assert
-      expect(result).toBe('¡Vaya sesión! 2 min y una media de 46 HPM. ¡A tope! 💪\n#hittracker #boxing #training')
+      expect(result).toBe('¡Vaya sesión! 2 min, una media de 46 HPM y 0 kCal quemadas. ¡A tope! 💪\n#hittracker #boxing #training')
     })
 
     it('should use "< 1 min" when total duration rounds to 0', () => {
@@ -114,7 +116,7 @@ describe('HT-003 — Compartir sesión en redes sociales', () => {
     it('scenario 1: 125000ms total + 45.7 HPM → exact template output', () => {
       const training = makeTraining({ roundDurations: [125000], hpmAverage: 45.7 })
       expect(generateShareText(training)).toBe(
-        '¡Vaya sesión! 2 min y una media de 46 HPM. ¡A tope! 💪\n#hittracker #boxing #training'
+        '¡Vaya sesión! 2 min, una media de 46 HPM y 0 kCal quemadas. ¡A tope! 💪\n#hittracker #boxing #training'
       )
     })
 

@@ -19,7 +19,7 @@ const formatDuration = (ms: number) => {
 // Fixtures
 const emptyStats: RoundStats = {
   duration: 0, totalImpacts: 0,
-  powerMax: 0, hpmAverage: 0, hpmMax: 0, powerTrend: [], isFatigued: false, isCadenceDropped: false
+  powerMax: 0, hpmAverage: 0, hpmMax: 0, powerTrend: [], isFatigued: false, isCadenceDropped: false, calories: 0
 }
 
 const emptyProfile: CalibrationProfile = {
@@ -37,7 +37,7 @@ function makeTraining(rounds: Round[]): Training {
   return {
     id: 'abc', createdAt: 0, device: { mac: '00:00', name: 'HIT' },
     profile: emptyProfile, rounds, roundDuration: 60, numRounds: rounds.length,
-    restDuration: 30, totalImpacts: 0, powerMax: 0, hpmAverage: 0
+    restDuration: 30, totalImpacts: 0, powerMax: 0, hpmAverage: 0, calories: 0
   }
 }
 

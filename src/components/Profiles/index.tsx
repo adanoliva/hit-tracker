@@ -264,7 +264,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
     if (!editing) return
     updateProfile(editing.id, {
       name: editing.name, threshold: editing.threshold,
-      sensitivity: editing.sensitivity,
+      sensitivity: editing.sensitivity, weightKg: editing.weightKg,
     })
     setEditing(null)
   }
@@ -404,6 +404,21 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                 color={colors.secondary}
                 onChange={(v) => setEditing({ ...editing, sensitivity: v })}
               />
+              <View style={sf.container}>
+                <Text style={sf.label}>Peso (kg)</Text>
+                <Text style={sf.hint}>Usado para estimar las kCal quemadas en las sesiones.</Text>
+                <TextInput
+                  style={s.input}
+                  value={editing.weightKg?.toString() ?? ''}
+                  onChangeText={(t) => {
+                    const v = parseInt(t, 10)
+                    setEditing({ ...editing, weightKg: Number.isFinite(v) ? v : undefined })
+                  }}
+                  placeholder="70"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="numeric"
+                />
+              </View>
               {/* ponytail: hidden=true — set to false to expose rebound tuning */}
               {false && (
                 <SliderField

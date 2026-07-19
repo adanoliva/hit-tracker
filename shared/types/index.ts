@@ -47,6 +47,7 @@ export interface CalibrationProfile {
   sensitivity: number
   rebound?: number   // personalized cooldown in ms derived from real rebound data
   calibrationData?: CalibrationData
+  weightKg?: number
   createdAt: number
 }
 
@@ -59,6 +60,7 @@ export interface RoundStats {
   powerTrend: number[]
   isFatigued: boolean
   isCadenceDropped: boolean
+  calories: number
 }
 
 export interface Round {
@@ -85,6 +87,11 @@ export interface Training {
   totalImpacts: number
   powerMax: number
   hpmAverage: number
+  calories: number
+  warmupCalories?: number
+  coreCalories?: number
+  warmupDurationMs?: number
+  coreDurationMs?: number
 }
 
 export interface AppConfig {
@@ -101,7 +108,7 @@ export interface Exercise {
   name: string
   category: ExerciseCategory
   muscles: string[]
-  equipment: 'none' | 'dumbbells' | 'pull-up-bar'
+  equipment: 'none' | 'dumbbells' | 'kettlebell' | 'pull-up-bar'
   description: string
   imageUrl?: string
   duration?: number

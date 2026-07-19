@@ -4,7 +4,7 @@
 
 HIT TRACKER es una app móvil Android para monitorizar entrenamientos de boxeo en tiempo real. Un sensor ESP32 colocado en el saco detecta los golpes vía Bluetooth y la app registra intensidad, frecuencia y evolución a lo largo de las rondas.
 
-La app también incluye un módulo de entrenamiento físico completo (calentamiento, core y boxeo) con planes personalizables y un catálogo de ejercicios integrado con la base de datos pública wger.
+La app también incluye un módulo de entrenamiento físico completo (calentamiento, core y boxeo) con planes personalizables. El catálogo base de calentamiento y core está adaptado del dataset público [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset) (MIT License); además permite buscar e importar ejercicios adicionales desde la base de datos pública wger.
 
 ---
 

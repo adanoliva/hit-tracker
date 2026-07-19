@@ -16,6 +16,7 @@ import { useCustomExerciseStore } from './src/core/stores/customExerciseStore'
 import { storage } from './src/services/storage'
 import { colors } from './src/theme'
 import { migrationService } from '@shared/services/migration'
+import { estimateTrainingCalories } from '@shared/services/calories'
 
 SplashScreen.preventAutoHideAsync()
 activateKeepAwakeAsync('global')
@@ -64,9 +65,9 @@ export default function App() {
       loadWorkoutPlans(),
       loadCustomExercises(),
     ]).then(([trainings, profiles, devices]) => {
-      const migrated = migrationService.migrate(trainings)
+      const migrated = migrationService.migrate(trainings).map(estimateTrainingCalories)
       migrated
-        .filter((t, i) => t.appVersion !== trainings[i].appVersion)
+        .filter((t, i) => t !== trainings[i])
         .forEach((t) => storage.saveTraining(t))
       setTrainings(migrated)
       if (profiles.length > 0) setProfiles(profiles)

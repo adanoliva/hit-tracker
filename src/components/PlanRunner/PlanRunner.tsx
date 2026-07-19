@@ -12,6 +12,7 @@ import { useTraining } from '../../core/hooks/useTraining'
 import { useSensorData } from '../../core/hooks/useSensorData'
 import { useBleReading } from '../../core/hooks/useBleReading'
 import { trainingService } from '../../core/services/trainingService'
+import { MET_WARMUP, MET_CORE, calcCalories, DEFAULT_WEIGHT_KG } from '@shared/services/calories'
 import { exerciseService } from '../../core/services/exerciseService'
 import { useCustomExerciseStore } from '../../core/stores/customExerciseStore'
 import { audioService } from '../../services/audio'
@@ -64,6 +65,9 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   const userPowerRef = useRef(getUserPowerMax(profile.id))
 
   const [planPhase, setPlanPhase] = useState<PlanPhase>(() => firstPhase(plan))
+  const phaseStartRef = useRef(Date.now())
+  const physicalCaloriesRef = useRef<{ warmupCalories?: number; coreCalories?: number; warmupDurationMs?: number; coreDurationMs?: number }>({})
+  const weightKg = profile.weightKg ?? DEFAULT_WEIGHT_KG
 
   const { impacts, powerMax, powerMaxMag, hpmStats, processReading, reset } = useSensorData(profile)
   const {
@@ -93,7 +97,15 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   useEffect(() => {
     if (finishedTraining && !savedRef.current) {
       savedRef.current = true
-      addTraining(finishedTraining)
+      const { warmupCalories = 0, coreCalories = 0, warmupDurationMs, coreDurationMs } = physicalCaloriesRef.current
+      addTraining({
+        ...finishedTraining,
+        warmupCalories: warmupDurationMs !== undefined ? warmupCalories : undefined,
+        coreCalories: coreDurationMs !== undefined ? coreCalories : undefined,
+        warmupDurationMs,
+        coreDurationMs,
+        calories: finishedTraining.calories + warmupCalories + coreCalories
+      })
     }
   }, [finishedTraining])
 
@@ -142,11 +154,21 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   })
 
   const handleWarmupComplete = () => {
+    const warmupDurationMs = Date.now() - phaseStartRef.current
+    physicalCaloriesRef.current.warmupDurationMs = warmupDurationMs
+    physicalCaloriesRef.current.warmupCalories = calcCalories(MET_WARMUP, warmupDurationMs, weightKg)
+    phaseStartRef.current = Date.now()
     if (plan.coreExerciseIds.length > 0) { setPlanPhase('core'); return }
     setPlanPhase('boxing')
   }
 
-  const handleCoreComplete = () => setPlanPhase('boxing')
+  const handleCoreComplete = () => {
+    const coreDurationMs = Date.now() - phaseStartRef.current
+    physicalCaloriesRef.current.coreDurationMs = coreDurationMs
+    physicalCaloriesRef.current.coreCalories = calcCalories(MET_CORE, coreDurationMs, weightKg)
+    phaseStartRef.current = Date.now()
+    setPlanPhase('boxing')
+  }
 
   const handlePhysicalAbort = () => onAbort()
 

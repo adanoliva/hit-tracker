@@ -18,6 +18,7 @@
 | ✅ | `HT-003` Compartir sesión (PNG + texto) |
 | ✅ | `HT-008` Power máximo basado en media de las últimas 5 sesiones |
 | ✅ | `HT-010` Sistema de migraciones de datos (migrationService) |
+| ✅ | `HT-014` / `HT-V3` Asistente de auto-calibración guiado + firmware V3 (detección en sensor, sync BLE) |
 
 ### V1.1 — Entrenamiento físico *(completo)*
 
@@ -31,6 +32,9 @@
 | ✅ | Integración wger API — búsqueda e importación de ejercicios |
 | ✅ | RoundComboEditor — combos por round con notación de boxeo |
 | ✅ | Fase de boxeo sin sensor (DUMMY_DEVICE) — el plan funciona sin BLE |
+| ✅ | `HT-022` Decaimiento exponencial del dynamicFloor (derivado de rebound calibrado) |
+| ✅ | `HT-023` Aviso sonoro al superar el máximo histórico (con ducking de audio) |
+| ✅ | `HT-024` Aviso de bajada de cadencia, independiente de fatiga por potencia |
 
 ### V2 — Calibración y nube *(pendiente)*
 
@@ -89,6 +93,4 @@
 | Prioridad | Descripción |
 |---|---|
 | Media | Pantalla blanca antes del splash en APK release (`windowBackground` del tema Android) |
-| Media | Modo calibración guiado: flujo de golpes en series para aprender umbrales reales |
 | Baja | % de valid hit configurable por perfil (actualmente sin campo `validHitThreshold` en tipos) |
-| Baja | Sonidos mobile — revisión y reemplazo de archivos de audio |

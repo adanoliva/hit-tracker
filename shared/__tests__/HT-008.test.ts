@@ -16,7 +16,7 @@ function makeTraining(profileId: string, powerMax: number): Training {
     device: { mac: 'AA:BB', name: 'Sensor' },
     profile, rounds: [], roundDuration: 0, numRounds: 0,
     restDuration: 0, totalImpacts: 0,
-    powerMax, hpmAverage: 0
+    powerMax, hpmAverage: 0, calories: 0
   }
 }
 

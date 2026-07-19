@@ -6,14 +6,14 @@
     "durationMin": 8,
     "difficulty": "easy",
     "exercises": [
-      { "exerciseId": "neck-rotations" },
-      { "exerciseId": "shoulder-circles" },
-      { "exerciseId": "wrist-rotations" },
-      { "exerciseId": "jumping-jacks" },
-      { "exerciseId": "shadow-boxing" },
-      { "exerciseId": "high-knees" },
-      { "exerciseId": "tricep-stretch" },
-      { "exerciseId": "chest-opener" }
+      { "exerciseId": "gv-1428" },
+      { "exerciseId": "gv-0721" },
+      { "exerciseId": "gv-3223" },
+      { "exerciseId": "gv-0685" },
+      { "exerciseId": "gv-3655" },
+      { "exerciseId": "gv-0630" },
+      { "exerciseId": "gv-1160" },
+      { "exerciseId": "gv-3561" }
     ]
   },
   {
@@ -23,12 +23,12 @@
     "durationMin": 15,
     "difficulty": "medium",
     "exercises": [
-      { "exerciseId": "plank-isometric" },
-      { "exerciseId": "bicycle-crunch" },
-      { "exerciseId": "russian-twist" },
-      { "exerciseId": "mountain-climbers" },
-      { "exerciseId": "leg-raises" },
-      { "exerciseId": "side-plank" }
+      { "exerciseId": "gv-0705" },
+      { "exerciseId": "gv-0003" },
+      { "exerciseId": "gv-0687" },
+      { "exerciseId": "gv-2466" },
+      { "exerciseId": "gv-0865" },
+      { "exerciseId": "gv-0464" }
     ]
   },
   {

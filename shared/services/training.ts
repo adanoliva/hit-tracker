@@ -1,5 +1,6 @@
 import type { Training, Round, RoundStats, Impact, CalibrationProfile, Device } from '../types'
 import { APP_VERSION } from '../constants'
+import { DEFAULT_WEIGHT_KG, boxingMetFromIntensity, calcCalories, avgIntensity } from './calories'
 
 export interface TrainingConfig {
   device: Device
@@ -9,12 +10,14 @@ export interface TrainingConfig {
   restDuration: number
 }
 
-function calcRoundStats(impacts: Impact[], duration: number): RoundStats {
+function calcRoundStats(impacts: Impact[], duration: number, weightKg: number): RoundStats {
   const totalImpacts = impacts.length
   const powerMax = impacts.reduce((max, i) => Math.max(max, Math.round(i.magnitude ?? 0)), 0)
   const durationMin = duration / 60000
   const hpmAverage = durationMin > 0 ? Math.round(totalImpacts / durationMin) : 0
   const powerTrend = impacts.map((i) => Math.round(i.magnitude ?? 0))
+
+  const calories = calcCalories(boxingMetFromIntensity(avgIntensity(impacts)), duration, weightKg)
 
   const firstHalf = powerTrend.slice(0, Math.floor(powerTrend.length / 2))
   const secondHalf = powerTrend.slice(Math.floor(powerTrend.length / 2))
@@ -32,7 +35,8 @@ function calcRoundStats(impacts: Impact[], duration: number): RoundStats {
     hpmMax: 0,
     powerTrend,
     isFatigued,
-    isCadenceDropped
+    isCadenceDropped,
+    calories
   }
 }
 
@@ -77,7 +81,8 @@ class TrainingService {
       restDuration: config.restDuration,
       totalImpacts: 0,
       powerMax: 0,
-      hpmAverage: 0
+      hpmAverage: 0,
+      calories: 0
     }
     this.current = training
     return training
@@ -97,12 +102,13 @@ class TrainingService {
     }
   }
 
-  finishRound(): Round | null {
+  finishRound(plannedDurationMs?: number): Round | null {
     if (!this.currentRound || !this.current) return null
 
     const endTime = Date.now()
-    const duration = endTime - this.currentRound.startTime
-    const stats = calcRoundStats(this.currentRound.impacts, duration)
+    const duration = plannedDurationMs ?? (endTime - this.currentRound.startTime)
+    const weightKg = this.current.profile.weightKg ?? DEFAULT_WEIGHT_KG
+    const stats = calcRoundStats(this.currentRound.impacts, duration, weightKg)
 
     const round: Round = {
       number: this.currentRound.number,
@@ -128,6 +134,7 @@ class TrainingService {
     this.current.powerMax = allImpacts.reduce((max, i) => Math.max(max, Math.round(i.magnitude ?? 0)), 0)
     this.current.hpmAverage =
       durationMin > 0 ? Math.round(allImpacts.length / durationMin) : 0
+    this.current.calories = this.current.rounds.reduce((sum, r) => sum + r.stats.calories, 0)
 
     this.current.appVersion = APP_VERSION
     const training = this.current

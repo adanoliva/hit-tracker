@@ -42,6 +42,7 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
           <Stat label="Total golpes" value={training.totalImpacts} />
           <Stat label="Power máximo" value={Math.max(0, ...training.rounds.flatMap(r => r.impacts).map(i => Math.round(i.magnitude)))} color={colors.accent} />
           <Stat label="HPM promedio" value={training.hpmAverage} color={colors.secondary} />
+          <Stat label="kCal quemadas" value={Math.round((training.calories ?? 0) + (training.warmupCalories ?? 0) + (training.coreCalories ?? 0))} color={colors.accent} />
         </View>
 
         <Text style={s.sectionTitle}>Por ronda</Text>
