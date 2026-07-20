@@ -186,6 +186,20 @@ El wizard captura `HitWindows` reales (pico + duración del rebote) para ajustar
 
 Los parámetros también pueden ajustarse manualmente en cualquier momento desde el formulario de edición del perfil.
 
+#### Cuenta Google (copia de seguridad)
+
+Desde Perfiles se puede conectar una cuenta de Google para respaldar los datos en Drive:
+
+- **Conectar con Google**: lanza el login. Es una única cuenta a nivel app (no una por perfil) — todos los perfiles y sus sesiones se respaldan bajo la misma cuenta
+- Al conectar por primera vez (o en un móvil nuevo), se descarga automáticamente todo el historial de sesiones que hubiera en Drive
+- Una vez conectada, se muestra el email de la cuenta y el estado de sincronización: "✓ Sincronizado", "Sincronizando...", "N sesiones pendientes" o "Error de sincronización"
+- Cada sesión se sube sola a Drive al terminarla; si se elimina una sesión (o un perfil entero), también se elimina de Drive
+- Sin conexión a internet, las subidas quedan en cola y se reintentan solas al recuperar red; también se puede forzar con el botón **Sincronizar ahora** / **Reintentar**
+- Los perfiles de calibración también se respaldan: cada vez que se crea, edita o elimina un perfil, se sube a Drive en silencio
+- Si al conectar la cuenta los perfiles de Drive difieren de los del dispositivo (por ejemplo, tras usar la app en otro móvil sin conexión), aparece un diálogo para elegir: usar los de Drive, mantener los locales, o combinar ambos conjuntos
+- **Desconectar** solo revoca la sincronización: no borra nada, ni en local ni en Drive
+- La sesión se restaura automáticamente al reabrir la app, sin pedir login de nuevo
+
 ---
 
 ## Conceptos Clave

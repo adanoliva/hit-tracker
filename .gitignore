@@ -17,6 +17,7 @@ yarn-debug.*
 yarn-error.*
 .DS_Store
 *.pem
+.env
 .env*.local
 /ios
 /android
@@ -25,3 +26,6 @@ desktop/src/tauri/target/
 desktop/out/
 desktop/dist/
 .claude
+assets/exercises/*.gif
+assets/exercises/*.jpg
+src/generated/exerciseImages.ts

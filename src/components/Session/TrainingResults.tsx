@@ -5,6 +5,7 @@ import { Share2 } from 'lucide-react-native'
 import type { Training } from '../../core/types'
 import { colors } from '../../theme'
 import { useShareSession } from '../../hooks/useShareSession'
+import { useDriveStore } from '../../core/stores/driveStore'
 
 interface TrainingResultsProps {
   training: Training
@@ -24,6 +25,13 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
   const { top } = useSafeAreaInsets()
   const statsRef = useRef<View>(null)
   const { share, isSharing } = useShareSession({ training, chartRef: statsRef })
+  const account = useDriveStore((s) => s.account)
+  const driveSyncStatus = useDriveStore((s) => s.syncStatus)
+  const isPending = useDriveStore((s) => s.pendingUploads.some((p) => p.trainingId === training.id))
+  const syncLabel = !account ? null
+    : driveSyncStatus === 'syncing' ? 'Sincronizando con Drive...'
+    : isPending ? 'Pendiente de sincronizar'
+    : '✓ Sincronizado con Drive'
   const bestRound = training.rounds.reduce(
     (best, r) => (r.stats.powerMax > best.stats.powerMax ? r : best),
     training.rounds[0]
@@ -35,6 +43,9 @@ export function TrainingResults({ training, onDone }: TrainingResultsProps) {
         <Text style={s.heroEmoji}>🥊</Text>
         <Text style={s.heroTitle}>Entrenamiento completado</Text>
         <Text style={s.muted}>{training.rounds.length} rondas · {training.device.name}</Text>
+        {syncLabel && (
+          <Text style={[s.syncLabel, isPending && { color: colors.textMuted }]}>{syncLabel}</Text>
+        )}
       </View>
 
       <View ref={statsRef} collapsable={false} style={s.shareCapture}>
@@ -92,6 +103,7 @@ const s = StyleSheet.create({
   heroEmoji: { fontSize: 48 },
   heroTitle: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
   muted: { fontSize: 12, color: colors.textMuted },
+  syncLabel: { fontSize: 12, color: colors.secondary, marginTop: 4 },
   shareCapture: { backgroundColor: colors.bgPrimary, gap: 16 },
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   stat: {

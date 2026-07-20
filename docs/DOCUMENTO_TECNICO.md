@@ -536,7 +536,7 @@ Incluye un `DEFAULT_PROFILE` (threshold=35, sensitivity=25) que no puede borrars
   updateProfile(id: string, updates: Partial<CalibrationProfile>): void
   deleteProfile(id: string): void      // no-op si id === DEFAULT_PROFILE.id
   selectProfile(id: string): void
-  persist(): void
+  persist(): void   // storage.saveProfiles(); + driveSync.uploadProfiles() si hay cuenta Google conectada
 }
 ```
 
@@ -548,9 +548,10 @@ Incluye un `DEFAULT_PROFILE` (threshold=35, sensitivity=25) que no puede borrars
   activePhase: TrainingPhase
   setActivePhase(phase: TrainingPhase): void
   setTrainings(trainings: Training[]): void
-  addTraining(training: Training): void       // + storage.saveTraining(); antepone al array (newest-first)
-  deleteTraining(id: string): void            // + storage.deleteTraining()
-  deleteTrainingsByProfile(profileId: string): void  // borra todas las sesiones de un perfil (+ storage.deleteTraining por cada una)
+  addTraining(training: Training): void       // + storage.saveTraining(); antepone al array (newest-first); sube a Drive si hay cuenta conectada
+  addTrainingLocal(training: Training): void  // igual que addTraining pero sin subir a Drive — usado al descargar sesiones desde Drive
+  deleteTraining(id: string): void            // + storage.deleteTraining(); borra también de Drive si hay cuenta conectada
+  deleteTrainingsByProfile(profileId: string): void  // borra todas las sesiones de un perfil (+ storage.deleteTraining y Drive por cada una)
   getProgressions(): {
     powerTrend: number[]    // powerMax por ronda del último training
     hpmTrend: number[]      // hpmAverage por ronda
@@ -588,6 +589,140 @@ Incluye un `DEFAULT_PROFILE` (threshold=35, sensitivity=25) que no puede borrars
 ```
 
 Los ejercicios se distinguen por prefijo en el `id`: sin prefijo = catálogo base, `custom-` = creado manualmente, `wger-` = importado de wger. `ExerciseSelector` fusiona automáticamente base + custom al listar.
+
+### `driveStore`
+
+Estado de la cuenta Google conectada y de la sincronización con Drive. Una única cuenta a nivel app (no por perfil) — ver `googleAuth` y `driveSync` más abajo.
+
+```typescript
+interface GoogleAccount {
+  email: string
+  displayName: string
+  accessToken: string
+  refreshToken: string
+  expiresAt: number   // timestamp ms
+}
+
+type SyncStatus = 'idle' | 'syncing' | 'error' | 'pending'
+
+interface PendingUpload {
+  trainingId: string
+  retries: number
+  lastAttempt: number   // timestamp ms
+}
+
+interface ProfileConflict {
+  local: CalibrationProfile[]
+  remote: CalibrationProfile[]
+}
+
+{
+  account: GoogleAccount | null
+  isConnecting: boolean
+  error: string | null
+  syncStatus: SyncStatus
+  pendingUploads: PendingUpload[]
+  profileConflict: ProfileConflict | null
+  setAccount(account: GoogleAccount | null): void
+  setConnecting(v: boolean): void
+  setError(msg: string | null): void
+  setSyncStatus(status: SyncStatus): void
+  setPendingUploads(uploads: PendingUpload[]): void
+  addPending(upload: PendingUpload): void       // reemplaza la entrada existente del mismo trainingId
+  updatePending(trainingId: string, updates: Partial<PendingUpload>): void
+  removePending(trainingId: string): void
+  setProfileConflict(conflict: ProfileConflict | null): void
+}
+```
+
+---
+
+## `googleAuth` (`src/services/googleAuth.ts`)
+
+Flujo OAuth2 con Google (scope `drive.appdata`) usando `expo-auth-session`. Los tokens se guardan en `expo-secure-store` (clave `ht_google_tokens`).
+
+```typescript
+restoreSession(): Promise<void>
+// Lee tokens de secure-store y popula driveStore.account. Llamado en App.tsx al arrancar
+// (junto al resto de cargas iniciales) — restaura la sesión sin pedir login de nuevo.
+
+connect(): Promise<void>
+// Lanza el flujo OAuth (AuthSession.AuthRequest + PKCE), intercambia el code por tokens,
+// obtiene email/nombre vía userinfo endpoint, persiste y guarda en driveStore.
+// Requiere la env var EXPO_PUBLIC_GOOGLE_CLIENT_ID (ver docs/GOOGLE-DRIVE-SETUP.md);
+// si falta, deja el error en driveStore.error sin lanzar el flujo.
+
+disconnect(): Promise<void>
+// Borra los tokens de secure-store y limpia driveStore.account. No toca datos locales ni Drive.
+
+ensureValidToken(): Promise<string | null>
+// A llamar antes de cualquier petición a Drive API (HT-004-b/c). Si el token expira en
+// menos de 60s, lo refresca con el refresh_token. Si el refresh falla (token revocado),
+// desconecta la cuenta automáticamente y devuelve null.
+```
+
+Tras un `connect()` exitoso, se llama automáticamente a `driveSync.downloadAll()` para traer el historial existente en Drive (primera conexión o dispositivo nuevo).
+
+---
+
+## `driveSync` (`src/services/driveSync.ts`)
+
+Backup de sesiones (`Training`) en la carpeta `appDataFolder` de Google Drive (invisible en drive.google.com, solo accesible por la app). Llama a la REST API de Drive v3 directamente por `fetch` (sin SDK). Los archivos se nombran `training_<id>.json`; el upsert se resuelve buscando por nombre antes de subir (`PATCH` si existe, `POST` si no).
+
+```typescript
+uploadTraining(training: Training): Promise<void>
+// Sube (o actualiza) la sesión. No-op si no hay cuenta conectada. Si falla, encola el
+// training en pendingUploads (incrementando retries si ya estaba) y deja syncStatus = 'pending'.
+
+downloadAll(): Promise<void>
+// Reconciliación en ambos sentidos, llamada tras connect(). Descarga de Drive las sesiones
+// que no existan localmente (por training.id) y las persiste vía trainingStore.addTrainingLocal()
+// — nunca sobreescribe una sesión local existente. Además sube a Drive las sesiones locales
+// que aún no estén ahí (cubre el caso de sesiones creadas antes de conectar la cuenta).
+
+deleteFromDrive(trainingId: string): Promise<void>
+// Elimina el archivo de Drive correspondiente (no-op si no existe) y lo quita de pendingUploads.
+
+retryPending(force?: boolean): Promise<void>
+// Reintenta la cola de pendientes. Backoff exponencial: 2^retries * 5000ms (5s/10s/20s),
+// tope de 3 reintentos automáticos — a partir de ahí solo se reintenta con force=true
+// (botón "Sincronizar ahora" en Perfiles, que también ignora el backoff).
+
+loadPendingQueue(): Promise<void>
+// Lee la cola persistida (drive-pending.json) y la carga en driveStore. Llamado en App.tsx al arrancar.
+
+initDriveSync(): void
+// Registra el listener de NetInfo que llama a retryPending() al recuperar conexión.
+// Llamado una vez en App.tsx al arrancar (idempotente).
+
+uploadProfiles(profiles: CalibrationProfile[]): Promise<void>
+// Upsert silencioso de profiles.json en Drive (sin cola de reintento ni feedback en UI).
+// Llamado automáticamente desde profileStore.persist() en cada mutación de perfil.
+
+mergeProfiles(local: CalibrationProfile[], remote: CalibrationProfile[]): CalibrationProfile[]
+// Une ambos arrays por profile.id (ordenado por createdAt); en caso de mismo id, gana remote.
+
+syncProfilesOnConnect(localProfiles: CalibrationProfile[]): Promise<void>
+// Llamado tras un connect() exitoso (HT-004-a). Compara local vs profiles.json de Drive:
+//   Drive vacío                 → sube local
+//   Local vacío                 → descarga Drive directo (sin diálogo) y lo persiste local
+//   Idénticos                   → no hace nada
+//   Distintos (ambos con datos) → driveStore.profileConflict se puebla, la UI muestra el modal
+
+resolveProfileConflict(conflict: ProfileConflict, resolution: 'use-drive' | 'use-local' | 'merge'): Promise<void>
+// Aplica la decisión del modal: guarda el resultado en profileStore + local + Drive, limpia el conflicto.
+```
+
+Estado de sincronización mostrado en la sección "Cuenta Google" de Perfiles:
+
+| `syncStatus` | `pendingUploads.length` | Texto |
+|---|---|---|
+| `idle` | 0 | "✓ Sincronizado" |
+| `syncing` | — | "Sincronizando..." |
+| `pending` | N > 0 | "N sesiones pendientes" + botón "Sincronizar ahora" |
+| `error` | — | "Error de sincronización" + botón "Reintentar" |
+
+Conflicto de perfiles (`driveStore.profileConflict`): modal no descartable en Perfiles con 3 opciones — "Usar Drive", "Usar Local", "Combinar" (usa `mergeProfiles`). Solo puede ocurrir si el mismo usuario editó perfiles en dos dispositivos distintos estando ambos offline respecto a Drive.
 
 ---
 
@@ -775,6 +910,11 @@ Carga paralela:
   storage.loadDevices()       → deviceStore
   storage.loadWorkoutPlans()  → workoutPlanStore
   storage.loadCustomExercises() → customExerciseStore
+  googleAuth.restoreSession() → driveStore
+  driveSync.loadPendingQueue() → driveStore
+  ↓
+driveSync.initDriveSync()   // listener NetInfo → retryPending() al recuperar red
+driveSync.retryPending()    // por si había pendientes al cerrar la app y ya hay conexión
   ↓
 min(width, height) >= 600 → lockOrientationAsync(LANDSCAPE) → TabletLayout
                           → MobileLayout (comportamiento actual)

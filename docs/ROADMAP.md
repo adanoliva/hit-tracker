@@ -35,13 +35,15 @@
 | ✅ | `HT-022` Decaimiento exponencial del dynamicFloor (derivado de rebound calibrado) |
 | ✅ | `HT-023` Aviso sonoro al superar el máximo histórico (con ducking de audio) |
 | ✅ | `HT-024` Aviso de bajada de cadencia, independiente de fatiga por potencia |
+| ✅ | `HT-004-a` Autenticación Google y gestión de cuenta (base para backup en Drive) |
+| ✅ | `HT-004-b` Sincronización automática de sesiones con Google Drive |
+| ✅ | `HT-004-c` Sincronización de perfiles de calibración con Google Drive (resolución de conflictos) |
 
-### V2 — Calibración y nube *(pendiente)*
+### V2 — Calibración avanzada *(pendiente)*
 
 | | Feature |
 |---|---|
 | ⬜ | `HT-006-a` Calibración vinculada a dispositivo (per Device.mac, no per perfil) |
-| ⬜ | `HT-004-a/b/c` Sincronización Google Drive (sesiones + perfiles) |
 | ⬜ | Nombre de dispositivo personalizable (definido en firmware antes de flashear) |
 | ⬜ | PIN de emparejamiento BLE (definido en firmware) |
 

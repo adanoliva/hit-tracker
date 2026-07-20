@@ -17,6 +17,8 @@ import { storage } from './src/services/storage'
 import { colors } from './src/theme'
 import { migrationService } from '@shared/services/migration'
 import { estimateTrainingCalories } from '@shared/services/calories'
+import { restoreSession } from './src/services/googleAuth'
+import { initDriveSync, loadPendingQueue, retryPending } from './src/services/driveSync'
 
 SplashScreen.preventAutoHideAsync()
 activateKeepAwakeAsync('global')
@@ -64,6 +66,8 @@ export default function App() {
       storage.loadDevices(),
       loadWorkoutPlans(),
       loadCustomExercises(),
+      restoreSession(),
+      loadPendingQueue(),
     ]).then(([trainings, profiles, devices]) => {
       const migrated = migrationService.migrate(trainings).map(estimateTrainingCalories)
       migrated
@@ -72,6 +76,8 @@ export default function App() {
       setTrainings(migrated)
       if (profiles.length > 0) setProfiles(profiles)
       setDevices(devices)
+      initDriveSync()
+      retryPending() // por si había pendientes al cerrar la app y ya hay red
       setReady(true)
     })
   }, [])

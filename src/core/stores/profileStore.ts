@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { CalibrationProfile } from '../types'
 import { storage } from '../../services/storage'
+import { useDriveStore } from './driveStore'
+import { uploadProfiles } from '../../services/driveSync'
 
 const DEFAULT_PROFILE: CalibrationProfile = {
   id: 'default-v1',
@@ -42,12 +44,10 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
 
   deleteProfile: (id) => {
-    if (id === DEFAULT_PROFILE.id) return
-    set((state) => ({
-      profiles: state.profiles.filter((p) => p.id !== id),
-      selectedProfileId:
-        state.selectedProfileId === id ? DEFAULT_PROFILE.id : state.selectedProfileId
-    }))
+    const state = get()
+    if (state.profiles.length <= 1) return
+    if (id === state.selectedProfileId) return
+    set((state) => ({ profiles: state.profiles.filter((p) => p.id !== id) }))
     get().persist()
   },
 
@@ -59,6 +59,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
 
   persist: () => {
-    storage.saveProfiles(get().profiles)
+    const profiles = get().profiles
+    storage.saveProfiles(profiles)
+    if (useDriveStore.getState().account) uploadProfiles(profiles)
   }
 }))

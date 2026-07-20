@@ -122,18 +122,18 @@
     <h1 class="slogan">Cada golpe <span class="accent">cuenta.</span></h1>
 
     <p class="page-title">Política de <span class="accent">privacidad</span></p>
-    <p class="updated">Última actualización: julio de 2026</p>
+    <p class="updated">Última actualización: julio de 2026 — añadida copia de seguridad en Google Drive</p>
 
     <h2>1. Responsable</h2>
     <p>Adán Oliva, contacto: <a href="mailto:hola@adanoliva.es">hola@adanoliva.es</a>. Hit Tracker es un proyecto independiente, sin entidad comercial detrás. El código fuente es público en <a href="https://github.com/adanoliva/hit-tracker" target="_blank" rel="noopener noreferrer">github.com/adanoliva/hit-tracker</a>.</p>
 
     <h2>2. Qué datos recopilamos</h2>
-    <p><strong>Ninguno.</strong> Ni esta web ni la aplicación móvil recopilan datos personales identificables. En concreto:</p>
+    <p>Ni esta web ni la aplicación móvil recopilan datos personales para uso propio. En concreto:</p>
     <ul>
       <li>Esta web no usa cookies, propias ni de terceros.</li>
       <li>Esta web no usa ningún servicio de analítica, medición o seguimiento (Google Analytics, píxeles, etc).</li>
-      <li>La aplicación móvil no tiene backend ni servidor propio: no existe ningún lugar donde tus datos puedan almacenarse fuera de tu dispositivo.</li>
-      <li>No se crean cuentas de usuario ni se pide ningún dato de identificación (nombre, email, etc).</li>
+      <li>La aplicación móvil no tiene backend ni servidor propio: por defecto no existe ningún lugar donde tus datos puedan almacenarse fuera de tu dispositivo.</li>
+      <li>No se pide ningún dato de identificación para usar la app. Solo si el usuario decide conectar voluntariamente su cuenta de Google (ver punto 4), se usa su email para identificar la copia de seguridad.</li>
     </ul>
 
     <h2>3. Datos almacenados en tu dispositivo</h2>
@@ -148,6 +148,15 @@
 
     <h2>4. Conexión con servicios externos</h2>
     <p>El catálogo de ejercicios de la app funciona sin conexión con un catálogo propio incluido en la aplicación. De forma opcional, si el usuario decide buscar o importar ejercicios adicionales, la app realiza consultas a la <a href="https://wger.de" target="_blank" rel="noopener noreferrer">API pública de wger</a> (un catálogo de ejercicios de terceros, independiente de Hit Tracker). Estas consultas solo incluyen el término de búsqueda introducido por el usuario — no se envía ningún dato personal ni identificativo. Consulta la política de privacidad de <a href="https://wger.de" target="_blank" rel="noopener noreferrer">wger.de</a> para más información sobre ese servicio.</p>
+
+    <p>De forma opcional, el usuario puede conectar una cuenta de Google desde la sección "Perfiles" para hacer copia de seguridad de sus sesiones y perfiles de calibración en su propio Google Drive. Si se activa:</p>
+    <ul>
+      <li>Se usa el scope <code>drive.appdata</code>: los datos se guardan en una carpeta oculta del Drive del usuario, invisible en drive.google.com y accesible únicamente por Hit Tracker.</li>
+      <li>Se accede al email de la cuenta para mostrar qué cuenta está conectada — no se comparte con terceros ni se usa con ningún otro fin.</li>
+      <li>La sincronización es automática mientras la cuenta esté conectada: cada sesión y cada cambio de perfil se sube a esa carpeta.</li>
+      <li>Desconectar la cuenta detiene la sincronización sin borrar nada, ni en el dispositivo ni en Drive. El usuario puede eliminar los datos en cualquier momento desde su propio Google Drive.</li>
+      <li>Consulta la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">política de privacidad de Google</a> para el tratamiento que hace Google de estos datos.</li>
+    </ul>
 
     <h2>5. Permisos que utiliza la aplicación</h2>
     <ul>

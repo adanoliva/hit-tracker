@@ -39,6 +39,8 @@ El hardware es un **ESP32 + GY-521 (MPU-6050)** que transmite datos de aceleróm
 │                                    │
 │  workoutPlanStore / customExercise │
 │  profileStore / deviceStore        │
+│  driveStore + driveSync (backup    │
+│  automático de sesiones en Drive)  │
 └─────────────────┬──────────────────┘
                   │ @shared alias
                   ▼

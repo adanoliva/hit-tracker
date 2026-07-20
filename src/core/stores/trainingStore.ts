@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { Training } from '../types'
 import { storage } from '../../services/storage'
+import { useDriveStore } from './driveStore'
+import { uploadTraining, deleteFromDrive } from '../../services/driveSync'
 
 type TrainingPhase = 'idle' | 'preparing' | 'round' | 'resting' | 'finished'
 
@@ -10,6 +12,7 @@ interface TrainingState {
   setActivePhase: (phase: TrainingPhase) => void
   setTrainings: (trainings: Training[]) => void
   addTraining: (training: Training) => void
+  addTrainingLocal: (training: Training) => void
   deleteTraining: (id: string) => void
   deleteTrainingsByProfile: (profileId: string) => void
   getProgressions: () => { powerTrend: number[]; hpmTrend: number[]; isFatigued: boolean }
@@ -26,17 +29,28 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
   addTraining: (training) => {
     set((state) => ({ trainings: [training, ...state.trainings] }))
     storage.saveTraining(training)
+    if (useDriveStore.getState().account) uploadTraining(training)
+  },
+
+  // Igual que addTraining pero sin re-subir a Drive — usado al descargar sesiones desde Drive.
+  addTrainingLocal: (training) => {
+    set((state) => ({ trainings: [training, ...state.trainings] }))
   },
 
   deleteTraining: (id) => {
     set((state) => ({ trainings: state.trainings.filter((t) => t.id !== id) }))
     storage.deleteTraining(id)
+    if (useDriveStore.getState().account) deleteFromDrive(id)
   },
 
   deleteTrainingsByProfile: (profileId) => {
     const toDelete = get().trainings.filter((t) => t.profile?.id === profileId)
     set((state) => ({ trainings: state.trainings.filter((t) => t.profile?.id !== profileId) }))
-    toDelete.forEach((t) => storage.deleteTraining(t.id))
+    const account = useDriveStore.getState().account
+    toDelete.forEach((t) => {
+      storage.deleteTraining(t.id)
+      if (account) deleteFromDrive(t.id)
+    })
   },
 
   getProgressions: () => {

@@ -6,9 +6,12 @@ import Slider from '@react-native-community/slider'
 import { useProfileStore } from '../../core/stores/profileStore'
 import { useTrainingStore } from '../../core/stores/trainingStore'
 import { useDeviceStore } from '../../core/stores/deviceStore'
+import { useDriveStore } from '../../core/stores/driveStore'
 import { useBleReading } from '../../core/hooks/useBleReading'
 import { calibrationService } from '../../core/services/calibration'
 import { sendProfileConfig, getSensorVersion } from '../../services/bleConnection'
+import { connect as connectGoogle, disconnect as disconnectGoogle } from '../../services/googleAuth'
+import { retryPending, resolveProfileConflict, getRemoteCounts, type ProfileConflictResolution } from '../../services/driveSync'
 import type { CalibrationProfile, HitWindow } from '../../core/types'
 import type { SensorReading } from '../../core/types'
 import { colors } from '../../theme'
@@ -101,6 +104,18 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
     )
   }
   const connected = useDeviceStore((s) => s.connected)
+  const { account, isConnecting, error: driveError, syncStatus: driveSyncStatus, pendingUploads, profileConflict } = useDriveStore()
+
+  const syncLabel =
+    driveSyncStatus === 'syncing' ? 'Sincronizando...'
+    : driveSyncStatus === 'error' ? 'Error de sincronización'
+    : driveSyncStatus === 'pending' && pendingUploads.length > 0 ? `${pendingUploads.length} sesiones pendientes`
+    : '✓ Sincronizado'
+  const [remoteCounts, setRemoteCounts] = useState<{ trainings: number; profiles: number } | null>(null)
+  useEffect(() => {
+    if (!account || driveSyncStatus === 'syncing') return
+    getRemoteCounts().then(setRemoteCounts).catch(() => {})
+  }, [account, driveSyncStatus])
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [editing, setEditing] = useState<CalibrationProfile | null>(null)
@@ -253,11 +268,27 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
     })
   }
 
+  const handleResolveConflict = (resolution: ProfileConflictResolution) => {
+    if (!profileConflict) return
+    resolveProfileConflict(profileConflict, resolution)
+  }
+
   const handleCreate = () => {
     if (!newName.trim()) return
     addProfile(calibrationService.createProfile(newName.trim()))
     setNewName('')
     setShowCreate(false)
+  }
+
+  const confirmDisconnectGoogle = () => {
+    Alert.alert(
+      'Desconectar cuenta',
+      'Se dejará de sincronizar con Google Drive. Tus datos locales y los archivos ya subidos a Drive no se eliminan.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Desconectar', style: 'destructive', onPress: () => disconnectGoogle() },
+      ]
+    )
   }
 
   const handleSaveEdit = () => {
@@ -346,6 +377,30 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
       </View>
     </Modal>
 
+    <Modal visible={profileConflict !== null} transparent animationType="fade" onRequestClose={() => {}}>
+      <View style={s.overlay}>
+        <View style={s.modal}>
+          <Text style={s.modalTitle}>⚠️ Conflicto de perfiles</Text>
+          <Text style={s.modalDesc}>
+            Este dispositivo tiene {profileConflict?.local.length ?? 0} perfiles.{'\n'}
+            Tu cuenta Drive tiene {profileConflict?.remote.length ?? 0} perfiles.{'\n\n'}
+            ¿Qué quieres hacer?
+          </Text>
+          <TouchableOpacity style={s.saveBtn} onPress={() => handleResolveConflict('merge')}>
+            <Text style={s.saveBtnText}>Combinar (recomendado)</Text>
+          </TouchableOpacity>
+          <View style={s.editActions}>
+            <TouchableOpacity style={[s.cancelBtn, { flex: 1 }]} onPress={() => handleResolveConflict('use-drive')}>
+              <Text style={s.cancelBtnText}>Usar Drive</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.cancelBtn, { flex: 1 }]} onPress={() => handleResolveConflict('use-local')}>
+              <Text style={s.cancelBtnText}>Usar Local</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+
     <Modal visible={showAbout} transparent animationType="fade" onRequestClose={() => setShowAbout(false)}>
       <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={() => setShowAbout(false)}>
         <View style={s.modal}>
@@ -377,6 +432,45 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
         </View>
       )}
       {!onBack && <Text style={s.title}>Perfiles</Text>}
+
+      <View style={s.card}>
+        <View style={s.cardRow}>
+          <View style={s.flex1}>
+            <Text style={s.profileName}>Cuenta Google</Text>
+            {account ? (
+              <>
+                <Text style={s.profileMeta}>{account.email}</Text>
+                <Text style={[s.profileMeta, driveSyncStatus === 'error' && { color: colors.accent }]}>{syncLabel}</Text>
+                {remoteCounts && (
+                  <Text style={s.profileMeta}>
+                    {remoteCounts.trainings} sesiones · {remoteCounts.profiles} perfiles en Drive
+                  </Text>
+                )}
+              </>
+            ) : (
+              <Text style={s.profileMeta}>
+                {driveError ?? 'Conecta tu cuenta para hacer copia de seguridad de tus sesiones en Drive'}
+              </Text>
+            )}
+          </View>
+          <View style={{ alignItems: 'flex-end', gap: 6 }}>
+            {account ? (
+              <TouchableOpacity style={s.editBtn} onPress={confirmDisconnectGoogle}>
+                <Text style={[s.editBtnText, { color: colors.accent }]}>Desconectar</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={s.useBtn} onPress={() => connectGoogle()} disabled={isConnecting}>
+                <Text style={s.useBtnText}>{isConnecting ? 'Conectando...' : 'Conectar con Google'}</Text>
+              </TouchableOpacity>
+            )}
+            {account && (driveSyncStatus === 'pending' || driveSyncStatus === 'error') && (
+              <TouchableOpacity style={s.editBtn} onPress={() => retryPending(true)}>
+                <Text style={s.editBtnText}>{driveSyncStatus === 'error' ? 'Reintentar' : 'Sincronizar ahora'}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </View>
 
       {profiles.map((p) => (
         <View key={p.id} style={[s.card, selectedProfileId === p.id && s.cardActive]}>
@@ -475,7 +569,7 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
                 <TouchableOpacity style={s.editBtn} onPress={() => setEditing(p)}>
                   <Text style={s.editBtnText}>Editar</Text>
                 </TouchableOpacity>
-                {p.id !== 'default-v1' && (
+                {p.id !== selectedProfileId && profiles.length > 1 && (
                   <TouchableOpacity style={s.editBtn} onPress={() => confirmDeleteProfile(p)}>
                     <Text style={[s.editBtnText, { color: colors.accent }]}>Eliminar</Text>
                   </TouchableOpacity>

@@ -144,6 +144,7 @@ Los agentes usan el ID de feature (ej. `HT-001`) para localizar el archivo. Si n
 - `docs/ROADMAP.md` — estado y próximos pasos
 - `docs/COLORES.md` — paleta de colores oficial
 - `docs/GUIA-CONEXION-V1.md` — esquema de conexión hardware (ESP32 + batería + LEDs)
+- `docs/GOOGLE-DRIVE-SETUP.md` — creación de credenciales OAuth2 para el backup en Google Drive
 - `docs/SENSOR-TECNICO-V*.md` — referencia técnica de cada versión de firmware ESP32
 - `.claude/FEATURES.md` — índice de features y su estado
 - `.claude/features/` — specs técnicas de cada feature

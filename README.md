@@ -50,6 +50,14 @@ No requiere cámara, ni suscripción, ni cuenta. El sensor vale ~15€ y los dat
 - Ajuste manual de threshold, sensitivity y rebound
 - Eliminar un perfil pide confirmación y borra también sus sesiones guardadas
 
+### Copia de seguridad en Google Drive
+
+- Conecta una cuenta de Google desde Perfiles para respaldar sesiones y perfiles automáticamente
+- Subida en silencio al terminar cada sesión o al editar un perfil; cola offline con reintento automático
+- Al conectar en un móvil nuevo, descarga el historial existente en Drive
+- Resolución de conflictos si los perfiles locales difieren de los de Drive (usar Drive, mantener locales, o combinar)
+- Los datos se guardan en `drive.appdata`, una carpeta oculta accesible solo por la app
+
 ---
 
 ## Hardware

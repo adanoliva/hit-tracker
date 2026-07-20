@@ -2,7 +2,8 @@
   "expo": {
     "name": "Hit Tracker",
     "slug": "hit-tracker",
-    "version": "1.22.1",
+    "scheme": ["hittracker", "com.googleusercontent.apps.979133969928-70eio2up7nsov07ve4bckqqhcdq5pksr"],
+    "version": "1.25.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -32,14 +33,19 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      ["expo-splash-screen", {
-        "image": "./assets/splash-icon.png",
-        "imageWidth": 288,
-        "resizeMode": "contain",
-        "backgroundColor": "#000000"
-      }],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 288,
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      ],
       "expo-audio",
-      "./plugins/withArmOnly"
+      "./plugins/withArmOnly",
+      "expo-web-browser",
+      "expo-secure-store"
     ]
   }
 }
