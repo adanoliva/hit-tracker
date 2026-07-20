@@ -456,8 +456,9 @@ code {
 }
 
 .features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 32px;
 }
 
@@ -470,6 +471,8 @@ code {
   display: flex;
   flex-direction: column;
   position: relative;
+  flex: 1 1 300px;
+  max-width: 365px;
 }
 
 .feature-card::before {
@@ -551,13 +554,15 @@ code {
 .steps {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
   margin-bottom: 60px;
   gap: 20px;
 }
 
 .step {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   background-color: var(--bg-secondary);
   padding: 32px;
   border-radius: var(--radius);
