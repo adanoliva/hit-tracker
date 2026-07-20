@@ -62,15 +62,13 @@ No requiere cámara, ni suscripción, ni cuenta. El sensor vale ~15€ y los dat
 
 ## Hardware
 
-```
-┌──────────────┐    I2C    ┌───────────────┐    BLE    ┌──────────────┐
-│  GY-521      ├──────────▶│  ESP32        ├──────────▶│  App Android │
-│  MPU-6050    │           │  DevKit V1    │           │              │
-│  ±16g        │           │  ~100 Hz      │           │              │
-└──────────────┘           └───────────────┘           └──────────────┘
+![Esquema de conexión ESP32 + GY-521 (MPU-6050)](esp32_mpu6050_conexion.png)
 
-Alimentación: 18650 → TP4056 → LM2596 (3.3V) → ESP32
-```
+> ⚠️ **Hardware de prototipado**, no un producto terminado. En particular, la batería 18650 y su circuito de carga (TP4056 + LM2596) no llevan protección de sobrecarga/sobredescarga más allá de la que trae el módulo TP4056 — usa celdas con protección (18650 "protected") y supervisa la carga. Móntalo bajo tu responsabilidad.
+>
+> Precisamente por dar cabida a la 18650 y su circuito de carga, el tamaño final queda más abultado de lo deseable. Ya existe una versión miniaturizada con **ESP32-C3 Mini**, más compacta:
+>
+> ![Esquema de conexión ESP32-C3 Mini + GY-521 (MPU-6050)](esp32_c3_mini_mpu6050_conexion.png)
 
 **Posición del sensor**: punto de anclaje del saco (menor oscilación pendular).
 
@@ -127,9 +125,9 @@ hit-tracker/
 ├─ src/
 │  ├─ core/
 │  │  ├─ hooks/               useSensorData · useTraining · useWorkoutPlayer · useBleReading
-│  │  ├─ stores/              deviceStore · profileStore · trainingStore · workoutPlanStore · customExerciseStore
+│  │  ├─ stores/              deviceStore · profileStore · trainingStore · workoutPlanStore · customExerciseStore · driveStore
 │  │  └─ services/            wgerService · exerciseService (re-exports)
-│  ├─ services/               audio · ble · bleConnection · storage
+│  ├─ services/               audio · ble · bleConnection · storage · googleAuth · driveSync
 │  └─ components/
 │     ├─ Dashboard/           Inicio: stats, progreso, historial
 │     ├─ Session/             Sesión de boxeo directa
@@ -150,7 +148,8 @@ hit-tracker/
    ├─ ROADMAP.md              Estado y próximos pasos
    ├─ COLORES.md              Paleta oficial
    ├─ GUIA-CONEXION-V1.md     Esquema de conexión hardware
-   └─ SENSOR-TECNICO-V*.md    Referencia técnica de cada versión de firmware
+   ├─ SENSOR-TECNICO-V*.md    Referencia técnica de cada versión de firmware
+   └─ GOOGLE-DRIVE-SETUP.md   Credenciales OAuth2 para el backup en Google Drive
 ```
 
 ---
@@ -246,6 +245,7 @@ Los ejercicios importados de wger se guardan localmente y están disponibles sin
 | [`docs/GUIA-CONEXION-V1.md`](docs/GUIA-CONEXION-V1.md) | Esquema de conexión hardware (batería + LEDs) |
 | [`docs/SENSOR-TECNICO-V3.md`](docs/SENSOR-TECNICO-V3.md) | Firmware V3: hit events + config BLE |
 | [`docs/SENSOR-TECNICO-V4.md`](docs/SENSOR-TECNICO-V4.md) | Firmware V4: LEDs + batería ADC |
+| [`docs/GOOGLE-DRIVE-SETUP.md`](docs/GOOGLE-DRIVE-SETUP.md) | Credenciales OAuth2 para el backup en Google Drive |
 
 ---
 
