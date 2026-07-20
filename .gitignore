@@ -10,6 +10,9 @@ expo-env.d.ts
 *.p8
 *.p12
 *.key
+*.keystore
+keystore.properties
+credentials.json
 *.mobileprovision
 .metro-health-check*
 npm-debug.*

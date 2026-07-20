@@ -3,7 +3,7 @@
     "name": "Hit Tracker",
     "slug": "hit-tracker",
     "scheme": ["hittracker", "com.googleusercontent.apps.979133969928-70eio2up7nsov07ve4bckqqhcdq5pksr"],
-    "version": "1.26.1",
+    "version": "1.26.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -44,6 +44,7 @@
       ],
       "expo-audio",
       "./plugins/withArmOnly",
+      "./plugins/withReleaseSigning",
       "expo-web-browser",
       "expo-secure-store"
     ]

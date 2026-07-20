@@ -124,7 +124,8 @@ GY-521 (MPU-6050) ──I2C──→ ESP32
 |---|---|---|---|---|
 | V2 | `FIRMWARE/HitTracker_V2/` | Stream continuo 16 bytes/10ms | No | No |
 | V3 | `FIRMWARE/HitTracker_V3/` | Hit events 6 bytes; config BLE | No | No |
-| **V4** | `FIRMWARE/HitTracker_V4/` | Hit events 6 bytes; config + batería BLE | **4 LEDs** | **ADC GPIO 34** |
+| V4 | `FIRMWARE/HitTracker_V4/` | Hit events 6 bytes; config BLE; decaimiento exponencial | No | No |
+| **V5** | `FIRMWARE/HitTracker_V5/` | Hit events 6 bytes; config + batería BLE | **4 LEDs** | **ADC GPIO 34** |
 
 **Posición del sensor — regla del punto de anclaje:**
 

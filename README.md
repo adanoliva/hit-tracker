@@ -66,9 +66,11 @@ No requiere cámara, ni suscripción, ni cuenta. El sensor vale ~15€ y los dat
 
 > ⚠️ **Hardware de prototipado**, no un producto terminado. En particular, la batería 18650 y su circuito de carga (TP4056 + LM2596) no llevan protección de sobrecarga/sobredescarga más allá de la que trae el módulo TP4056 — usa celdas con protección (18650 "protected") y supervisa la carga. Móntalo bajo tu responsabilidad.
 >
-> Precisamente por dar cabida a la 18650 y su circuito de carga, el tamaño final queda más abultado de lo deseable. Ya existe una versión miniaturizada con **ESP32-C3 Mini**, más compacta:
+> Precisamente por dar cabida a la 18650 y su circuito de carga, el tamaño final queda más abultado de lo deseable. Esta versión con ESP32 DevKit V1 está validada y funciona de forma estable en uso real — el siguiente paso en desarrollo es una versión **MINI** con **ESP32-C3 Mini**, mucho más compacta:
 >
 > ![Esquema de conexión ESP32-C3 Mini + GY-521 (MPU-6050)](esp32_c3_mini_mpu6050_conexion.png)
+>
+> La versión MINI aún no incorpora los LEDs indicadores ni la monitorización de batería de la V4 — está pendiente portarlos al nuevo formato (ver `docs/ROADMAP.md`).
 
 **Posición del sensor**: punto de anclaje del saco (menor oscilación pendular).
 

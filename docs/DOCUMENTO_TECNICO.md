@@ -752,10 +752,10 @@ storage.loadCustomExercises(): Promise<Exercise[]>
 
 | UUID (sufijo) | Tipo | Versión | Descripción |
 |---|---|---|---|
-| `...26a8` | NOTIFY | V2+ | Hit events / stream — `{uint32 timestamp_ms, uint16 magnitude}` 6 bytes (V3/V4) o 16 bytes (V2) |
-| `...26a9` | READ | V2+ | Versión firmware (`uint8`: 2/3/4) |
+| `...26a8` | NOTIFY | V2+ | Hit events / stream — `{uint32 timestamp_ms, uint16 magnitude}` 6 bytes (V3/V4/V5) o 16 bytes (V2) |
+| `...26a9` | READ | V2+ | Versión firmware (`uint8`: 2/3/4/5) |
 | `...26aa` | WRITE | V3+ | Config: `{uint16 threshold_raw, uint16 cooldown_ms}` — 4 bytes |
-| `...26ab` | READ | **V4** | Nivel de batería — `uint8` 0-100 % |
+| `...26ab` | READ | **V5** | Nivel de batería — `uint8` 0-100 % |
 
 Service UUID completo: `4fafc201-1fb5-459e-8fcc-c5c9c331914b`
 
@@ -946,11 +946,12 @@ npm run test            # Jest — tests unitarios de lógica de negocio
 - **Frecuencia de muestreo**: ~100Hz (10ms/muestra)
 - **Escala**: ±16g, 1g = 128 raw. Reposo ≈ 128. Golpe suave 400-700. Golpe fuerte 1000-1500+.
 
-| Versión | Archivo | Protocolo | LEDs | Batería ADC |
-|---|---|---|---|---|
-| V2 | `FIRMWARE/HitTracker_V2/HitTracker_V2.ino` | Stream continuo — 16 bytes/10ms | No | No |
-| V3 | `FIRMWARE/HitTracker_V3/HitTracker_V3.ino` | Hit events — 6 bytes/golpe; config BLE | No | No |
-| **V4** | `FIRMWARE/HitTracker_V4/HitTracker_V4.ino` | Hit events — 6 bytes/golpe; config + batería BLE | **4 LEDs** | **GPIO 34** |
+| Versión | Archivo | Protocolo | Decaimiento `dynamicFloor` | LEDs | Batería ADC |
+|---|---|---|---|---|---|
+| V2 | `FIRMWARE/HitTracker_V2/HitTracker_V2.ino` | Stream continuo — 16 bytes/10ms | Lineal (app) | No | No |
+| V3 | `FIRMWARE/HitTracker_V3/HitTracker_V3.ino` | Hit events — 6 bytes/golpe; config BLE | Lineal | No | No |
+| V4 | `FIRMWARE/HitTracker_V4/HitTracker_V4.ino` | Hit events — 6 bytes/golpe; config BLE | **Exponencial** (ver `SENSOR-TECNICO-V4.md`) | No | No |
+| **V5** | `FIRMWARE/HitTracker_V5/HitTracker_V5.ino` | Hit events — 6 bytes/golpe; config + batería BLE | Lineal | **4 LEDs** | **GPIO 34** |
 
 ---
 

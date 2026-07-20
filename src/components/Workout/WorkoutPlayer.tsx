@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Flame, Dumbbell, Zap, SkipForward, X } from 'lucide-react-native'
 import type { Exercise, Routine } from '@shared/types'
@@ -45,48 +45,54 @@ export function WorkoutPlayer({ routine, onComplete, onAbort }: WorkoutPlayerPro
         <View style={[s.progressFill, { width: progressPct }]} />
       </View>
 
-      {/* Imagen (o icono si no hay) + phase label */}
-      <View style={s.iconWrap}>
-        {phase === 'exercise' && EXERCISE_IMAGES[currentExercise.id] ? (
-          <Image source={EXERCISE_IMAGES[currentExercise.id]} style={s.exerciseImage} resizeMode="contain" />
-        ) : (
-          <CategoryIcon category={currentExercise.category} size={48} />
+      <ScrollView
+        style={s.scroll}
+        contentContainerStyle={s.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Imagen (o icono si no hay) + phase label */}
+        <View style={s.iconWrap}>
+          {phase === 'exercise' && EXERCISE_IMAGES[currentExercise.id] ? (
+            <Image source={EXERCISE_IMAGES[currentExercise.id]} style={s.exerciseImage} resizeMode="contain" />
+          ) : (
+            <CategoryIcon category={currentExercise.category} size={48} />
+          )}
+          <Text style={s.phaseLabel}>
+            {phase === 'rest' ? 'Descanso' : totalSets > 1 ? `Serie ${setIndex + 1} / ${totalSets}` : currentExercise.name}
+          </Text>
+        </View>
+
+        {/* Exercise name (only during exercise phase) */}
+        {phase === 'exercise' && totalSets > 1 && (
+          <Text style={s.exerciseName}>{currentExercise.name}</Text>
         )}
-        <Text style={s.phaseLabel}>
-          {phase === 'rest' ? 'Descanso' : totalSets > 1 ? `Serie ${setIndex + 1} / ${totalSets}` : currentExercise.name}
-        </Text>
-      </View>
 
-      {/* Exercise name (only during exercise phase) */}
-      {phase === 'exercise' && totalSets > 1 && (
-        <Text style={s.exerciseName}>{currentExercise.name}</Text>
-      )}
+        {/* Timer or reps */}
+        {phase === 'exercise' && !isReps && (
+          <Text style={s.timer}>{timeLeft}</Text>
+        )}
+        {phase === 'exercise' && isReps && (
+          <>
+            <Text style={s.repsCount}>{currentExercise.reps} reps</Text>
+            <TouchableOpacity style={s.doneBtn} onPress={advance}>
+              <Text style={s.doneBtnText}>Hecho</Text>
+            </TouchableOpacity>
+          </>
+        )}
+        {phase === 'rest' && (
+          <Text style={s.timer}>{timeLeft}</Text>
+        )}
 
-      {/* Timer or reps */}
-      {phase === 'exercise' && !isReps && (
-        <Text style={s.timer}>{timeLeft}</Text>
-      )}
-      {phase === 'exercise' && isReps && (
-        <>
-          <Text style={s.repsCount}>{currentExercise.reps} reps</Text>
-          <TouchableOpacity style={s.doneBtn} onPress={advance}>
-            <Text style={s.doneBtnText}>Hecho</Text>
-          </TouchableOpacity>
-        </>
-      )}
-      {phase === 'rest' && (
-        <Text style={s.timer}>{timeLeft}</Text>
-      )}
+        {/* Description (exercise phase only) */}
+        {phase === 'exercise' && (
+          <Text style={s.description}>{currentExercise.description}</Text>
+        )}
 
-      {/* Description (exercise phase only) */}
-      {phase === 'exercise' && (
-        <Text style={s.description}>{currentExercise.description}</Text>
-      )}
-
-      {/* Muscles */}
-      {phase === 'exercise' && (
-        <Text style={s.muscles}>{currentExercise.muscles.join(' · ')}</Text>
-      )}
+        {/* Muscles */}
+        {phase === 'exercise' && (
+          <Text style={s.muscles}>{currentExercise.muscles.join(' · ')}</Text>
+        )}
+      </ScrollView>
 
       {/* Skip button */}
       <TouchableOpacity style={s.skipBtn} onPress={skip}>
@@ -106,6 +112,8 @@ const s = StyleSheet.create({
   routineName: { fontSize: 13, color: colors.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 },
   progressTrack: { height: 4, backgroundColor: colors.bgTertiary, borderRadius: 2 },
   progressFill: { height: 4, backgroundColor: colors.accent, borderRadius: 2 },
+  scroll: { flex: 1 },
+  scrollContent: { gap: 12, paddingBottom: 8 },
   iconWrap: { alignItems: 'center', gap: 12, marginTop: 16 },
   exerciseImage: { width: 160, height: 160, borderRadius: 16, backgroundColor: colors.bgSecondary },
   phaseLabel: { fontSize: 14, color: colors.textSecondary, fontWeight: '600' },
@@ -121,7 +129,7 @@ const s = StyleSheet.create({
   muscles: { fontSize: 12, color: colors.textMuted, textAlign: 'center' },
   skipBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, marginTop: 'auto', paddingVertical: 12,
+    gap: 6, paddingVertical: 12,
   },
   skipText: { fontSize: 13, color: colors.textMuted },
 })

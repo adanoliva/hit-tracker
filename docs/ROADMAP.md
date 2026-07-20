@@ -60,39 +60,33 @@
 
 ## Hardware / Firmware
 
-### Fase 1 — Prototipo con batería *(actual)*
+### Fase 1 — Prototipo con batería *(validado)*
 
 - ESP32 DevKit V1 + GY-521 en breadboard
 - Batería 18650 + TP4056 + LM2596 (3.3V)
-- 4 LEDs indicadores (Rojo/Azul/Verde/Amarillo)
-- Monitorización de batería via ADC
-- Fijación al saco con bridas / cinta
-- **Firmware activo: V4**
-
-### Fase 2 — Consolidación *(pendiente)*
-
-- PCB personalizada: ESP32 + MPU-6050 en placa compacta
-- Carga USB-C integrada
+- Carga por micro-USB (vía módulo TP4056)
 - Interruptor on/off físico
+- Fijación al saco con cinta (pegado directamente al saco)
+- **Firmware activo: V3** (detección + cooldown, sin LEDs ni batería; V4 añade decaimiento exponencial del `dynamicFloor`, pendiente de flashear; V5 soporta LEDs y monitorización de batería por código, sin montar aún en este prototipo)
+- Funcionando de forma estable en uso real — validado como base fiable antes de miniaturizar
+
+### Fase 2 — Versión MINI *(actual)*
+
+- Migración a **ESP32-C3 Mini** (ver esquema `esp32_c3_mini_mpu6050_conexion.png`), mismo GY-521
+- Reduce drásticamente el tamaño frente al DevKit V1 + batería 18650 de la Fase 1
+- Carga USB-C integrada
+- Pendiente: montar los 4 LEDs indicadores y la monitorización de batería (ADC), ya soportados por el firmware V5
+- Firmware: adaptar V5 al ESP32-C3 (pinout distinto)
+
+### Fase 3 — Consolidación *(pendiente)*
+
+- ESP32-C3 Mini consolidado (LEDs + batería portados, no placa custom)
+- Diseño miniaturizado en torno al C3 Mini como módulo, sin PCB a medida
+- Diseño de carcasa oficial
 - Pruebas de durabilidad con uso real
 
-### Fase 3 — Autonomía sin app *(pendiente)*
+### Fase 4 — Mejoras y ampliación *(opcional, abierta)*
 
-- **Botón de acción**: inicia/finaliza sesión local
-- **Micro SD**: graba sesiones sin app; importación automática al conectar BLE
-- La app detecta sesiones pendientes en el sensor y las importa al historial
-
-### Fase 4 — Producto *(pendiente)*
-
-- Diseño de carcasa
-- Impresión 3D / fabricación
-- Fijación definitiva al saco (velcro, tornillos o integración en vendas)
+No es una fase final ni con objetivo cerrado — hueco para explorar mejoras según vayan surgiendo (autonomía sin app, nuevos sensores, optimizaciones), sin bloquear el resto del roadmap.
 
 ---
-
-## Bugs conocidos y deuda técnica
-
-| Prioridad | Descripción |
-|---|---|
-| Media | Pantalla blanca antes del splash en APK release (`windowBackground` del tema Android) |
-| Baja | % de valid hit configurable por perfil (actualmente sin campo `validHitThreshold` en tipos) |

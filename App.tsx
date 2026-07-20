@@ -73,6 +73,7 @@ export default function App() {
       migrated
         .filter((t, i) => t !== trainings[i])
         .forEach((t) => storage.saveTraining(t))
+
       setTrainings(migrated)
       if (profiles.length > 0) setProfiles(profiles)
       setDevices(devices)
