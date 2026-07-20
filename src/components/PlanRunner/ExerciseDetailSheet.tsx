@@ -1,7 +1,8 @@
-import { Modal, View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { Modal, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { X } from 'lucide-react-native'
 import type { Exercise } from '../../core/types'
+import { EXERCISE_IMAGES } from '../../generated/exerciseImages'
 import { colors } from '../../theme'
 
 interface Props {
@@ -28,6 +29,10 @@ export function ExerciseDetailSheet({ exercise, isBase, onClose, onDelete }: Pro
               <X size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
+
+          {EXERCISE_IMAGES[exercise.id] && (
+            <Image source={EXERCISE_IMAGES[exercise.id]} style={s.image} resizeMode="contain" />
+          )}
 
           <View style={s.badges}>
             <View style={[s.badge, { borderColor: DIFF_COLOR[exercise.difficulty] }]}>
@@ -99,6 +104,7 @@ const s = StyleSheet.create({
   },
   title: { flex: 1, fontSize: 18, fontWeight: '700', color: colors.textPrimary },
   closeBtn: { padding: 4 },
+  image: { width: '100%', height: 200, backgroundColor: colors.bgTertiary },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20, marginBottom: 12 },
   badge: {
     borderWidth: 1, borderRadius: 8,

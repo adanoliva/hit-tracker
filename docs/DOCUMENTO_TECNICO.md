@@ -317,17 +317,17 @@ Devuelve únicamente los ejercicios del catálogo base (`shared/data/exercises.j
 
 #### Origen del catálogo warmup/core (`id` con prefijo `gv-`)
 
-Los ejercicios de calentamiento y core del catálogo base (`id: "gv-<id>"`) están adaptados a partir del dataset público **[exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset)** (MIT License) — nombre, instrucciones (traducidas/adaptadas al español) y agrupación muscular provienen de ahí; el `id` numérico tras `gv-` es el ID original del dataset. Solo se importó texto: **no se han usado las imágenes/GIFs del dataset**, ya que su copyright pertenece a Gym Visual (gymvisual.com) y requieren licencia comercial aparte. Filtrado aplicado: solo ejercicios sin equipamiento de gimnasio (`body weight`, `dumbbell`, `kettlebell`), sin duplicados por patrón de movimiento.
+Los ejercicios de calentamiento y core del catálogo base (`id: "gv-<id>"`) están adaptados a partir del dataset público **[exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset)** (MIT License) — nombre, instrucciones (traducidas/adaptadas al español) y agrupación muscular provienen de ahí; el `id` numérico tras `gv-` es el ID original del dataset. Solo se importó texto del dataset: las imágenes/GIFs son © Gym Visual (gymvisual.com), con licencia comercial adquirida aparte para uso en la app. Filtrado aplicado: solo ejercicios sin equipamiento de gimnasio (`body weight`, `dumbbell`, `kettlebell`), sin duplicados por patrón de movimiento.
 
-#### Imágenes de ejercicios (opcional, sistema de assets locales)
+#### Imágenes de ejercicios (sistema de assets locales)
 
-Las imágenes/GIFs (cuando se licencien de Gym Visual) se colocan en `assets/exercises/<id-dataset>.gif` (sin el prefijo `gv-`) y se generan como `require()` estáticos mediante:
+Las 38 imágenes/GIFs licenciadas de Gym Visual están en `assets/exercises/<id-dataset>.gif` (sin el prefijo `gv-`), a 720px. No se distribuyen en el repositorio (`assets/exercises/*.gif` y `src/generated/exerciseImages.ts` están en `.gitignore`, por licencia). Se generan como `require()` estáticos mediante:
 
 ```bash
 npm run images:gen   # escanea assets/exercises/ y regenera src/generated/exerciseImages.ts
 ```
 
-`CatalogScreen` consulta `EXERCISE_IMAGES[exercise.id]`; si no existe, no se muestra imagen (no falla). Ver `assets/exercises/README.md` para la lista de IDs pendientes.
+`CatalogScreen`, `ExerciseDetailSheet` y `WorkoutPlayer` consultan `EXERCISE_IMAGES[exercise.id]`; si no existe, no se muestra imagen (no falla). Ver `assets/exercises/README.md` y `gymvisual-shortlist.md` (raíz del repo) para el detalle de la selección y las sustituciones aplicadas.
 
 ### `migrationService` (`shared/services/migration.ts`)
 

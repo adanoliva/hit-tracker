@@ -32,8 +32,8 @@
     "difficulty": "easy"
   },
   {
-    "id": "gv-0685",
-    "name": "Carrera en el sitio",
+    "id": "gv-3196",
+    "name": "Carrera rápida en el sitio",
     "category": "warmup",
     "muscles": [
       "Cardiovascular",
@@ -42,7 +42,7 @@
       "Gemelos"
     ],
     "equipment": "none",
-    "description": "Comienza de pie con los pies separados a la altura de la cadera. Activa el core y mantén la parte superior del cuerpo relajada. Comienza a trotar en el lugar, levantando las rodillas hacia el pecho y aterrizando suavemente sobre la punta de los pies. Mantén un ritmo constante y continúa trotando durante la duración o distancia deseada. Recuerda respirar profundamente y mantener una buena postura durante todo el ejercicio.",
+    "description": "Comienza de pie con los pies separados a la altura de la cadera. Activa el core y mantén la parte superior del cuerpo relajada. Da pasos rápidos y cortos en el sitio, moviendo los pies lo más rápido posible mientras aterrizas suavemente sobre la punta de los pies. Mantén el ritmo alto y continúa durante la duración deseada. Recuerda respirar profundamente y mantener una buena postura durante todo el ejercicio.",
     "duration": 30,
     "rest": 10,
     "difficulty": "easy"
@@ -112,8 +112,8 @@
     "difficulty": "easy"
   },
   {
-    "id": "gv-3318",
-    "name": "Giro de brazos 360°",
+    "id": "gv-9653",
+    "name": "Torsión de tronco con brazos en swing",
     "category": "warmup",
     "muscles": [
       "Cardiovascular",
@@ -218,30 +218,31 @@
     "difficulty": "easy"
   },
   {
-    "id": "gv-0002",
-    "name": "Flexión lateral 45°",
+    "id": "gv-3997",
+    "name": "Flexión lateral con brazo flexionado",
     "category": "core",
     "muscles": [
       "Abdominales",
       "Oblicuos"
     ],
     "equipment": "none",
-    "description": "Ponte de pie con los pies separados a la altura de los hombros y los brazos extendidos hacia abajo a los lados. Manteniendo la espalda recta y el core activado, flexiona lentamente el torso hacia un lado, bajando la mano hacia la rodilla. Haz una pausa por un momento en la parte inferior, luego regresa lentamente a la posición inicial. Repite del otro lado. Continúa alternando lados durante el número de repeticiones deseado.",
+    "description": "Ponte de pie con los pies separados a la altura de los hombros y una mano detrás de la cabeza con el codo apuntando hacia afuera. Manteniendo la espalda recta y el core activado, flexiona lentamente el torso hacia el lado contrario al brazo flexionado. Haz una pausa por un momento en el punto más bajo, luego regresa lentamente a la posición inicial. Repite el número de repeticiones deseado y cambia de lado.",
     "sets": 3,
     "reps": 15,
     "rest": 20,
     "difficulty": "medium"
   },
   {
-    "id": "gv-0003",
-    "name": "Bicicleta abdominal",
+    "id": "gv-3999",
+    "name": "Bicicleta abdominal de pie",
     "category": "core",
     "muscles": [
       "Abdominales",
+      "Oblicuos",
       "Flexores de cadera"
     ],
     "equipment": "none",
-    "description": "Túmbate sobre tu espalda con las manos colocadas detrás de la cabeza. Levanta las piernas del suelo y flexiona las rodillas formando un ángulo de 90 grados. Lleva el codo derecho hacia la rodilla izquierda mientras simultáneamente estiras la pierna derecha. Regresa a la posición inicial y repite el movimiento del lado opuesto, llevando el codo izquierdo hacia la rodilla derecha mientras estiras la pierna izquierda. Continúa alternando lados con un movimiento de pedaleo durante el número de repeticiones deseado.",
+    "description": "Ponte de pie con las manos colocadas detrás de la cabeza y los codos apuntando hacia afuera. Levanta una rodilla hacia el pecho mientras giras el torso para llevar el codo contrario hacia esa rodilla. Vuelve a la posición inicial y repite con la otra pierna, alternando lados con un movimiento de pedaleo. Continúa el número de repeticiones deseado.",
     "sets": 3,
     "reps": 15,
     "rest": 20,
@@ -594,205 +595,6 @@
     "reps": 15,
     "rest": 20,
     "difficulty": "medium"
-  },
-  {
-    "id": "gv-2802",
-    "name": "Elevación de piernas con giro",
-    "category": "core",
-    "muscles": [
-      "Abdominales",
-      "Oblicuos",
-      "Flexores de cadera"
-    ],
-    "equipment": "none",
-    "description": "Túmbate sobre tu espalda con las piernas extendidas y los brazos a los lados. Coloca las manos debajo de los glúteos como apoyo. Activa el abdomen y levanta ambas piernas del suelo, manteniéndolas rectas. Mientras levantas las piernas, gira las caderas hacia un lado, llevando las piernas hacia el hombro opuesto. Haz una pausa por un momento en la parte superior, luego baja lentamente las piernas de vuelta a la posición inicial. Repite el movimiento, esta vez girando las caderas hacia el otro lado. Continúa alternando lados durante el número de repeticiones deseado.",
-    "sets": 3,
-    "reps": 15,
-    "rest": 20,
-    "difficulty": "medium"
-  },
-  {
-    "id": "gv-3420",
-    "name": "V-sit",
-    "category": "core",
-    "muscles": [
-      "Abdominales",
-      "Flexores de cadera"
-    ],
-    "equipment": "none",
-    "description": "Siéntate en el suelo con las piernas extendidas frente a ti. Inclínate ligeramente hacia atrás y levanta las piernas del suelo, manteniéndolas rectas. Al mismo tiempo, levanta la parte superior del cuerpo del suelo y extiende los brazos hacia las piernas. Mantén esta posición durante unos segundos, luego baja lentamente la parte superior del cuerpo y las piernas de nuevo a la posición inicial. Repite el número de repeticiones deseado.",
-    "sets": 3,
-    "duration": 20,
-    "rest": 20,
-    "difficulty": "medium"
-  },
-  {
-    "id": "squats",
-    "name": "Sentadillas",
-    "category": "fullbody",
-    "muscles": [
-      "Cuádriceps",
-      "Glúteos",
-      "Isquiotibiales"
-    ],
-    "equipment": "none",
-    "description": "Pies a la anchura de hombros, baja flexionando rodillas hasta que los muslos queden paralelos al suelo. Mantén el pecho erguido y las rodillas en línea con los pies.",
-    "sets": 3,
-    "reps": 15,
-    "rest": 30,
-    "difficulty": "easy"
-  },
-  {
-    "id": "push-ups",
-    "name": "Flexiones",
-    "category": "fullbody",
-    "muscles": [
-      "Pecho",
-      "Tríceps",
-      "Hombros"
-    ],
-    "equipment": "none",
-    "description": "Manos a la anchura de hombros, baja el pecho hasta rozar el suelo manteniendo el cuerpo recto. Empuja explosivamente en la subida.",
-    "sets": 3,
-    "reps": 10,
-    "rest": 30,
-    "difficulty": "medium"
-  },
-  {
-    "id": "lunges",
-    "name": "Zancadas alternas",
-    "category": "fullbody",
-    "muscles": [
-      "Cuádriceps",
-      "Glúteos",
-      "Equilibrio"
-    ],
-    "equipment": "none",
-    "description": "Da un paso adelante y baja la rodilla trasera casi hasta el suelo. Empuja con el talón delantero para volver. Alterna piernas en cada repetición.",
-    "sets": 3,
-    "reps": 10,
-    "rest": 30,
-    "difficulty": "easy"
-  },
-  {
-    "id": "burpees",
-    "name": "Burpees",
-    "category": "fullbody",
-    "muscles": [
-      "Fullbody",
-      "Cardiovascular"
-    ],
-    "equipment": "none",
-    "description": "Desde de pie: agáchate, apoya las manos, salta a plancha, haz una flexión, vuelve a la cuclillas y salta con brazos arriba. Mantén el ritmo constante.",
-    "sets": 3,
-    "reps": 8,
-    "rest": 40,
-    "difficulty": "hard"
-  },
-  {
-    "id": "superman",
-    "name": "Superman (lumbar)",
-    "category": "fullbody",
-    "muscles": [
-      "Lumbares",
-      "Glúteos",
-      "Espalda alta"
-    ],
-    "equipment": "none",
-    "description": "Tumbado boca abajo con brazos extendidos, eleva simultáneamente brazos y piernas manteniendo la tensión 2 segundos. Baja de forma controlada.",
-    "sets": 3,
-    "reps": 12,
-    "rest": 20,
-    "difficulty": "easy"
-  },
-  {
-    "id": "tricep-dips",
-    "name": "Fondos de tríceps",
-    "category": "fullbody",
-    "muscles": [
-      "Tríceps",
-      "Hombros"
-    ],
-    "equipment": "none",
-    "description": "Apoya las manos en una silla o el borde de la cama con los dedos hacia adelante. Baja el cuerpo flexionando los codos y empuja para subir.",
-    "sets": 3,
-    "reps": 10,
-    "rest": 30,
-    "difficulty": "medium"
-  },
-  {
-    "id": "sumo-squat",
-    "name": "Sentadilla sumo",
-    "category": "fullbody",
-    "muscles": [
-      "Aductores",
-      "Glúteos",
-      "Cuádriceps"
-    ],
-    "equipment": "none",
-    "description": "Pies más separados que la anchura de hombros con los pies girados 45°. Baja manteniendo la espalda recta. Trabaja especialmente la cara interna del muslo.",
-    "sets": 3,
-    "reps": 12,
-    "rest": 30,
-    "difficulty": "easy"
-  },
-  {
-    "id": "hip-flexor-stretch",
-    "name": "Estiramiento de flexores de cadera",
-    "category": "mobility",
-    "muscles": [
-      "Flexores de cadera",
-      "Cuádriceps"
-    ],
-    "equipment": "none",
-    "description": "Arrodíllate en una rodilla y empuja la cadera hacia adelante hasta sentir el estiramiento. Mantén el torso erguido. Cambia de pierna a la mitad.",
-    "duration": 30,
-    "rest": 5,
-    "difficulty": "easy"
-  },
-  {
-    "id": "hip-circles",
-    "name": "Círculos de cadera",
-    "category": "mobility",
-    "muscles": [
-      "Cadera",
-      "Core"
-    ],
-    "equipment": "none",
-    "description": "Con manos en la cadera y pies a la anchura de hombros, traza círculos amplios con la pelvis en ambas direcciones. Ayuda a liberar tensión lumbar.",
-    "duration": 30,
-    "rest": 5,
-    "difficulty": "easy"
-  },
-  {
-    "id": "pike-push-ups",
-    "name": "Flexiones en pica",
-    "category": "upper",
-    "muscles": [
-      "Hombros",
-      "Tríceps"
-    ],
-    "equipment": "none",
-    "description": "En posición de pica (caderas altas), baja la cabeza hacia el suelo flexionando los codos. Empuja hacia arriba. Trabaja los hombros como en un press militar.",
-    "sets": 3,
-    "reps": 8,
-    "rest": 30,
-    "difficulty": "medium"
-  },
-  {
-    "id": "calf-raises",
-    "name": "Elevaciones de gemelos",
-    "category": "lower",
-    "muscles": [
-      "Gemelos",
-      "Soleos"
-    ],
-    "equipment": "none",
-    "description": "De pie con los pies juntos, elévate sobre las puntas de los pies al máximo y baja de forma controlada. Esencial para el footwork y la explosividad.",
-    "sets": 3,
-    "reps": 20,
-    "rest": 20,
-    "difficulty": "easy"
   },
   {
     "id": "boxing-jab-cross",

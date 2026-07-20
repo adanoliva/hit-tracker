@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Flame, Dumbbell, Zap, SkipForward, X } from 'lucide-react-native'
 import type { Exercise, Routine } from '@shared/types'
 import type { ResolvedRoutine } from '../../core/hooks/useWorkoutPlayer'
 import { useWorkoutPlayer } from '../../core/hooks/useWorkoutPlayer'
+import { EXERCISE_IMAGES } from '../../generated/exerciseImages'
 import { colors } from '../../theme'
 
 interface WorkoutPlayerProps {
@@ -44,9 +45,13 @@ export function WorkoutPlayer({ routine, onComplete, onAbort }: WorkoutPlayerPro
         <View style={[s.progressFill, { width: progressPct }]} />
       </View>
 
-      {/* Icon + phase label */}
+      {/* Imagen (o icono si no hay) + phase label */}
       <View style={s.iconWrap}>
-        <CategoryIcon category={currentExercise.category} size={48} />
+        {phase === 'exercise' && EXERCISE_IMAGES[currentExercise.id] ? (
+          <Image source={EXERCISE_IMAGES[currentExercise.id]} style={s.exerciseImage} resizeMode="contain" />
+        ) : (
+          <CategoryIcon category={currentExercise.category} size={48} />
+        )}
         <Text style={s.phaseLabel}>
           {phase === 'rest' ? 'Descanso' : totalSets > 1 ? `Serie ${setIndex + 1} / ${totalSets}` : currentExercise.name}
         </Text>
@@ -102,6 +107,7 @@ const s = StyleSheet.create({
   progressTrack: { height: 4, backgroundColor: colors.bgTertiary, borderRadius: 2 },
   progressFill: { height: 4, backgroundColor: colors.accent, borderRadius: 2 },
   iconWrap: { alignItems: 'center', gap: 12, marginTop: 16 },
+  exerciseImage: { width: 160, height: 160, borderRadius: 16, backgroundColor: colors.bgSecondary },
   phaseLabel: { fontSize: 14, color: colors.textSecondary, fontWeight: '600' },
   exerciseName: { fontSize: 22, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
   timer: { fontSize: 96, fontFamily: 'monospace', fontWeight: '800', color: colors.accent, textAlign: 'center' },

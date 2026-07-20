@@ -126,6 +126,7 @@ Tres tabs: **Calentamiento**, **Core/Fullbody**, **Boxing**.
 
 - Búsqueda por texto en tiempo real
 - Ejercicios del catálogo base + ejercicios custom añadidos por el usuario
+- Los ejercicios de calentamiento y core del catálogo base muestran un GIF de demostración (miniatura en la lista, ampliado en el detalle y durante la guía del WorkoutPlayer)
 - Toca un ejercicio para ver su detalle (músculos, equipo, descripción)
 - Botón **Añadir ejercicio** en cada tab para crear ejercicios custom de esa categoría
 - Los ejercicios custom pueden eliminarse desde su detalle

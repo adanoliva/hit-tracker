@@ -192,7 +192,7 @@ El catálogo combina tres fuentes:
 
 Los ejercicios importados de wger se guardan localmente y están disponibles sin conexión.
 
-**Atribución**: los ejercicios de calentamiento y core del catálogo base (`id` con prefijo `gv-`) están adaptados —nombre, instrucciones y grupos musculares, traducidos al español— del dataset público [hasaneyldrm/exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset), publicado bajo licencia MIT. Solo se ha usado el texto del dataset; las imágenes/GIFs originales son © [Gym Visual](https://gymvisual.com) y no están incluidas — la app soporta añadirlas localmente (`assets/exercises/`, ver `npm run images:gen`) si se licencian aparte.
+**Atribución**: los ejercicios de calentamiento y core del catálogo base (`id` con prefijo `gv-`) están adaptados —nombre, instrucciones y grupos musculares, traducidos al español— del dataset público [hasaneyldrm/exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset), publicado bajo licencia MIT. Los GIFs de estos ejercicios son © [Gym Visual](https://gymvisual.com), con licencia adquirida para uso en la app, y no se distribuyen en el repositorio (`assets/exercises/*.gif` está en `.gitignore`) — quien clone el proyecto puede añadir sus propias imágenes licenciadas siguiendo la convención documentada en `assets/exercises/README.md` y ejecutando `npm run images:gen`.
 
 ---
 

@@ -9,7 +9,7 @@
       { "exerciseId": "gv-1428" },
       { "exerciseId": "gv-0721" },
       { "exerciseId": "gv-3223" },
-      { "exerciseId": "gv-0685" },
+      { "exerciseId": "gv-3196" },
       { "exerciseId": "gv-3655" },
       { "exerciseId": "gv-0630" },
       { "exerciseId": "gv-1160" },
@@ -24,27 +24,11 @@
     "difficulty": "medium",
     "exercises": [
       { "exerciseId": "gv-0705" },
-      { "exerciseId": "gv-0003" },
+      { "exerciseId": "gv-3999" },
       { "exerciseId": "gv-0687" },
       { "exerciseId": "gv-2466" },
       { "exerciseId": "gv-0865" },
       { "exerciseId": "gv-0464" }
-    ]
-  },
-  {
-    "id": "fullbody-no-equipment",
-    "name": "Fullbody Sin Material",
-    "category": "fullbody",
-    "durationMin": 20,
-    "difficulty": "medium",
-    "exercises": [
-      { "exerciseId": "squats" },
-      { "exerciseId": "push-ups" },
-      { "exerciseId": "lunges" },
-      { "exerciseId": "burpees" },
-      { "exerciseId": "superman" },
-      { "exerciseId": "tricep-dips" },
-      { "exerciseId": "sumo-squat" }
     ]
   }
 ]
