@@ -26,6 +26,8 @@ Las versiones siguen [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PA
 
 **Regla**: cada vez que se haga un commit que añada funcionalidad o corrija un bug, actualizar la versión en `package.json`. La versión se actualiza en el mismo commit que el cambio, no en uno separado. Para mobile, también actualizar `app.json`.
 
+**Regla (Google Play)**: antes de generar un `.aab` (`npm run android:bundle`), incrementar `versionCode` en `app.json` (`expo.android.versionCode`). Play Console rechaza subir un bundle con un `versionCode` ya usado.
+
 ## Comandos
 
 ```bash

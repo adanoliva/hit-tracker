@@ -27,7 +27,8 @@
         "monochromeImage": "./resources/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.hittracker.app"
+      "package": "com.hittracker.app",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
