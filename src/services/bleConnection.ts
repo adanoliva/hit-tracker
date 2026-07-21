@@ -48,7 +48,7 @@ function parseV3(raw: Uint8Array): SensorReading | null {
 function parseReading(base64: string): SensorReading | null {
   try {
     const raw = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
-    if (_sensorVersion === 3) return parseV3(raw)
+    if (_sensorVersion >= 3) return parseV3(raw)
     return _sensorVersion === 2 ? parseV2(raw) : parseV1(raw)
   } catch {
     return null

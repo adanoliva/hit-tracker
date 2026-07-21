@@ -39,7 +39,7 @@
 #include <math.h>
 
 // ── Identidad ──────────────────────────────────────────────────────────────
-#define DEVICE_NAME    "HT-PROTV4"
+#define DEVICE_NAME    "HT-PROT"
 #define SENSOR_VERSION 4
 
 // ── Pines ──────────────────────────────────────────────────────────────────

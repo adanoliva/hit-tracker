@@ -16,7 +16,7 @@ El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acel
 
 | Plataforma | Archivo | Versión actual |
 |---|---|---|
-| Mobile | `package.json` | 1.16.0 |
+| Mobile | `package.json` | 1.26.2 |
 
 Las versiones siguen [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
@@ -48,7 +48,7 @@ shared/
 ├─ services/
 │  ├─ calibration.ts        calibrationService (detección, intensidad)
 │  ├─ training.ts           trainingService (singleton, gestiona rondas)
-│  ├─ exercise.ts           exerciseService (catálogo base)
+│  ├─ exercise.ts           exerciseService (catálogo base + importación desde wger API)
 │  └─ migration.ts          migrationService (migra trainings legados)
 ├─ data/
 │  ├─ exercises.json        Catálogo base de ejercicios
@@ -68,9 +68,10 @@ El alias `@shared/*` está configurado en `tsconfig.json` + `metro.config.js`.
 Sensor (BLE) → useSensorData() → useTraining() → trainingStore → UI
 ```
 
-- **`shared/services/`**: Lógica de negocio pura. `calibrationService`, `trainingService` (singleton con estado de la ronda activa), `exerciseService`, `migrationService`.
+- **`shared/services/`**: Lógica de negocio pura. `calibrationService`, `trainingService` (singleton con estado de la ronda activa), `exerciseService`, `migrationService`, `caloriesService`.
 - **`hooks/`**: Puente entre servicios y UI. `useSensorData` procesa el stream raw y detecta picos. `useTraining` orquesta fases y timers de rondas/descansos. `useWorkoutPlayer` gestiona el player de ejercicios físicos.
 - **`stores/`**: Estado global con Zustand. `deviceStore`, `profileStore`, `trainingStore`, `workoutPlanStore`, `customExerciseStore`.
+- **`src/services/`**: `bleConnection`, `audio`, `storage`, `googleAuth` + `driveSync` (backup/restauración de sesiones y perfiles en Google Drive, ver `docs/GOOGLE-DRIVE-SETUP.md`).
 
 ### Modelo de datos principal
 
@@ -135,6 +136,8 @@ Las features se definen, implementan y documentan mediante un flujo de agentes:
 - **`.claude/FEATURES.md`** — índice con estado de todas las features
 
 Los agentes usan el ID de feature (ej. `HT-001`) para localizar el archivo. Si no existe, no continúan.
+
+`.claude/` está en `.gitignore` — es local-only, no se trackea en el repo.
 
 ## Documentación
 
