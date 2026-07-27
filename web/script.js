@@ -242,20 +242,6 @@ if ('serviceWorker' in navigator) {
   // navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
 }
 
-// ==================== MISC ==================== 
-
-// Cambiar tema según preferencia del sistema (dark/light)
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').media !== 'not all') {
-  const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  
-  darkModeQuery.addEventListener('change', (e) => {
-    if (e.matches) {
-      document.documentElement.style.colorScheme = 'dark';
-    } else {
-      document.documentElement.style.colorScheme = 'light';
-    }
-  });
-}
 
 // Detectar si es primera visita
 function isFirstVisit() {

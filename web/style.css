@@ -870,20 +870,3 @@ h2 {
     transition-duration: 0.01ms !important;
   }
 }
-
-/* Dark mode already applied by default */
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f5f5f5;
-    --bg-tertiary: #eeeeee;
-    --border: #e0e0e0;
-    --text-primary: #1a1a1a;
-    --text-secondary: #666666;
-    --text-muted: #999999;
-  }
-
-  .navbar {
-    background-color: rgba(255, 255, 255, 0.95);
-  }
-}
