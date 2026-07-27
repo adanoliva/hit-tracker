@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hit Tracker — Plataforma de entrenamiento de boxeo</title>
-  <meta name="description" content="Plataforma completa de entrenamiento de boxeo. Planes con calentamiento, core y sesión de boxeo en tiempo real. Sensor ESP32 vía BLE. Catálogo integrado con wger. Android.">
-  <meta name="keywords" content="hit tracker, boxeo, entrenamiento boxeo, planes de entrenamiento, sensor boxeo, ESP32, BLE, análisis golpes, app boxeo, wger">
+  <meta name="description" content="Plataforma completa de entrenamiento de boxeo. Planes con calentamiento, core y sesión de boxeo en tiempo real. Sensor ESP32 vía BLE. Catálogo de ejercicios integrado con wger. Android.">
+  <meta name="keywords" content="hit tracker, boxeo, entrenamiento boxeo, planes de entrenamiento, sensor boxeo, ESP32, BLE, análisis golpes, app boxeo, wger, catálogo ejercicios">
   <meta name="author" content="Hit Tracker">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hit-tracker.es/">
@@ -27,543 +27,464 @@
   <meta name="twitter:image" content="https://hit-tracker.es/screenshoot/mobile/dashboard.png">
 
   <link rel="icon" href="logo.png" type="image/png">
-  <style>
-    :root {
-      --bg-primary: #0f0f0f;
-      --bg-secondary: #1a1a1a;
-      --border: #2a2a2a;
-      --accent: #ff4444;
-      --secondary: #c0c0c0;
-      --text-primary: #e0e0e0;
-      --text-muted: #808080;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 24px 80px;
-    }
-
-    .page-layout {
-      display: flex;
-      align-items: center;
-      gap: 64px;
-      max-width: 1000px;
-      width: 100%;
-    }
-
-    .content-left {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .logo img {
-      height: 44px;
-      width: auto;
-    }
-
-    .logo-text {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-
-    .logo-text span {
-      color: var(--accent);
-    }
-
-    .badge {
-      display: inline-block;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 999px;
-      margin-bottom: 28px;
-    }
-
-    h1 {
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      font-weight: 800;
-      line-height: 1.15;
-      margin-bottom: 20px;
-    }
-
-    h1 .accent { color: var(--accent); }
-
-    p {
-      color: var(--text-muted);
-      font-size: 1rem;
-      line-height: 1.7;
-      margin-bottom: 12px;
-    }
-
-    .divider {
-      width: 40px;
-      height: 2px;
-      background: var(--border);
-      margin: 28px 0;
-    }
-
-    .stack {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tag {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-
-    .tag.highlight {
-      border-color: var(--secondary);
-      color: var(--secondary);
-    }
-
-    /* Carousel */
-    .device-carousel {
-      position: relative;
-      width: 420px;
-      flex-shrink: 0;
-      height: 430px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .device-slide {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.7s ease;
-      pointer-events: none;
-      gap: 12px;
-    }
-
-    .device-slide.active {
-      opacity: 1;
-      pointer-events: auto;
-      animation: float 3.5s ease-in-out infinite;
-    }
-
-    .device-label {
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .phone-frame {
-      width: 180px;
-      background: #111;
-      border: 9px solid #1c1c1c;
-      border-radius: 32px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(255,68,68,0.2), 0 4px 16px rgba(0,0,0,0.6);
-    }
-
-    .phone-notch {
-      height: 18px;
-      background: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .phone-notch::after {
-      content: '';
-      width: 52px;
-      height: 5px;
-      background: #2a2a2a;
-      border-radius: 3px;
-    }
-
-    .phone-screen img { width: 100%; display: block; }
-
-    .tablet-frame {
-      width: 360px;
-      background: #111;
-      border: 10px solid #1c1c1c;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(255,68,68,0.2), 0 4px 16px rgba(0,0,0,0.6);
-    }
-
-    .tablet-camera {
-      height: 16px;
-      background: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .tablet-camera::after {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #2a2a2a;
-    }
-
-    .tablet-screen img { width: 100%; display: block; }
-
-    .carousel-dots {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 8px;
-      opacity: 0;
-    }
-
-    .carousel-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      border: none;
-      background: var(--border);
-      cursor: pointer;
-      padding: 0;
-      transition: background 0.3s, transform 0.3s;
-    }
-
-    .carousel-dot.active {
-      background: var(--accent);
-      transform: scale(1.2);
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(-8px); }
-      50% { transform: translateY(8px); }
-    }
-
-    footer {
-      position: fixed;
-      bottom: 24px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-    }
-
-    footer a {
-      color: var(--text-muted);
-      text-decoration: underline;
-    }
-
-    @media (max-width: 860px) {
-      .page-layout {
-        flex-direction: column;
-        gap: 48px;
-      }
-
-      .content-left {
-        text-align: center;
-      }
-
-      .logo { justify-content: center; }
-      .divider { margin: 28px auto; }
-      .stack { justify-content: center; }
-
-      .device-carousel {
-        width: 100%;
-        max-width: 360px;
-        height: 400px;
-      }
-
-      .tablet-frame { width: 300px; }
-      .phone-frame { width: 150px; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="page-layout">
-    <div class="content-left">
-      <div class="logo">
-        <img src="logo.png" alt="Hit Tracker" />
-        <div class="logo-text">Hit<span>Tracker</span></div>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <img src="logo.png" alt="Hit Tracker" style="height:28px;width:auto;">
+        <span class="logo">Hit<span style="color:var(--accent)">Tracker</span></span>
       </div>
-      <div class="badge">Próximamente</div>
+      <ul class="nav-links">
+        <li><a href="#features">Características</a></li>
+        <li><a href="#how">Cómo funciona</a></li>
+        <li><a href="#specs">Especificaciones</a></li>
+        <li><a href="#cta">Crea el tuyo</a></li>
+      </ul>
+    </div>
+  </nav>
 
-      <h1>Cada golpe<br><span class="accent">cuenta.</span></h1>
+  <!-- HERO -->
+  <section id="hero" class="hero">
+    <div class="container hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">
+          Hit<span style="color:var(--accent)">Tracker</span>
+          <span class="accent-text">Cada golpe <span style="color:var(--accent)">cuenta.</span></span>
+        </h1>
+        <p class="hero-subtitle">
+          Planes de entrenamiento completos. Análisis en tiempo real. Sensor ESP32 vía BLE.
+        </p>
+        <p class="hero-description">
+          Crea planes con calentamiento, core y boxeo. Ejecuta la sesión guiada y mide cada golpe al instante. Catálogo integrado con wger para descubrir nuevos ejercicios.
+        </p>
 
-      <p>
-        Plataforma completa de entrenamiento de boxeo. Planes con calentamiento, core y sesión en tiempo real.
-        Sensor ESP32 + MPU-6050 vía Bluetooth BLE. Catálogo interno de ejercicios — amplíalo con tus propios ejercicios o buscando en <a href="https://wger.de" target="_blank" rel="noopener noreferrer" style="color: var(--text-primary); font-weight: 700;">wger</a>. Disponible para <strong style="color: var(--text-primary)">Android</strong>.
-      </p>
-      <p>
-        Crea tu plan, conecta el sensor y mide cada golpe al instante.
-      </p>
+        <p class="hero-footer">
+          Basado en ESP32 + React Native. Código abierto. GPL v3.
+        </p>
 
-      <div class="divider"></div>
+        <div class="download-buttons">
+          <a href="https://play.google.com/store/apps/details?id=com.hittracker.app" class="btn btn-primary" target="_blank" rel="noopener">Descargar en Google Play</a>
+        </div>
+      </div>
 
-      <div class="stack">
-        <span class="tag highlight">ESP32 + MPU-6050</span>
-        <span class="tag highlight">Bluetooth BLE</span>
-        <a href="https://wger.de" target="_blank" rel="noopener noreferrer" class="tag highlight" style="text-decoration:none">wger</a>
-        <span class="tag highlight">Backup Google Drive</span>
-        <span class="tag">React Native</span>
-        <span class="tag">Expo</span>
-        <span class="tag">TypeScript</span>
+      <div class="hero-visual">
+        <div class="device-carousel">
+
+                    <div class="device-slide active" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/splash.png" alt="Pantalla de bienvenida" />
+              </div>
+            </div>
+            <div class="device-label">Bienvenida</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/dashboard.png" alt="Dashboard — resumen de sesiones" />
+              </div>
+            </div>
+            <div class="device-label">Dashboard</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/perfiles-01.png" alt="Perfiles de calibración" />
+              </div>
+            </div>
+            <div class="device-label">Perfiles</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/perfiles-02.png" alt="Wizard de calibración guiado" />
+              </div>
+            </div>
+            <div class="device-label">Calibración</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/dispositivos.png" alt="Gestión de dispositivos BLE" />
+              </div>
+            </div>
+            <div class="device-label">Dispositivos</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/catalogo-01.png" alt="Catálogo de ejercicios" />
+              </div>
+            </div>
+            <div class="device-label">Catálogo</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/catalogo-02.png" alt="Búsqueda en el catálogo" />
+              </div>
+            </div>
+            <div class="device-label">Catálogo</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/detalle-ejercicio.png" alt="Detalle de ejercicio" />
+              </div>
+            </div>
+            <div class="device-label">Detalle de ejercicio</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/crear-plan-01.png" alt="Crear plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Crear plan</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/crear-plan-02.png" alt="Crear plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Crear plan</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/crear-plan-03.png" alt="Crear plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Crear plan</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/ejecutar-plan-01.png" alt="Ejecución del plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Entrenamiento</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/ejecutar-plan-02.png" alt="Ejecución del plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Entrenamiento</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/ejecutar-plan-03.png" alt="Ejecución del plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Entrenamiento</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/ejecutar-plan-04.png" alt="Ejecución del plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Entrenamiento</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/ejecutar-plan-05.png" alt="Ejecución del plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Entrenamiento</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/ejecutar-plan-06.png" alt="Ejecución del plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Entrenamiento</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/ejecutar-plan-07.png" alt="Ejecución del plan de entrenamiento" />
+              </div>
+            </div>
+            <div class="device-label">Entrenamiento</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/inicio-sesion.png" alt="Sesión en directo" />
+              </div>
+            </div>
+            <div class="device-label">Sesión en directo</div>
+          </div>
+    
+          <div class="device-slide" data-device="mobile">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <img src="screenshoot/mobile/detalle-sesion.png" alt="Detalle de sesión" />
+              </div>
+            </div>
+            <div class="device-label">Detalle de sesión</div>
+          </div>
+    
+          <div class="carousel-dots">
+            <button class="carousel-dot active" data-index="0"></button>
+            <button class="carousel-dot" data-index="1"></button>
+            <button class="carousel-dot" data-index="2"></button>
+            <button class="carousel-dot" data-index="3"></button>
+            <button class="carousel-dot" data-index="4"></button>
+            <button class="carousel-dot" data-index="5"></button>
+            <button class="carousel-dot" data-index="6"></button>
+            <button class="carousel-dot" data-index="7"></button>
+            <button class="carousel-dot" data-index="8"></button>
+            <button class="carousel-dot" data-index="9"></button>
+            <button class="carousel-dot" data-index="10"></button>
+            <button class="carousel-dot" data-index="11"></button>
+            <button class="carousel-dot" data-index="12"></button>
+            <button class="carousel-dot" data-index="13"></button>
+            <button class="carousel-dot" data-index="14"></button>
+            <button class="carousel-dot" data-index="15"></button>
+            <button class="carousel-dot" data-index="16"></button>
+            <button class="carousel-dot" data-index="17"></button>
+            <button class="carousel-dot" data-index="18"></button>
+            <button class="carousel-dot" data-index="19"></button>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div class="device-carousel">
-
-      <div class="device-slide active" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/splash.png" alt="Pantalla de bienvenida" />
-          </div>
+  <!-- FEATURES -->
+  <section id="features" class="features">
+    <div class="container">
+      <h2>Características</h2>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>Planes de Entrenamiento</h3>
+          <p>Crea planes completos: calentamiento, core y boxeo. Define rondas, descansos y combos por ronda. El plan se ejecuta en secuencia, guiado paso a paso.</p>
         </div>
-        <div class="device-label">Bienvenida</div>
-      </div>
 
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/dashboard.png" alt="Dashboard — resumen de sesiones" />
-          </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Catálogo de Ejercicios</h3>
+          <p>El catálogo es local: viene con ejercicios base y puedes añadir los tuyos. Si quieres más, busca en <a href="https://wger.de" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline">wger</a> (open source) e importa los que necesites con un tap.</p>
         </div>
-        <div class="device-label">Dashboard</div>
-      </div>
 
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/perfiles-01.png" alt="Perfiles de calibración" />
-          </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Sesión de Boxeo en Directo</h3>
+          <p>Cada golpe registrado al instante: potencia, HPM y cadencia ronda a ronda. Campana de inicio y fin. Resultados completos al terminar.</p>
         </div>
-        <div class="device-label">Perfiles</div>
-      </div>
 
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/perfiles-02.png" alt="Wizard de calibración guiado" />
-          </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <h3>Calibración Inteligente</h3>
+          <p>Wizard guiado: golpea ligero y fuerte, la app sugiere umbral y sensibilidad automáticamente. Múltiples perfiles para diferentes sacos o personas.</p>
         </div>
-        <div class="device-label">Calibración</div>
-      </div>
 
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/dispositivos.png" alt="Gestión de dispositivos BLE" />
-          </div>
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h3>Progreso Histórico</h3>
+          <p>Power máximo y HPM de las últimas sesiones. Gráfico de evolución por ronda. Todo guardado localmente, sin cuenta ni suscripción.</p>
         </div>
-        <div class="device-label">Dispositivos</div>
-      </div>
 
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/catalogo-01.png" alt="Catálogo de ejercicios" />
-          </div>
+        <div class="feature-card">
+          <div class="feature-icon">☁️</div>
+          <h3>Copia de Seguridad en Google Drive</h3>
+          <p>Conecta tu cuenta de Google y respalda sesiones y perfiles automáticamente. Funciona offline con cola de reintento y restaura tu historial en un móvil nuevo.</p>
         </div>
-        <div class="device-label">Catálogo</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/catalogo-02.png" alt="Búsqueda en el catálogo" />
-          </div>
-        </div>
-        <div class="device-label">Catálogo</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/detalle-ejercicio.png" alt="Detalle de ejercicio" />
-          </div>
-        </div>
-        <div class="device-label">Detalle de ejercicio</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/crear-plan-01.png" alt="Crear plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Crear plan</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/crear-plan-02.png" alt="Crear plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Crear plan</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/crear-plan-03.png" alt="Crear plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Crear plan</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/ejecutar-plan-01.png" alt="Ejecución del plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Entrenamiento</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/ejecutar-plan-02.png" alt="Ejecución del plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Entrenamiento</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/ejecutar-plan-03.png" alt="Ejecución del plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Entrenamiento</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/ejecutar-plan-04.png" alt="Ejecución del plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Entrenamiento</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/ejecutar-plan-05.png" alt="Ejecución del plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Entrenamiento</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/ejecutar-plan-06.png" alt="Ejecución del plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Entrenamiento</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/ejecutar-plan-07.png" alt="Ejecución del plan de entrenamiento" />
-          </div>
-        </div>
-        <div class="device-label">Entrenamiento</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/inicio-sesion.png" alt="Sesión en directo" />
-          </div>
-        </div>
-        <div class="device-label">Sesión en directo</div>
-      </div>
-
-      <div class="device-slide" data-device="mobile">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="screenshoot/mobile/detalle-sesion.png" alt="Detalle de sesión" />
-          </div>
-        </div>
-        <div class="device-label">Detalle de sesión</div>
-      </div>
-
-      <div class="carousel-dots">
-        <button class="carousel-dot active" data-index="0"></button>
-        <button class="carousel-dot" data-index="1"></button>
-        <button class="carousel-dot" data-index="2"></button>
-        <button class="carousel-dot" data-index="3"></button>
-        <button class="carousel-dot" data-index="4"></button>
-        <button class="carousel-dot" data-index="5"></button>
-        <button class="carousel-dot" data-index="6"></button>
-        <button class="carousel-dot" data-index="7"></button>
-        <button class="carousel-dot" data-index="8"></button>
-        <button class="carousel-dot" data-index="9"></button>
-        <button class="carousel-dot" data-index="10"></button>
-        <button class="carousel-dot" data-index="11"></button>
-        <button class="carousel-dot" data-index="12"></button>
-        <button class="carousel-dot" data-index="13"></button>
-        <button class="carousel-dot" data-index="14"></button>
-        <button class="carousel-dot" data-index="15"></button>
-        <button class="carousel-dot" data-index="16"></button>
-        <button class="carousel-dot" data-index="17"></button>
-        <button class="carousel-dot" data-index="18"></button>
-        <button class="carousel-dot" data-index="19"></button>
       </div>
     </div>
-  </div>
+  </section>
 
+  <!-- CÓMO FUNCIONA -->
+  <section id="how" class="how-it-works">
+    <div class="container">
+      <h2>Cómo Funciona</h2>
+      
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Configura tu Perfil</h3>
+          <p>Crea un perfil de calibración y ajústalo con el wizard guiado: golpea ligero y fuerte, la app sugiere umbral y sensibilidad.</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Conecta el Sensor</h3>
+          <p>Sujeta el ESP32 al saco y emparéjalo por BLE. La app lo detecta automáticamente.</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Inicia tu Sesión o tu Plan</h3>
+          <p>Ve directo a una sesión de boxeo, o crea un plan de entrenamiento completo (calentamiento → core → boxeo) y déjate guiar por el WorkoutPlayer. Cada golpe se registra en tiempo real.</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Analiza</h3>
+          <p>Power máximo, HPM promedio y gráfico de evolución por ronda. Compara con sesiones anteriores y mira cómo progresas.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SPECS -->
+  <section id="specs" class="specs">
+    <div class="container">
+      <h2>Especificaciones</h2>
+
+      <div class="specs-grid">
+        <div class="spec-column">
+          <h3>Hardware</h3>
+          <ul>
+            <li>Microcontrolador: ESP32-32D</li>
+            <li>Sensor: GY-521 (MPU-6050)</li>
+            <li>Frecuencia: 100Hz</li>
+            <li>Rango: ±16g aceleración</li>
+            <li>Conexión: Bluetooth 4.2 BLE</li>
+            <li>Alimentación: batería recargable</li>
+          </ul>
+        </div>
+
+        <div class="spec-column">
+          <h3>Métricas</h3>
+          <ul>
+            <li><strong>Power:</strong> Magnitud del golpe (raw)</li>
+            <li><strong>HPM:</strong> Golpes por minuto</li>
+            <li><strong>HPM promedio:</strong> Media de la ronda</li>
+            <li><strong>Accuracy:</strong> ±2% en magnitud</li>
+            <li><strong>Latency:</strong> &lt;50ms procesamiento</li>
+            <li><strong>Storage:</strong> Ilimitado (archivos JSON)</li>
+          </ul>
+        </div>
+
+        <div class="spec-column">
+          <h3>Software</h3>
+          <ul>
+            <li>React Native + Expo SDK 56</li>
+            <li>Lenguaje: TypeScript 6</li>
+            <li>Estado: Zustand 5</li>
+            <li>Gráficos: react-native-svg 15</li>
+            <li>Build: EAS Build</li>
+            <li>Backup: Google Drive (drive.appdata)</li>
+            <li>Licencia: GPL v3</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CREA EL TUYO -->
+  <section id="cta" class="cta-section">
+    <div class="container">
+      <h2>Crea el tuyo</h2>
+      <p class="cta-text">
+        HitTracker es un proyecto completamente abierto, publicado bajo licencia <strong>GPL v3</strong>.
+        El código de la app, el firmware del sensor y el esquema de conexión son libres de usar,
+        estudiar, modificar y distribuir. Si quieres adaptarlo a tu saco, tu gimnasio o tu forma de entrenar,
+        tienes todo el derecho. Eso sí: cualquier versión modificada que distribuyas debe publicarse
+        también bajo GPL v3. La libertad se comparte, no se cierra.
+      </p>
+      <p class="cta-text">
+        El sensor se construye con un <strong>ESP32 DevKit V1</strong> y un módulo <strong>GY-521 (MPU-6050)</strong>.
+        El firmware V4 incluye 4 LEDs indicadores y monitorización de batería. Con el esquema incluido en el repositorio,
+        puedes tenerlo funcionando en una tarde.
+      </p>
+      <p class="cta-text">
+        El repositorio incluye firmware, app mobile, planes de ejercicios base y documentación completa.
+        Las contribuciones son bienvenidas.
+      </p>
+      <p class="cta-text">
+        <strong>¿Quieres contribuir?</strong> Hay frentes abiertos donde cualquier ayuda suma: portar la app a
+        <strong>iOS</strong>, diseñar una <strong>carcasa imprimible en 3D</strong> para el sensor, o incluso
+        montar y vender el sensor ya ensamblado para quien prefiera no soldarlo. Si te animas con alguno,
+        abre un issue o una pull request en el repositorio.
+      </p>
+      <div class="download-buttons">
+        <a href="https://github.com/adanoliva/hit-tracker#" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+          Ver en GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-copy">&copy; 2026 Hit Tracker &middot; GPL v3</p>
+      <p class="footer-copy" style="margin-top:8px;font-size:0.7rem;opacity:0.6;max-width:640px;margin-left:auto;margin-right:auto">
+        Este software se distribuye sin garantía de ningún tipo. El repositorio oficial es
+        <a href="https://github.com/adanoliva/hit-tracker" style="color:inherit">github.com/adanoliva/hit-tracker</a>.
+        Las distribuciones externas a este repositorio no están verificadas ni respaldadas por sus autores.
+      </p>
+      <p class="footer-copy" style="margin-top:8px;font-size:0.7rem;opacity:0.6;max-width:640px;margin-left:auto;margin-right:auto">
+        Los GIFs de demostración de ejercicios son &copy; <a href="https://gymvisual.com" target="_blank" rel="noopener noreferrer" style="color:inherit">Gym Visual</a>, con licencia adquirida para uso en la app.
+      </p>
+      <p class="footer-copy" style="margin-top:8px">
+        <a href="privacidad.html">Política de privacidad</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
   <script>
     (function () {
       const slides = document.querySelectorAll('.device-slide')
@@ -579,9 +500,13 @@
         dots[current].classList.add('active')
       }
 
-      function next() { goTo((current + 1) % slides.length) }
+      function next() {
+        goTo((current + 1) % slides.length)
+      }
 
-      function startTimer() { timer = setInterval(next, 4000) }
+      function startTimer() {
+        timer = setInterval(next, 4000)
+      }
 
       dots.forEach((dot, i) => {
         dot.addEventListener('click', () => {
@@ -594,10 +519,5 @@
       startTimer()
     })()
   </script>
-
-  <footer>
-    En desarrollo &mdash; Hit Tracker &copy; 2026 &middot;
-    <a href="privacidad.html">Política de privacidad</a>
-  </footer>
 </body>
 </html>

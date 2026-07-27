@@ -251,6 +251,21 @@ Los ejercicios importados de wger se guardan localmente y están disponibles sin
 
 ---
 
+## Seguridad
+
+Este proyecto se ha desarrollado con asistencia de IA ("vibecoded"). Para compensar la falta de revisión manual línea a línea, se ha pasado una auditoría de seguridad dedicada sobre autenticación, BLE, almacenamiento local, dependencias y configuración de la app.
+
+**Medidas ya implementadas:**
+- Login con Google mediante OAuth2 + **PKCE** (Authorization Code flow) — un código de autorización interceptado no es canjeable por tokens sin el code verifier
+- Tokens de sesión guardados en **`expo-secure-store`** (keystore cifrado del sistema), no en `AsyncStorage`
+- Backup en Drive limitado al scope **`drive.appdata`** — carpeta oculta y sandboxeada, sin acceso al resto del Drive del usuario
+- Sin secretos ni API keys hardcodeadas en el repo (el client ID de Google se lee de `EXPO_PUBLIC_GOOGLE_CLIENT_ID`, público por diseño en OAuth de apps móviles)
+- Sitio web estático (`web/`) sin `innerHTML`, `eval` ni formularios: sin superficie de XSS
+
+**Riesgos aceptados / pendientes:**
+- Sesiones y perfiles de calibración se guardan como JSON en claro en `expo-file-system` (sin cifrar). Impacto bajo (son datos de entrenamiento, no credenciales), pero requeriría acceso físico a un dispositivo rooteado/desbloqueado para leerse
+- El sensor BLE no tiene pairing/autenticación más allá de las UUIDs del servicio — un dispositivo BLE malicioso que clone esas UUIDs podría enviar datos de golpe falsos. Se considera riesgo bajo dado el contexto (fitness personal), pero pendiente añadir validación de rangos físicamente posibles en los valores recibidos
+
 ## Distribución oficial
 
 El repositorio oficial es **[github.com/adanoliva/hit-tracker](https://github.com/adanoliva/hit-tracker)**. Las distribuciones fuera de este repositorio no están verificadas por los autores.
