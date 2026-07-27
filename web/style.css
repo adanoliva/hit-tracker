@@ -790,6 +790,11 @@ code {
   margin-bottom: 24px;
 }
 
+.hero-text .download-buttons {
+  justify-content: flex-start;
+  margin-top: 32px;
+}
+
 .download-note {
   font-size: 13px;
   color: var(--text-secondary);

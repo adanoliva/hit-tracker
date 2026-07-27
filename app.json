@@ -3,7 +3,7 @@
     "name": "Hit Tracker",
     "slug": "hit-tracker",
     "scheme": ["hittracker", "com.googleusercontent.apps.979133969928-70eio2up7nsov07ve4bckqqhcdq5pksr"],
-    "version": "1.26.2",
+    "version": "1.26.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -28,7 +28,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.hittracker.app",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"

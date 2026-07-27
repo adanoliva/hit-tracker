@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.10.2'
+export const APP_VERSION = '1.26.3'
 
 // Factor de conversión Impact.magnitude de m/s² a raw/16
 // Con MPU-6050 en ±16g: 1g = 2048 LSB raw → /16 = 128 unidades

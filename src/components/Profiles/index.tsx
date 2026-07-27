@@ -183,23 +183,26 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
       prevReadingRef.current = reading
       if (!prev) return
 
-      const now = reading.timestamp
       const sub = subStepRef.current
 
       const wallNow = Date.now()  // use wall clock for all cooldown comparisons
+
+      // V3/V4: firmware already notifies one confirmed peak per hit — no rising/falling
+      // stream to compare, so `reading` itself is the peak (see useSensorData.ts)
+      const isFirmwarePeak = reading.isPeak && reading.magnitude > MIN_CALIB_HIT
+      const isStreamPeak = !reading.isPeak && reading.magnitude < prev.magnitude && prev.magnitude > MIN_CALIB_HIT
 
       // Diagnostic log: capture every reading above baseline
       if (reading.magnitude > MIN_CALIB_HIT) {
         const dt = lastDiagTimeRef.current ? wallNow - lastDiagTimeRef.current : 0
         lastDiagTimeRef.current = wallNow
-        const isPeak = sub === 'waiting' && reading.magnitude < prev.magnitude && prev.magnitude > MIN_CALIB_HIT
-        setDiagLog((log) => [{ mag: Math.round(prev.magnitude), dt, isPeak }, ...log].slice(0, 12))
+        const isPeak = sub === 'waiting' && (isFirmwarePeak || isStreamPeak)
+        setDiagLog((log) => [{ mag: Math.round(isFirmwarePeak ? reading.magnitude : prev.magnitude), dt, isPeak }, ...log].slice(0, 12))
       }
 
       if (sub === 'waiting') {
-        const isRising = reading.magnitude >= prev.magnitude
-        if (!isRising && prev.magnitude > MIN_CALIB_HIT && wallNow - lastHitTimeRef.current > INTER_HIT_COOLDOWN) {
-          peakMagRef.current = prev.magnitude
+        if ((isFirmwarePeak || isStreamPeak) && wallNow - lastHitTimeRef.current > INTER_HIT_COOLDOWN) {
+          peakMagRef.current = isFirmwarePeak ? reading.magnitude : prev.magnitude
           peakTimeRef.current = wallNow
           reboundMaxRef.current = 0
           subStepRef.current = 'rebound'
