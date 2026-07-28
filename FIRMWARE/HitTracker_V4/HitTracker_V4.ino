@@ -65,7 +65,9 @@
 #define FLOOR_RECOVERY_FRACTION 0.05f
 
 // ── Configuración de muestreo ──────────────────────────────────────────────
-const uint16_t INTERVAL_MS = 10  ;  // 100 Hz
+// ponytail: 200Hz en vez de 100Hz — a 100Hz (10ms) se pierden impactos de saco
+// (duran 5-20ms) si el pico cae entre dos lecturas I2C. Subir más si sigue fallando.
+const uint16_t INTERVAL_MS = 5;  // 200 Hz
 
 // ── Estado global ──────────────────────────────────────────────────────────
 BLEServer*         pServer    = nullptr;
@@ -134,8 +136,9 @@ void initBLE() {
 
   BLEService* pService = pServer->createService(SERVICE_UUID);
 
-  // Hit event characteristic (NOTIFY)
-  pHitChar = pService->createCharacteristic(HIT_CHAR_UUID, BLECharacteristic::PROPERTY_NOTIFY);
+  // Hit event characteristic (INDICATE — requiere ACK del receptor, evita
+  // pérdida silenciosa de golpes que sí sufría NOTIFY bajo golpes seguidos)
+  pHitChar = pService->createCharacteristic(HIT_CHAR_UUID, BLECharacteristic::PROPERTY_INDICATE);
   pHitChar->addDescriptor(new BLE2902());
 
   // Version characteristic (READ)
@@ -165,7 +168,7 @@ void sendHitEvent(uint32_t timestamp, uint16_t magnitude) {
   memcpy(&buffer[0], &timestamp, 4);
   memcpy(&buffer[4], &magnitude, 2);
   pHitChar->setValue(buffer, 6);
-  pHitChar->notify();
+  pHitChar->notify(false);  // false = enviar como INDICATE (con ACK), no NOTIFY
   Serial.printf("HIT: mag=%u ts=%u\n", magnitude, timestamp);
 }
 
@@ -196,6 +199,7 @@ void setup() {
 // ── Loop ───────────────────────────────────────────────────────────────────
 void loop() {
   uint32_t now = millis();
+
   if (now - lastReadTime < INTERVAL_MS) {
     delay(1);
     return;

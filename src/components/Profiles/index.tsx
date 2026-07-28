@@ -181,23 +181,23 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
     onReading: (reading) => {
       const prev = prevReadingRef.current
       prevReadingRef.current = reading
-      if (!prev) return
 
       const sub = subStepRef.current
 
       const wallNow = Date.now()  // use wall clock for all cooldown comparisons
 
       // V3/V4: firmware already notifies one confirmed peak per hit — no rising/falling
-      // stream to compare, so `reading` itself is the peak (see useSensorData.ts)
+      // stream to compare, so `reading` itself is the peak (see useSensorData.ts).
+      // No depende de `prev`, así que el primer golpe tras conectar también cuenta.
       const isFirmwarePeak = reading.isPeak && reading.magnitude > MIN_CALIB_HIT
-      const isStreamPeak = !reading.isPeak && reading.magnitude < prev.magnitude && prev.magnitude > MIN_CALIB_HIT
+      const isStreamPeak = !!prev && !reading.isPeak && reading.magnitude < prev.magnitude && prev.magnitude > MIN_CALIB_HIT
 
       // Diagnostic log: capture every reading above baseline
       if (reading.magnitude > MIN_CALIB_HIT) {
         const dt = lastDiagTimeRef.current ? wallNow - lastDiagTimeRef.current : 0
         lastDiagTimeRef.current = wallNow
         const isPeak = sub === 'waiting' && (isFirmwarePeak || isStreamPeak)
-        setDiagLog((log) => [{ mag: Math.round(isFirmwarePeak ? reading.magnitude : prev.magnitude), dt, isPeak }, ...log].slice(0, 12))
+        setDiagLog((log) => [{ mag: Math.round(isFirmwarePeak || !prev ? reading.magnitude : prev.magnitude), dt, isPeak }, ...log].slice(0, 12))
       }
 
       if (sub === 'waiting') {
