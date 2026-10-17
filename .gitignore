@@ -33,3 +33,4 @@ assets/exercises/*.gif
 assets/exercises/*.jpg
 src/generated/exerciseImages.ts
 FIRMWARE/*/build/
+.agents/
