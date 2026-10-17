@@ -4,7 +4,7 @@ import { storage } from '../../services/storage'
 import { useDriveStore } from './driveStore'
 import { uploadProfiles } from '../../services/driveSync'
 
-const DEFAULT_PROFILE: CalibrationProfile = {
+export const DEFAULT_PROFILE: CalibrationProfile = {
   id: 'default-v1',
   name: 'Default',
   threshold: 35,

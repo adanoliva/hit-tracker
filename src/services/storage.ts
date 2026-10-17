@@ -21,6 +21,14 @@ async function ensureDir(path: string) {
   await FileSystem.makeDirectoryAsync(path, { intermediates: true }).catch(() => {})
 }
 
+// Escribe en .tmp y renombra (rename es atómico): si la app muere a mitad de escritura
+// el archivo original queda intacto en vez de corrupto (y leído luego como []).
+export async function writeJson(path: string, data: unknown): Promise<void> {
+  const tmp = path + '.tmp'
+  await FileSystem.writeAsStringAsync(tmp, JSON.stringify(data))
+  await FileSystem.moveAsync({ from: tmp, to: path })
+}
+
 async function readJson<T>(path: string, fallback: T): Promise<T> {
   try {
     const raw = await FileSystem.readAsStringAsync(path)
@@ -33,10 +41,7 @@ async function readJson<T>(path: string, fallback: T): Promise<T> {
 export const storage = {
   async saveTraining(training: Training) {
     await ensureDir(TRAININGS_DIR)
-    await FileSystem.writeAsStringAsync(
-      TRAININGS_DIR + `training_${training.id}.json`,
-      JSON.stringify(training)
-    )
+    await writeJson(TRAININGS_DIR + `training_${training.id}.json`, training)
   },
 
   async loadTrainings(): Promise<Training[]> {
@@ -59,7 +64,7 @@ export const storage = {
 
   async saveProfiles(profiles: CalibrationProfile[]) {
     await ensureDir(BASE)
-    await FileSystem.writeAsStringAsync(BASE + 'profiles.json', JSON.stringify(profiles))
+    await writeJson(BASE + 'profiles.json', profiles)
   },
 
   async loadProfiles(): Promise<CalibrationProfile[]> {
@@ -68,7 +73,7 @@ export const storage = {
 
   async saveDevices(devices: Device[]) {
     await ensureDir(BASE)
-    await FileSystem.writeAsStringAsync(BASE + 'devices.json', JSON.stringify(devices))
+    await writeJson(BASE + 'devices.json', devices)
   },
 
   async loadDevices(): Promise<Device[]> {
@@ -77,7 +82,7 @@ export const storage = {
 
   async saveWorkoutPlans(plans: WorkoutPlan[]) {
     await ensureDir(BASE)
-    await FileSystem.writeAsStringAsync(BASE + 'workout_plans.json', JSON.stringify(plans))
+    await writeJson(BASE + 'workout_plans.json', plans)
   },
 
   async loadWorkoutPlans(): Promise<WorkoutPlan[]> {
@@ -86,7 +91,7 @@ export const storage = {
 
   async saveCustomExercises(exercises: Exercise[]) {
     await ensureDir(BASE)
-    await FileSystem.writeAsStringAsync(BASE + 'custom_exercises.json', JSON.stringify(exercises))
+    await writeJson(BASE + 'custom_exercises.json', exercises)
   },
 
   async loadCustomExercises(): Promise<Exercise[]> {

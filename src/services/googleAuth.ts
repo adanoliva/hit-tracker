@@ -41,8 +41,11 @@ async function fetchUserInfo(accessToken: string): Promise<{ email: string; name
 export async function restoreSession(): Promise<void> {
   const raw = await SecureStore.getItemAsync(TOKENS_KEY)
   if (!raw) return
-  const account: GoogleAccount = JSON.parse(raw)
-  useDriveStore.getState().setAccount(account)
+  try {
+    useDriveStore.getState().setAccount(JSON.parse(raw))
+  } catch {
+    await clearPersistedAccount() // JSON corrupto: mejor pedir login que bloquear el arranque
+  }
 }
 
 export async function connect(): Promise<void> {
@@ -105,7 +108,9 @@ export async function disconnect(): Promise<void> {
   useDriveStore.getState().setAccount(null)
 }
 
-async function refreshAccessToken(refreshToken: string): Promise<GoogleAccount | null> {
+// null = fallo transitorio (sin red, 5xx): se reintenta más tarde.
+// 'revoked' = Google rechaza el refresh token (invalid_grant): hay que volver a hacer login.
+async function refreshAccessToken(refreshToken: string): Promise<GoogleAccount | 'revoked' | null> {
   try {
     const result = await AuthSession.refreshAsync({ clientId: CLIENT_ID, refreshToken }, DISCOVERY)
     if (!result.accessToken) return null
@@ -117,23 +122,24 @@ async function refreshAccessToken(refreshToken: string): Promise<GoogleAccount |
       refreshToken: result.refreshToken ?? refreshToken,
       expiresAt: Date.now() + (result.expiresIn ?? 3600) * 1000,
     }
-  } catch {
-    return null
+  } catch (e) {
+    return e instanceof AuthSession.TokenError && e.params?.error === 'invalid_grant' ? 'revoked' : null
   }
 }
 
 // Llamar antes de cualquier petición a Drive API. Refresca si va a expirar en <60s;
-// si el refresh falla (token revocado), desconecta la cuenta.
+// solo desconecta si el token está revocado; un fallo de red deja la cuenta intacta.
 export async function ensureValidToken(): Promise<string | null> {
   const account = useDriveStore.getState().account
   if (!account) return null
   if (Date.now() < account.expiresAt - 60_000) return account.accessToken
 
   const refreshed = await refreshAccessToken(account.refreshToken)
-  if (!refreshed) {
+  if (refreshed === 'revoked') {
     await disconnect()
     return null
   }
+  if (!refreshed) return null
   await persistAccount(refreshed)
   useDriveStore.getState().setAccount(refreshed)
   return refreshed.accessToken

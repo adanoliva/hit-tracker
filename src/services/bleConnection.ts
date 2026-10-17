@@ -1,5 +1,6 @@
 import { getBleManager } from './ble'
 import type { SensorReading } from '../core/types'
+import { useDeviceStore } from '../core/stores/deviceStore'
 
 const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'
 const CHAR_UUID    = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'
@@ -10,6 +11,8 @@ type ReadingCallback = (r: SensorReading) => void
 
 let _device: any = null
 let _subscription: any = null
+let _disconnectSub: any = null
+let _onReading: ReadingCallback = () => {}
 let _sensorVersion = 1
 
 function parseV1(raw: Uint8Array): SensorReading | null {
@@ -55,8 +58,13 @@ function parseReading(base64: string): SensorReading | null {
   }
 }
 
+// Idempotente: si ya hay conexión con ese dispositivo solo cambia el destino de las lecturas.
+// Antes cada ronda desconectaba y reconectaba el sensor, perdiendo los primeros golpes.
 export async function connectBleDevice(deviceId: string, onReading: ReadingCallback): Promise<void> {
+  _onReading = onReading
+  if (_device?.id === deviceId && (await _device.isConnected().catch(() => false))) return
   await disconnectBleDevice()
+  _onReading = onReading
 
   const ble = getBleManager()
   if (!ble) throw new Error('BLE no disponible')
@@ -78,12 +86,32 @@ export async function connectBleDevice(deviceId: string, onReading: ReadingCallb
   _subscription = _device.monitorCharacteristicForService(
     SERVICE_UUID,
     CHAR_UUID,
-    (_error: any, characteristic: any) => {
-      if (!characteristic?.value) return
+    (error: any, characteristic: any) => {
+      if (error || !characteristic?.value) return // la caída se gestiona en onDisconnected
       const reading = parseReading(characteristic.value)
-      if (reading) onReading(reading)
+      if (reading) _onReading(reading)
     }
   )
+
+  _disconnectSub = _device.onDisconnected(() => handleUnexpectedDisconnect(deviceId))
+}
+
+// ponytail: 3 reintentos fijos de 2s; backoff si el sensor tarda más en volver
+async function handleUnexpectedDisconnect(deviceId: string): Promise<void> {
+  _subscription?.remove()
+  _disconnectSub?.remove()
+  _subscription = null
+  _disconnectSub = null
+  _device = null
+  for (let i = 0; i < 3; i++) {
+    await new Promise((r) => setTimeout(r, 2000))
+    if (_device) return // alguien reconectó (o eligió otro dispositivo) mientras esperábamos
+    try {
+      await connectBleDevice(deviceId, _onReading)
+      return
+    } catch {}
+  }
+  useDeviceStore.getState().setConnected(null)
 }
 
 export function getSensorVersion(): number {
@@ -103,6 +131,8 @@ export async function sendProfileConfig(threshold: number, rebound: number): Pro
 }
 
 export async function disconnectBleDevice(): Promise<void> {
+  _disconnectSub?.remove() // desconexión manual: que no salte el reintento
+  _disconnectSub = null
   _subscription?.remove()
   _subscription = null
   try { await _device?.cancelConnection() } catch {}

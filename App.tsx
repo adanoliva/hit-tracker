@@ -79,8 +79,8 @@ export default function App() {
       setDevices(devices)
       initDriveSync()
       retryPending() // por si había pendientes al cerrar la app y ya hay red
-      setReady(true)
-    })
+    }).catch((e) => console.warn('Error al cargar datos iniciales', e))
+      .finally(() => setReady(true)) // nunca quedarse en el splash
   }, [])
 
   useEffect(() => {

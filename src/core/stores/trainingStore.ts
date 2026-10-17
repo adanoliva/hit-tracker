@@ -40,16 +40,15 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
   deleteTraining: (id) => {
     set((state) => ({ trainings: state.trainings.filter((t) => t.id !== id) }))
     storage.deleteTraining(id)
-    if (useDriveStore.getState().account) deleteFromDrive(id)
+    deleteFromDrive(id)
   },
 
   deleteTrainingsByProfile: (profileId) => {
     const toDelete = get().trainings.filter((t) => t.profile?.id === profileId)
     set((state) => ({ trainings: state.trainings.filter((t) => t.profile?.id !== profileId) }))
-    const account = useDriveStore.getState().account
     toDelete.forEach((t) => {
       storage.deleteTraining(t.id)
-      if (account) deleteFromDrive(t.id)
+      deleteFromDrive(t.id)
     })
   },
 

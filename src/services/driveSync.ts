@@ -3,9 +3,9 @@ import NetInfo from '@react-native-community/netinfo'
 import type { Training, CalibrationProfile } from '../core/types'
 import { useDriveStore, type PendingUpload, type ProfileConflict } from '../core/stores/driveStore'
 import { useTrainingStore } from '../core/stores/trainingStore'
-import { useProfileStore } from '../core/stores/profileStore'
+import { useProfileStore, DEFAULT_PROFILE } from '../core/stores/profileStore'
 import { ensureValidToken } from './googleAuth'
-import { storage } from './storage'
+import { storage, writeJson } from './storage'
 
 const PROFILES_FILE_NAME = 'profiles.json'
 
@@ -14,6 +14,12 @@ const UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3'
 const BOUNDARY = 'ht_drive_boundary'
 const MAX_RETRIES = 3
 const PENDING_QUEUE_FILE = FileSystem.documentDirectory + 'HitTracker/drive-pending.json'
+const PENDING_DELETES_FILE = FileSystem.documentDirectory + 'HitTracker/drive-deleted.json'
+
+// Sesiones borradas en local cuyo borrado en Drive aún no se ha confirmado. Sin esto,
+// borrar sin red (o con la cuenta desconectada) hacía que downloadAll la resucitara.
+// ponytail: crece sin límite si nunca se conecta una cuenta; son solo ids
+let pendingDeletes = new Set<string>()
 
 function trainingFileName(id: string): string {
   return `training_${id}.json`
@@ -92,8 +98,24 @@ const driveApi = {
 }
 
 async function persistQueue(): Promise<void> {
-  const { pendingUploads } = useDriveStore.getState()
-  await FileSystem.writeAsStringAsync(PENDING_QUEUE_FILE, JSON.stringify(pendingUploads)).catch(() => {})
+  await writeJson(PENDING_QUEUE_FILE, useDriveStore.getState().pendingUploads).catch(() => {})
+}
+
+async function persistDeletes(): Promise<void> {
+  await writeJson(PENDING_DELETES_FILE, [...pendingDeletes]).catch(() => {})
+}
+
+async function flushDeletes(): Promise<void> {
+  if (!useDriveStore.getState().account) return
+  for (const id of [...pendingDeletes]) {
+    try {
+      await driveApi.deleteFile(trainingFileName(id))
+      pendingDeletes.delete(id)
+    } catch {
+      // se reintenta en el próximo retryPending/downloadAll
+    }
+  }
+  await persistDeletes()
 }
 
 export async function loadPendingQueue(): Promise<void> {
@@ -104,6 +126,11 @@ export async function loadPendingQueue(): Promise<void> {
     if (uploads.length > 0) useDriveStore.getState().setSyncStatus('pending')
   } catch {
     // sin cola pendiente previa
+  }
+  try {
+    pendingDeletes = new Set(JSON.parse(await FileSystem.readAsStringAsync(PENDING_DELETES_FILE)))
+  } catch {
+    // sin borrados pendientes
   }
 }
 
@@ -128,16 +155,13 @@ export async function uploadTraining(training: Training): Promise<void> {
   }
 }
 
+// Se llama siempre al borrar en local, haya cuenta o no: queda anotado y se borra en Drive
+// en cuanto se pueda.
 export async function deleteFromDrive(trainingId: string): Promise<void> {
-  const store = useDriveStore.getState()
-  if (!store.account) return
-  try {
-    await driveApi.deleteFile(trainingFileName(trainingId))
-  } catch {
-    // borrado local ya ocurrió; si Drive falla aquí no hay cola de reintento para deletes (fuera de spec)
-  }
-  store.removePending(trainingId)
-  await persistQueue()
+  pendingDeletes.add(trainingId)
+  useDriveStore.getState().removePending(trainingId)
+  await Promise.all([persistDeletes(), persistQueue()])
+  await flushDeletes()
 }
 
 // Reconciliación inicial en ambos sentidos: descarga de Drive lo que falte en local (sin
@@ -153,13 +177,18 @@ export async function downloadAll(): Promise<void> {
     const localTrainings = useTrainingStore.getState().trainings
     const localIds = new Set(localTrainings.map((t) => t.id))
 
+    await flushDeletes()
+
     for (const file of files) {
       const trainingId = file.name.replace('training_', '').replace('.json', '')
-      if (localIds.has(trainingId)) continue
-      const data = await driveApi.downloadFile(file.id)
-      const training: Training = JSON.parse(data)
-      await storage.saveTraining(training)
-      useTrainingStore.getState().addTrainingLocal(training)
+      if (localIds.has(trainingId) || pendingDeletes.has(trainingId)) continue
+      try {
+        const training: Training = JSON.parse(await driveApi.downloadFile(file.id))
+        await storage.saveTraining(training)
+        useTrainingStore.getState().addTrainingLocal(training)
+      } catch {
+        // archivo corrupto o fallo puntual: se salta y se reintenta en la próxima reconciliación
+      }
     }
 
     for (const training of localTrainings) {
@@ -176,7 +205,9 @@ export async function downloadAll(): Promise<void> {
 // force=true (botón "Sincronizar ahora") ignora el backoff y el tope de reintentos.
 export async function retryPending(force = false): Promise<void> {
   const { pendingUploads, account } = useDriveStore.getState()
-  if (!account || pendingUploads.length === 0) return
+  if (!account) return
+  await flushDeletes()
+  if (pendingUploads.length === 0) return
 
   for (const pending of [...pendingUploads]) {
     if (!force) {
@@ -239,7 +270,9 @@ export async function syncProfilesOnConnect(localProfiles: CalibrationProfile[])
     return
   }
 
-  if (localProfiles.length === 0) {
+  // El store siempre tiene al menos el perfil Default: si solo hay ese, es una instalación
+  // nueva y no tiene sentido preguntar por conflicto.
+  if (localProfiles.every((p) => p.id === DEFAULT_PROFILE.id)) {
     const remoteProfiles: CalibrationProfile[] = JSON.parse(remoteJson)
     useProfileStore.getState().setProfiles(remoteProfiles)
     await storage.saveProfiles(remoteProfiles)
