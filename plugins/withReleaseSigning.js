@@ -21,6 +21,11 @@ def hasReleaseKeystore = keystorePropertiesFile.exists()
 if (hasReleaseKeystore) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
+// Un .aab es siempre para Play: firmarlo con la clave de debug no debe pasar en silencio.
+// (APK/run:android release sí cae a debug, para builds locales de prueba.)
+if (!hasReleaseKeystore && gradle.startParameter.taskNames.any { it.toLowerCase().contains('bundlerelease') }) {
+    throw new GradleException("Falta keystores/keystore.properties: no se puede generar el .aab firmado para Play")
+}
 
 android {`
 

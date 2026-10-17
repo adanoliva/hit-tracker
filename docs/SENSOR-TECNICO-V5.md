@@ -146,6 +146,8 @@ Baja ≤20%: ██░░██░░░░░░░░░░░░░░░░�
 
 Service UUID completo: `4fafc201-1fb5-459e-8fcc-c5c9c331914b`
 
+La characteristic de config (`...26aa`) es escribible sin emparejamiento por cualquier dispositivo en rango BLE. Por eso el firmware descarta las escrituras que no midan exactamente 4 bytes o que se salgan de rango: `threshold_raw` entre 1 y 1000, `cooldown_ms` entre 50 y 2000. Tampoco escribe en NVS si el valor no cambia. Al arrancar, si en NVS hay un valor fuera de rango, se usan los valores por defecto (300 / 400).
+
 La characteristic de batería (`...26ab`) es de solo lectura. La app puede consultarla al conectar y periódicamente para mostrar el nivel al usuario.
 
 ---

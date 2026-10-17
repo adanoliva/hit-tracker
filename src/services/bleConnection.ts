@@ -124,8 +124,9 @@ export async function sendProfileConfig(threshold: number, rebound: number): Pro
   if (!_device) throw new Error('No device connected')
   const buf = new ArrayBuffer(4)
   const view = new DataView(buf)
-  view.setUint16(0, threshold * 10, true)
-  view.setUint16(2, rebound, true)
+  // mismos rangos que valida el firmware V5 (CFG_*_MIN/MAX): fuera de ellos ignora la escritura
+  view.setUint16(0, Math.min(1000, Math.max(1, Math.round(threshold * 10))), true)
+  view.setUint16(2, Math.min(2000, Math.max(50, Math.round(rebound))), true)
   const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)))
   await _device.writeCharacteristicWithResponseForService(SERVICE_UUID, CONFIG_UUID, b64)
 }

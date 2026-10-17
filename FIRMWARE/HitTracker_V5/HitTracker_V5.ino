@@ -84,6 +84,10 @@
 // ── Config por defecto ─────────────────────────────────────────────────────
 #define DEFAULT_THRESHOLD 300
 #define DEFAULT_COOLDOWN  400
+#define CFG_THRESHOLD_MIN 1
+#define CFG_THRESHOLD_MAX 1000
+#define CFG_COOLDOWN_MIN  50
+#define CFG_COOLDOWN_MAX  2000
 
 // ── Muestreo ───────────────────────────────────────────────────────────────
 const uint16_t INTERVAL_MS = 10;  // 100 Hz
@@ -212,6 +216,9 @@ void loadConfig() {
   cfgThreshold = prefs.getUShort("threshold", DEFAULT_THRESHOLD);
   cfgCooldown  = prefs.getUShort("cooldown",  DEFAULT_COOLDOWN);
   prefs.end();
+  // NVS con valores de antes de validar onWrite: volver a los defaults
+  if (cfgThreshold < CFG_THRESHOLD_MIN || cfgThreshold > CFG_THRESHOLD_MAX) cfgThreshold = DEFAULT_THRESHOLD;
+  if (cfgCooldown  < CFG_COOLDOWN_MIN  || cfgCooldown  > CFG_COOLDOWN_MAX)  cfgCooldown  = DEFAULT_COOLDOWN;
   Serial.printf("Config: threshold=%u cooldown=%u\n", cfgThreshold, cfgCooldown);
 }
 
@@ -238,10 +245,18 @@ class ServerCallbacks : public BLEServerCallbacks {
 class ConfigCallbacks : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* pChar) {
     String val = pChar->getValue();
-    if (val.length() < 4) return;
+    if (val.length() != 4) return;
     uint16_t th, cd;
     memcpy(&th, val.c_str(),     2);
     memcpy(&cd, val.c_str() + 2, 2);
+    // La característica es escribible por cualquiera en rango BLE (sin emparejamiento):
+    // rechazar valores fuera de lo que la app puede enviar (threshold 0-100 → 1-1000 raw,
+    // rebound 200-700ms con margen). Sin esto, un 65535 dejaba el sensor sin detectar nada.
+    if (th < CFG_THRESHOLD_MIN || th > CFG_THRESHOLD_MAX || cd < CFG_COOLDOWN_MIN || cd > CFG_COOLDOWN_MAX) {
+      Serial.printf("Config rechazada: threshold=%u cooldown=%u\n", th, cd);
+      return;
+    }
+    if (th == cfgThreshold && cd == cfgCooldown) return;  // evita desgastar NVS con escrituras repetidas
     cfgThreshold = th;
     cfgCooldown  = cd;
     dynamicFloor = (float)cfgThreshold;

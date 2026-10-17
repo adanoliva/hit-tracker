@@ -38,10 +38,18 @@ async function readJson<T>(path: string, fallback: T): Promise<T> {
   }
 }
 
+// El id acaba en una ruta de archivo y puede venir de Drive: sin validar, un id con "../"
+// escribiría fuera de trainings/. Los ids reales son "training-<ISO con : y . cambiados por ->".
+const SAFE_ID = /^[\w-]+$/
+function trainingPath(id: string): string {
+  if (!SAFE_ID.test(id)) throw new Error(`id de sesión no válido: ${id}`)
+  return TRAININGS_DIR + `training_${id}.json`
+}
+
 export const storage = {
   async saveTraining(training: Training) {
     await ensureDir(TRAININGS_DIR)
-    await writeJson(TRAININGS_DIR + `training_${training.id}.json`, training)
+    await writeJson(trainingPath(training.id), training)
   },
 
   async loadTrainings(): Promise<Training[]> {
@@ -59,7 +67,7 @@ export const storage = {
   },
 
   async deleteTraining(id: string) {
-    await FileSystem.deleteAsync(TRAININGS_DIR + `training_${id}.json`, { idempotent: true })
+    await FileSystem.deleteAsync(trainingPath(id), { idempotent: true })
   },
 
   async saveProfiles(profiles: CalibrationProfile[]) {

@@ -22,16 +22,18 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(async () => {}),
 }))
 const refreshAsync = jest.fn()
+const revokeAsync = jest.fn(async () => true)
 jest.mock('expo-auth-session', () => {
   class TokenError extends Error {
     params: Record<string, string>
     constructor(params: Record<string, string>) { super(params.error); this.params = params }
   }
-  return { TokenError, refreshAsync: (...a: unknown[]) => refreshAsync(...a) }
+  return { TokenError, refreshAsync: (...a: unknown[]) => refreshAsync(...a), revokeAsync: (...a: unknown[]) => (revokeAsync as any)(...a) }
 })
 
 import * as AuthSession from 'expo-auth-session'
-import { ensureValidToken, restoreSession } from '../services/googleAuth'
+import { ensureValidToken, restoreSession, disconnect } from '../services/googleAuth'
+import { storage } from '../services/storage'
 import { deleteFromDrive, downloadAll } from '../services/driveSync'
 import { useDriveStore } from '../core/stores/driveStore'
 import { useTrainingStore } from '../core/stores/trainingStore'
@@ -54,6 +56,13 @@ describe('googleAuth — refresh de token', () => {
   it('invalid_grant: desconecta', async () => {
     refreshAsync.mockRejectedValue(new (AuthSession as any).TokenError({ error: 'invalid_grant' }))
     expect(await ensureValidToken()).toBeNull()
+    expect(useDriveStore.getState().account).toBeNull()
+  })
+
+  it('disconnect revoca el refresh token en Google y borra la cuenta aunque falle la red', async () => {
+    revokeAsync.mockRejectedValueOnce(new TypeError('Network request failed'))
+    await disconnect()
+    expect(revokeAsync).toHaveBeenCalledWith(expect.objectContaining({ token: 'r' }), expect.anything())
     expect(useDriveStore.getState().account).toBeNull()
   })
 
@@ -91,5 +100,17 @@ describe('driveSync — borrados y descargas', () => {
     await downloadAll()
     expect(downloaded).toEqual(['t-ok']) // ni la borrada, y la corrupta no corta el bucle
     expect(useTrainingStore.getState().trainings.map((t) => t.id)).toEqual(['t-ok'])
+  })
+})
+
+describe('storage — ids de sesión en rutas', () => {
+  it('rechaza ids con path traversal', async () => {
+    await expect(storage.saveTraining({ id: '../../profiles' } as any)).rejects.toThrow('no válido')
+    await expect(storage.deleteTraining('a/b')).rejects.toThrow('no válido')
+  })
+
+  it('acepta el formato real de id', async () => {
+    await storage.saveTraining({ id: 'training-2026-10-17T10-00-00-000Z' } as any)
+    expect(Object.keys(files)).toContain('file:///doc/HitTracker/trainings/training_training-2026-10-17T10-00-00-000Z.json')
   })
 })

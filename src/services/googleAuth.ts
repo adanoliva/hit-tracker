@@ -103,9 +103,19 @@ export async function connect(): Promise<void> {
   }
 }
 
-export async function disconnect(): Promise<void> {
+async function forgetAccount(): Promise<void> {
   await clearPersistedAccount()
   useDriveStore.getState().setAccount(null)
+}
+
+// Revoca el grant en Google (revocar el refresh token invalida también los access tokens):
+// sin esto el token seguía siendo válido tras "Desconectar". Best-effort: sin red, el borrado
+// local sigue adelante y el usuario puede revocarlo a mano en myaccount.google.com.
+export async function disconnect(): Promise<void> {
+  const account = useDriveStore.getState().account
+  await forgetAccount()
+  if (!account) return
+  await AuthSession.revokeAsync({ clientId: CLIENT_ID, token: account.refreshToken }, DISCOVERY).catch(() => {})
 }
 
 // null = fallo transitorio (sin red, 5xx): se reintenta más tarde.
@@ -136,7 +146,7 @@ export async function ensureValidToken(): Promise<string | null> {
 
   const refreshed = await refreshAccessToken(account.refreshToken)
   if (refreshed === 'revoked') {
-    await disconnect()
+    await forgetAccount() // ya revocado en Google: nada que revocar
     return null
   }
   if (!refreshed) return null
