@@ -103,6 +103,21 @@ describe('driveSync — borrados y descargas', () => {
   })
 })
 
+describe('driveSync — subida desde downloadAll', () => {
+  it('sesión local que no está en Drive se sube con POST directo, sin buscar su fileId', async () => {
+    refreshAsync.mockResolvedValue({ accessToken: 'new', expiresIn: 3600 })
+    useTrainingStore.setState({ trainings: [{ id: 't-local', rounds: [], createdAt: 1 } as any] })
+    const calls: string[] = []
+    ;(globalThis as any).fetch = jest.fn(async (url: string, init?: { method?: string }) => {
+      calls.push(`${init?.method ?? 'GET'} ${url}`)
+      return { ok: true, status: 200, json: async () => ({ files: [] }), text: async () => '' }
+    })
+    await downloadAll()
+    expect(calls.some((c) => c.includes("training_t-local.json'"))).toBe(false) // sin findFileId
+    expect(calls.some((c) => c.startsWith('POST') && c.includes('uploadType=multipart'))).toBe(true)
+  })
+})
+
 describe('storage — ids de sesión en rutas', () => {
   it('rechaza ids con path traversal', async () => {
     await expect(storage.saveTraining({ id: '../../profiles' } as any)).rejects.toThrow('no válido')

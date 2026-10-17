@@ -110,9 +110,10 @@ export function PlanRunner({ plan, onDone, onAbort }: PlanRunnerProps) {
   }, [finishedTraining])
 
   useEffect(() => {
-    if (phase !== 'idle') activateKeepAwakeAsync()
-    else deactivateKeepAwake()
-    return () => { deactivateKeepAwake() }
+    // tag propio: con el tag por defecto, montar otra pantalla en idle apagaba el keep-awake de esta
+    if (phase !== 'idle') activateKeepAwakeAsync('plan-runner')
+    else deactivateKeepAwake('plan-runner')
+    return () => { deactivateKeepAwake('plan-runner') }
   }, [phase])
 
   const prevPhaseRef = useRef<string>('idle')

@@ -41,9 +41,11 @@ async function findFileId(name: string): Promise<string | null> {
 }
 
 const driveApi = {
-  async uploadFile(name: string, content: string): Promise<void> {
+  // existingId: undefined = buscarlo en Drive; null = el llamador ya sabe que no existe
+  // (downloadAll acaba de listar), lo que ahorra una petición por sesión.
+  async uploadFile(name: string, content: string, existingId?: string | null): Promise<void> {
     const headers = await authHeader()
-    const existingId = await findFileId(name)
+    if (existingId === undefined) existingId = await findFileId(name)
     const metadata = existingId ? {} : { name, parents: ['appDataFolder'] }
     const body =
       `--${BOUNDARY}\r\n` +
@@ -134,12 +136,12 @@ export async function loadPendingQueue(): Promise<void> {
   }
 }
 
-export async function uploadTraining(training: Training): Promise<void> {
+export async function uploadTraining(training: Training, existingId?: string | null): Promise<void> {
   const store = useDriveStore.getState()
   if (!store.account) return
   store.setSyncStatus('syncing')
   try {
-    await driveApi.uploadFile(trainingFileName(training.id), JSON.stringify(training))
+    await driveApi.uploadFile(trainingFileName(training.id), JSON.stringify(training), existingId)
     store.removePending(training.id)
     await persistQueue()
     store.setSyncStatus(useDriveStore.getState().pendingUploads.length > 0 ? 'pending' : 'idle')
@@ -192,7 +194,7 @@ export async function downloadAll(): Promise<void> {
     }
 
     for (const training of localTrainings) {
-      if (!remoteIds.has(training.id)) await uploadTraining(training)
+      if (!remoteIds.has(training.id)) await uploadTraining(training, null)
     }
 
     store.setSyncStatus(useDriveStore.getState().pendingUploads.length > 0 ? 'pending' : 'idle')

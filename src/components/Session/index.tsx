@@ -41,9 +41,10 @@ export function TrainingPage({ onBack }: { onBack?: () => void }) {
   useEffect(() => { audioService.enableDucking() }, [])
 
   useEffect(() => {
-    if (phase !== 'idle') activateKeepAwakeAsync()
-    else deactivateKeepAwake()
-    return () => { deactivateKeepAwake() }
+    // tag propio: con el tag por defecto, montar otra pantalla en idle apagaba el keep-awake de esta
+    if (phase !== 'idle') activateKeepAwakeAsync('session')
+    else deactivateKeepAwake('session')
+    return () => { deactivateKeepAwake('session') }
   }, [phase])
 
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { activateKeepAwakeAsync } from 'expo-keep-awake'
 import { StatusBar } from 'expo-status-bar'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SplashScreen from 'expo-splash-screen'
@@ -21,7 +20,6 @@ import { restoreSession } from './src/services/googleAuth'
 import { initDriveSync, loadPendingQueue, retryPending } from './src/services/driveSync'
 
 SplashScreen.preventAutoHideAsync()
-activateKeepAwakeAsync('global')
 
 const NAV_THEME = {
   ...DarkTheme,
