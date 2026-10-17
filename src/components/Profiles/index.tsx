@@ -202,7 +202,8 @@ export function ProfilesPage({ onBack }: { onBack?: () => void }) {
 
       if (sub === 'waiting') {
         if ((isFirmwarePeak || isStreamPeak) && wallNow - lastHitTimeRef.current > INTER_HIT_COOLDOWN) {
-          peakMagRef.current = isFirmwarePeak ? reading.magnitude : prev.magnitude
+          // prev no es null acá: isStreamPeak ya exige !!prev (ver arriba)
+          peakMagRef.current = isFirmwarePeak ? reading.magnitude : prev!.magnitude
           peakTimeRef.current = wallNow
           reboundMaxRef.current = 0
           subStepRef.current = 'rebound'

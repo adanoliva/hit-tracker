@@ -1,2 +1,2 @@
-export { exerciseService } from '@shared/services/exercise'
-export type { ResolvedRoutine } from '@shared/services/exercise'
+export { exerciseService } from '@shared-kernel/domain/exercise'
+export type { ResolvedRoutine } from '@shared-kernel/domain/exercise'

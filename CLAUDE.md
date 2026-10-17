@@ -114,6 +114,38 @@ En modo libre (`roundDuration = 0`): el timer sube y el usuario termina la ronda
 
 Existe en `Profiles/index.tsx`. Muestra versión, descripción del proyecto y enlace al repositorio. El botón `ⓘ` está fijo en la esquina inferior derecha de la pantalla de Perfiles.
 
+## Skills
+
+Skills a usar durante todo el ciclo de vida del proyecto, no solo al implementar una feature puntual. Invocar la que corresponda al tipo de tarea, en el momento indicado:
+
+### Features nuevas (`/feature-spec` → `/dev` → `/qa` → `/doc`)
+
+Ver [Flujo de desarrollo de features](#flujo-de-desarrollo-de-features) más abajo — cada paso de ese flujo es una skill.
+
+### Migración a Clean Architecture / DDD
+
+- **`migrate-context`** — checklist obligatorio al migrar cualquier bounded context (Training, Calibration, Device, WorkoutPlan, Sync) a la estructura por capas de `docs/PROPUESTA-CLEAN-ARCHITECTURE.md`. Usar de punta a punta en cada contexto, no solo como referencia — define el orden (domain → application → infrastructure → presentation) y qué no saltarse (tests, borrado de código viejo, actualización de imports).
+
+### Calidad de código (usar antes de dar una tarea por terminada)
+
+- **`ponytail:ponytail-review`** — revisión enfocada en sobre-ingeniería: interfaces con una sola implementación, abstracciones especulativas, código muerto. Imprescindible después de cada contexto migrado a Clean Architecture, donde el riesgo de meter capas de más es alto.
+- **`simplify`** — pasada de simplificación/reuso sobre el diff antes de cerrarlo. Complementa a `ponytail-review` (esa caza sobre-ingeniería; esta, reuso y eficiencia).
+- **`review`** o `/code-review` (`ultra` para multi-agente) — revisión de correctness del diff, como si fuera un PR. Usar en cualquier cambio no trivial, no solo en el refactor de arquitectura.
+- **`security-review`** — obligatoria antes de tocar código de autenticación, tokens o sync con servicios externos (`googleAuth.ts`, `driveSync.ts`, el futuro contexto Sync).
+
+### UI (mobile o web)
+
+Al construir o modificar UI, usar estas skills instaladas, en este orden:
+
+1. **`ui-ux-pro-max`** — para decidir estilo, paleta, tipografía, layout y patrones UX antes de implementar.
+2. **`frontend-design`** — para que el resultado no se vea genérico/hecho por IA (evitar plantillas obvias, gradientes por defecto, espaciado descuidado).
+3. Skills de **Emil Kowalski** (`animation-vocabulary`, `improve-animations`, `find-animation-opportunities`, `review-animations`, `apple-design`, `prototype`, `emil-design-eng`, `pick-ui-library`) — para animaciones y transiciones fluidas.
+4. Skills de **Vercel** (`web-design-guidelines`, `vercel-react-best-practices`, `vercel-optimize`, `vercel-composition-patterns`) — para auditar el resultado final antes de darlo por terminado. `vercel-react-native-skills` aplica específicamente a mobile (listas, animaciones, módulos nativos).
+
+### Documentación
+
+- **`writing-guidelines`** — al escribir o revisar contenido de `docs/*.md`, para que la prosa sea consistente en voz y tono.
+
 ## Tests
 
 Los tests usan **Jest + ts-jest** y cubren únicamente lógica de negocio pura (servicios y hooks puros). No se testean componentes React Native.

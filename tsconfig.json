@@ -6,7 +6,8 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["./shared/*"],
+      "@shared-kernel/*": ["./shared-kernel/*"]
     }
   }
 }

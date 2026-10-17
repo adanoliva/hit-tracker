@@ -15,9 +15,9 @@ describe('HT-014 — analyzeCalibrationWindows', () => {
     const heavy = makeWindows([900, 950, 920], 420)
     const result = calibrationService.analyzeCalibrationWindows(light, heavy)
     expect(result).not.toBeNull()
-    // lightAvg=250, base=200, range=700, threshold=200/10=20, sensitivity=700/10=70
+    // lightAvg=250, heavyAvg=923.33, base=200, range=723.33, threshold=20, sensitivity=72.3
     expect(result!.suggestedThreshold).toBeCloseTo(20, 0)
-    expect(result!.suggestedSensitivity).toBeCloseTo(70, 0)
+    expect(result!.suggestedSensitivity).toBeCloseTo(72.3, 1)
     // rebound: max(280,420) + 80 = 500
     expect(result!.suggestedRebound).toBe(500)
   })

@@ -1,7 +1,7 @@
 // HT-016: Game mode removal — smoke tests
 // Verifies that game-related exports were removed and unrelated code is intact.
 
-import { exerciseService } from '../../shared/services/exercise'
+import { exerciseService } from '../../shared-kernel/domain/exercise'
 
 describe('HT-016 — Game mode removal', () => {
   it('exerciseService is unaffected', () => {

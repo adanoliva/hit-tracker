@@ -1,4 +1,4 @@
-import type { Exercise, ExerciseCategory, Routine, RoutineExercise } from '../types'
+import type { Exercise, ExerciseCategory, Routine, RoutineExercise } from '@shared/types'
 import exercisesData from '../data/exercises.json'
 import routinesData from '../data/routines.json'
 

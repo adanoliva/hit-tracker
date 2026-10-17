@@ -58,10 +58,16 @@
     "preset": "ts-jest",
     "testEnvironment": "node",
     "roots": [
-      "<rootDir>/src/__tests__"
+      "<rootDir>/src",
+      "<rootDir>/shared",
+      "<rootDir>/shared-kernel"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/"
     ],
     "moduleNameMapper": {
-      "^@shared/(.*)$": "<rootDir>/../shared/$1"
+      "^@shared/(.*)$": "<rootDir>/../shared/$1",
+      "^@shared-kernel/(.*)$": "<rootDir>/../shared-kernel/$1"
     },
     "globals": {
       "ts-jest": {

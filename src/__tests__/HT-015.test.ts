@@ -1,4 +1,4 @@
-import { exerciseService } from '../../shared/services/exercise'
+import { exerciseService } from '../../shared-kernel/domain/exercise'
 
 test('getAll returns ≥ 25 exercises with required fields', () => {
   const all = exerciseService.getAll()

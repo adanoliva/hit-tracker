@@ -1,5 +1,5 @@
 import type { WorkoutPlan, Exercise, ExerciseCategory } from '../../shared/types'
-import { exerciseService } from '../../shared/services/exercise'
+import { exerciseService } from '../../shared-kernel/domain/exercise'
 
 // Replicates firstPhase logic from PlanRunner.tsx
 function firstPhase(plan: WorkoutPlan): 'warmup' | 'core' | 'boxing' {

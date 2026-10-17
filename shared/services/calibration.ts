@@ -21,9 +21,11 @@ export const calibrationService = {
   ): { suggestedThreshold: number; suggestedSensitivity: number; suggestedRebound: number } | null {
     const lightAvg = avg(light.map((w) => w.peak))
     const heavyAvg = avg(heavy.map((w) => w.peak))
+    // el golpe fuerte debe promediar al menos un 20% más que el liviano para
+    // considerar la diferenciación suficiente (ver HT-007.test.ts)
+    if (heavyAvg < lightAvg * 1.2) return null
     const base = lightAvg * 0.8
     const range = heavyAvg - base
-    if (range < base * 0.2) return null
     const suggestedThreshold = Math.min(100, Math.max(0, Math.round((base / 10) * 10) / 10))
     const suggestedSensitivity = Math.min(100, Math.max(1, Math.round((range / 10) * 10) / 10))
     // personalized cooldown: worst-case rebound across all punches + 80ms margin
