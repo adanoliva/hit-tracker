@@ -1,3 +1,7 @@
+// ==================== VERCEL ANALYTICS ====================
+import { inject } from '@vercel/analytics';
+inject();
+
 // ==================== SMOOTH SCROLL ==================== 
 
 function scrollToSection(sectionId) {
