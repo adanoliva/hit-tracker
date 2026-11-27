@@ -13,7 +13,7 @@ const CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? ''
 // (no admite un scheme propio como "hittracker://" para este flujo) — hay que registrarlo
 // también en app.json → expo.scheme.
 const GOOGLE_REDIRECT_SCHEME = `com.googleusercontent.apps.${CLIENT_ID.replace('.apps.googleusercontent.com', '')}`
-const SCOPES = ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive.appdata']
+const SCOPES = ['openid', 'email', 'https://www.googleapis.com/auth/drive.appdata']
 const DISCOVERY = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
   tokenEndpoint: 'https://oauth2.googleapis.com/token',

@@ -1,9 +1,9 @@
-{
+﻿{
   "expo": {
     "name": "Hit Tracker",
     "slug": "hit-tracker",
     "scheme": ["hittracker", "com.googleusercontent.apps.979133969928-70eio2up7nsov07ve4bckqqhcdq5pksr"],
-    "version": "1.26.8",
+    "version": "1.26.9",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -23,7 +23,8 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.hittracker.app",
-      "versionCode": 5
+      "versionCode": 6,
+      "blockedPermissions": ["android.permission.RECORD_AUDIO", "android.permission.SYSTEM_ALERT_WINDOW"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -38,7 +39,7 @@
           "backgroundColor": "#000000"
         }
       ],
-      "expo-audio",
+      ["expo-audio", { "microphonePermission": false }],
       "./plugins/withArmOnly",
       "./plugins/withReleaseSigning",
       "expo-web-browser",
