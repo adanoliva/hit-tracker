@@ -188,7 +188,7 @@ WorkoutPlan
 ### Catálogo de ejercicios
 
 El catálogo combina tres fuentes:
-1. **Base**: ejercicios incluidos en la app (`shared/data/exercises.json`)
+1. **Base**: ejercicios incluidos en la app (`shared-kernel/data/exercises.json`)
 2. **Custom**: ejercicios creados por el usuario
 3. **wger**: ejercicios importados desde [wger.de](https://wger.de) (búsqueda por nombre, filtro por equipamiento body weight y mancuernas)
 

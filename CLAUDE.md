@@ -50,19 +50,25 @@ shared/
 ├─ services/
 │  ├─ calibration.ts        calibrationService (detección, intensidad)
 │  ├─ training.ts           trainingService (singleton, gestiona rondas)
-│  ├─ exercise.ts           exerciseService (catálogo base + importación desde wger API)
+│  ├─ calories.ts           caloriesService
 │  └─ migration.ts          migrationService (migra trainings legados)
+└─ __tests__/               Tests Jest de lógica compartida
+
+shared-kernel/              Primer paso de la migración a Clean Architecture (WIP)
+├─ domain/exercise.ts       exerciseService (catálogo base + rutinas)
 ├─ data/
 │  ├─ exercises.json        Catálogo base de ejercicios
 │  └─ routines.json         Rutinas predefinidas
-└─ __tests__/               Tests Jest de lógica compartida
+└─ __tests__/
 ```
+
+**Migración a Clean Architecture en curso**: solo el catálogo de ejercicios se ha movido a `shared-kernel/`. El resto de contextos siguen en `shared/` y `src/core/`. Plan y estructura destino en `docs/PROPUESTA-CLEAN-ARCHITECTURE.md`; cada contexto se migra con la skill `migrate-context`.
 
 Los archivos locales son **re-exports** de `@shared`:
 - `src/core/types/index.ts` → re-export
 - etc.
 
-El alias `@shared/*` está configurado en `tsconfig.json` + `metro.config.js`.
+Los alias `@shared/*` y `@shared-kernel/*` están configurados en `tsconfig.json` + `metro.config.js`.
 
 ### Capas de la app
 
@@ -70,9 +76,10 @@ El alias `@shared/*` está configurado en `tsconfig.json` + `metro.config.js`.
 Sensor (BLE) → useSensorData() → useTraining() → trainingStore → UI
 ```
 
-- **`shared/services/`**: Lógica de negocio pura. `calibrationService`, `trainingService` (singleton con estado de la ronda activa), `exerciseService`, `migrationService`, `caloriesService`.
-- **`hooks/`**: Puente entre servicios y UI. `useSensorData` procesa el stream raw y detecta picos. `useTraining` orquesta fases y timers de rondas/descansos. `useWorkoutPlayer` gestiona el player de ejercicios físicos.
-- **`stores/`**: Estado global con Zustand. `deviceStore`, `profileStore`, `trainingStore`, `workoutPlanStore`, `customExerciseStore`.
+- **`shared/services/`** y **`shared-kernel/domain/`**: Lógica de negocio pura. `calibrationService`, `trainingService` (singleton con estado de la ronda activa), `migrationService`, `caloriesService`; `exerciseService` en `shared-kernel`.
+- **`src/core/hooks/`**: Puente entre servicios y UI. `useSensorData` procesa el stream raw y detecta picos. `useTraining` orquesta fases y timers de rondas/descansos. `useWorkoutPlayer` gestiona el player de ejercicios físicos.
+- **`src/core/stores/`**: Estado global con Zustand. `deviceStore`, `profileStore`, `trainingStore`, `workoutPlanStore`, `customExerciseStore`, `driveStore`.
+- **`src/core/services/`**: re-exports de `@shared`/`@shared-kernel` y `wgerService` (búsqueda e importación desde la API de wger).
 - **`src/services/`**: `bleConnection`, `audio`, `storage`, `googleAuth` + `driveSync` (backup/restauración de sesiones y perfiles en Google Drive, ver `docs/GOOGLE-DRIVE-SETUP.md`).
 
 ### Modelo de datos principal
@@ -161,17 +168,31 @@ Convención de nombre: `HT-XXX.test.ts` para tests asociados a una feature, `<no
 Las features se definen, implementan y documentan mediante un flujo de agentes:
 
 ```
-/feature-spec  →  /dev HT-XXX  →  /qa HT-XXX  →  /doc HT-XXX
+/feature-spec <idea>  →  /dev HT-XXX  →  /qa HT-XXX  →  /doc HT-XXX
+ idea + refinamiento     plan + código    tests + revisión  docs + cierre
 ```
 
+| Fase | Comando | Puerta de control |
+|---|---|---|
+| Idea → Refinamiento | `/feature-spec` | Preguntas al usuario; spec con impacto en privacidad y pruebas manuales |
+| Planificación → Desarrollo | `/dev` | El usuario aprueba el plan antes de escribir código; `tsc` + `npm test` por tarea; bump de versión |
+| Test | `/qa` | Tests Jest, `ponytail-review` + `code-review`, `security-review` si toca auth/sync/permisos, pruebas en dispositivo |
+| Documentación | `/doc` | Docs, web y `web/privacidad.html`; aviso de Play Console si cambian datos o permisos |
+
+Cada comando para al terminar e indica el siguiente: no se encadenan solos. Ninguno hace commit.
+
+Estados (`status` en el frontmatter): `pending` → `in-progress` → `qa-passed` → `done`.
+
 - **`.claude/features/pending/`** — specs listas para implementar
-- **`.claude/features/in-progress/`** — en desarrollo
-- **`.claude/features/done/`** — completadas, testeadas y documentadas
+- **`.claude/features/in-progress/`** — en desarrollo o validadas, pendientes de documentar
+- **`.claude/features/done/`** — completadas, validadas y documentadas
+- **`.claude/features/TEMPLATE.md`** — plantilla de spec
+- **`.claude/commands/`** — los cuatro comandos del flujo
 - **`.claude/FEATURES.md`** — índice con estado de todas las features
 
 Los agentes usan el ID de feature (ej. `HT-001`) para localizar el archivo. Si no existe, no continúan.
 
-`.claude/` está en `.gitignore` — es local-only, no se trackea en el repo.
+Los comandos, las specs y `FEATURES.md` se versionan en git. El resto de `.claude/` (ajustes locales, skills de terceros) está en `.gitignore`.
 
 ## Documentación
 

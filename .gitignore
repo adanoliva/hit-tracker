@@ -28,7 +28,13 @@ out/
 desktop/src/tauri/target/
 desktop/out/
 desktop/dist/
-.claude
+.claude/*
+!.claude/commands/
+!.claude/features/
+!.claude/FEATURES.md
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/migrate-context/
 assets/exercises/*.gif
 assets/exercises/*.jpg
 src/generated/exerciseImages.ts

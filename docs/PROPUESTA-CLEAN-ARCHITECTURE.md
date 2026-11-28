@@ -1,6 +1,6 @@
 # Propuesta: Clean Architecture + DDD + SOLID para HIT TRACKER
 
-Estado: **propuesta para revisión — no implementada**. Decisiones ya tomadas con el usuario: migración completa en un solo esfuerzo (no incremental por contexto), inyección de dependencias manual (factories + Context, sin librería nueva), reestructuración tanto de `shared/` como de `src/` por capas.
+Estado: **en curso (WIP)**. Hecho: Shared Kernel (catálogo de `Exercise`/`Routine` en `shared-kernel/`). Pendiente: Training, Calibration, Device, WorkoutPlan y Sync. Decisiones ya tomadas con el usuario: migración completa en un solo esfuerzo (no incremental por contexto), inyección de dependencias manual (factories + Context, sin librería nueva), reestructuración tanto de `shared/` como de `src/` por capas.
 
 ## 1. Problemas detectados en el código actual
 
@@ -26,7 +26,7 @@ Mapeo de la exploración del código a los principios que se violan, para justif
 | **WorkoutPlan** | `WorkoutPlan` | `BoxingPhaseConfig`, `BoxingRoundScript` (VOs) | Definición y ejecución de planes de entrenamiento (calentamiento + core + boxeo) |
 | **Sync** | — (proceso, no aggregate) | `SyncConflict` (VO) | Sincronización de datos del usuario con Google Drive |
 
-**Shared Kernel**: catálogo de `Exercise` y `Routine` (`shared/data/exercises.json`, `routines.json`) — lo consumen `WorkoutPlan` y el catálogo/búsqueda Wger. Vive en `shared-kernel/`, no pertenece a un solo contexto.
+**Shared Kernel**: catálogo de `Exercise` y `Routine` (`shared-kernel/data/exercises.json`, `routines.json`) — lo consumen `WorkoutPlan` y el catálogo/búsqueda Wger. Vive en `shared-kernel/`, no pertenece a un solo contexto.
 
 **Platform** (no es DDD, es infraestructura transversal sin lógica de negocio): `audio.ts`, helpers genéricos de `expo-file-system`. No se modela como contexto.
 

@@ -305,7 +305,7 @@ trainingService.getPreviousRoundStats(roundNumber: number): RoundStats | null
 - `isFatigued`: promedio magnitud 2ª mitad de impacts < promedio 1ª mitad × 0.85 — partición **por índice** de golpe.
 - `isCadenceDropped`: ritmo (golpes/ms) de la 2ª mitad de la ronda < 70% del ritmo de la 1ª mitad — partición **por tiempo**, no por índice (para no sesgar la medición si el ritmo ya varía dentro de la ronda). El punto medio se ancla en `impacts[0].time`, no en `round.startTime`, porque `Impact.time` usa el reloj del sensor BLE (`millis()` del ESP32) mientras que `round.startTime`/`endTime` usan `Date.now()` — son relojes distintos. Requiere un mínimo de 4 golpes en la 1ª mitad y 2 en la 2ª para evaluarse; si no se cumple, queda en `false`. Señal independiente de `isFatigued` (potencia vs. volumen), ambas pueden darse juntas, por separado o ninguna.
 
-### `exerciseService` (`shared/services/exercise.ts`)
+### `exerciseService` (`shared-kernel/domain/exercise.ts`)
 
 ```typescript
 exerciseService.getAll(): Exercise[]
@@ -313,7 +313,7 @@ exerciseService.getById(id: string): Exercise | undefined
 exerciseService.getByCategory(category: ExerciseCategory): Exercise[]
 ```
 
-Devuelve únicamente los ejercicios del catálogo base (`shared/data/exercises.json`). Los custom se gestionan en `customExerciseStore`.
+Devuelve únicamente los ejercicios del catálogo base (`shared-kernel/data/exercises.json`). Los custom se gestionan en `customExerciseStore`.
 
 #### Origen del catálogo warmup/core (`id` con prefijo `gv-`)
 
