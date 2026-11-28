@@ -16,7 +16,7 @@ El hardware consiste en un ESP32 + GY-521 (MPU-6050) que transmite datos de acel
 
 | Plataforma | Archivo | Versión actual |
 |---|---|---|
-| Mobile | `package.json` | 1.26.9 |
+| Mobile | `package.json` | 1.26.10 |
 
 Las versiones siguen [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
